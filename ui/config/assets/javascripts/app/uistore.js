@@ -1,25 +1,25 @@
 define(function(require, exports, module) {
-	'use strict';
+    'use strict';
 
-	var UIActions = require('app/uiactions');
+    var UIActions = require('app/uiactions');
 
-	module.exports = Reflux.createStore({
+    module.exports = Reflux.createStore({
 
-		listenables: [ UIActions ],
+        listenables: [ UIActions ],
 
-		getInitialState: function() {
-			if (!this.ui) {
-				this.ui = {
-					active: 'upstream-path'
-				};
-			}
-			return this.ui;
-		},
+        getInitialState: function() {
+            if (!this.ui) {
+                this.ui = {
+                    active: 'upstream-path'
+                };
+            }
+            return this.ui;
+        },
 
-		onActiveNode: function (node) {
-			this.ui.active = node;
-			this.trigger(this.ui);
-		}
+        onActiveNode: function (node) {
+            this.ui.active = node;
+            this.trigger(this.ui);
+        }
 
-	});
+    });
 });

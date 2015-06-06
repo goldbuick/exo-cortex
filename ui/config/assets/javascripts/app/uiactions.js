@@ -1,8 +1,8 @@
 define(function(require, exports, module) {
-	'use strict';
+    'use strict';
 
-	module.exports = Reflux.createActions([
-		'activeNode'
-	]);
+    module.exports = Reflux.createActions([
+        'activeNode'
+    ]);
 
 });

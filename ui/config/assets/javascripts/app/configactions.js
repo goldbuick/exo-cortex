@@ -1,12 +1,12 @@
 define(function(require, exports, module) {
-	'use strict';
+    'use strict';
 
-	module.exports = Reflux.createActions([
-		'updateAll',
-		'valueUpdate',
-		'valueDelete',
-		'addValueToArray',
-		'addValueToObject',
-	]);
+    module.exports = Reflux.createActions([
+        'updateAll',
+        'valueUpdate',
+        'valueDelete',
+        'addValueToArray',
+        'addValueToObject',
+    ]);
 
 });

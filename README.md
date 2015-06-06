@@ -21,5 +21,10 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 * ui/chat, front-end to drive any api nodes that support chat coms
 
 ### v2 roadmap
+* stem/api-webhook, generate events from webhooks
+* stem/terminal-rules, define triggers from events
+
+### v3 roadmap
+* stem/api-messages, integrate with apple messages
 * stem/api-xmpp, integrate with still functioning google talk
 * stem/api-slack, integrate with slack teams

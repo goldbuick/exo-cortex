@@ -1,4 +1,4 @@
-![exo-cortex](https://raw.github.com/goldbuick/exo-cortex/edit/master/logo.png)
+![exo-cortex](https://raw.githubusercontent.com/goldbuick/exo-cortex/master/logo.png)
 
 Internet of things, for anyone
 ==============================

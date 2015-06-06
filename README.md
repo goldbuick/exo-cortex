@@ -1,7 +1,7 @@
-exo-cortex
-==========
+![exo-cortex](https://raw.github.com/goldbuick/exo-cortex/edit/master/logo.png)
 
-Internet of things, for everyone.
+Internet of things, for anyone
+==============================
 
 My primary goal is to build a collection of Dockerfiles you can use to deploy your own
 IOT setup.

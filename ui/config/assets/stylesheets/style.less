@@ -1,0 +1,127 @@
+
+@import "flexbox.less";
+
+header, main, footer {
+  padding-left: 240px;
+}
+
+@media only screen and (max-width : 992px) {
+  header, main, footer {
+    padding-left: 0;
+  }
+}
+
+nav .nav-wrapper i {
+  font-size: 2.5rem;
+}
+
+ul.side-nav li {
+  line-height: 64px;
+}
+
+ul.side-nav li.logo {
+  height: 64px;
+  padding: 0 10px 0 0;
+}
+
+.input-field label {
+  left: 0;
+}
+
+.dropdown-content li > a,
+.dropdown-content li > span,
+.input-field input[type=text]:focus + label
+{
+  color: #263238;
+}
+
+input[type=text]:focus {
+  border-bottom: 1px solid #263238;
+  -webkit-box-shadow: 0 1px 0 0 #263238;
+  -moz-box-shadow: 0 1px 0 0 #263238;
+  box-shadow: 0 1px 0 0 #263238;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.bg-hover.active, .bg-hover:hover {
+  background-color: #eceff1;
+}
+
+.edit-depth-0,
+.edit-depth-1,
+.edit-depth-2,
+.edit-depth-3,
+.edit-depth-4,
+.edit-depth-5,
+.edit-depth-6,
+.edit-depth-7,
+.edit-depth-8,
+.edit-depth-9,
+{
+  padding: 5px 0;
+}
+
+.edit-depth-1 { padding-left: 10px; }
+.edit-depth-2 { padding-left: 15px; }
+.edit-depth-3 { padding-left: 20px; }
+.edit-depth-4 { padding-left: 25px; }
+.edit-depth-5 { padding-left: 30px; }
+.edit-depth-6 { padding-left: 35px; }
+.edit-depth-7 { padding-left: 40px; }
+.edit-depth-8 { padding-left: 45px; }
+.edit-depth-9 { padding-left: 50px; }
+
+.upstream {
+  overflow: visible !important;
+
+  .node rect,
+  .node circle,
+  .node ellipse {
+    stroke: #333;
+    fill: #fff;
+    stroke-width: 1px;
+  }
+  .edgePath path {
+    stroke: #333;
+    fill: #333;
+    stroke-width: 1.5px;
+  }
+}
+
+.upstream-row {
+  padding-bottom: 15px;
+}
+
+.flex-cols {
+  .flex-display;
+  .flex-direction(row);
+  .align-items(flex-start);
+}
+
+.flex-rows {
+  .flex-display;
+  .flex-direction(column);
+  .align-items(flex-start);
+}
+
+.flex-center {
+  .align-items(center);
+}
+
+.flex-item {
+  margin: 5px;
+  .flex(1 0 auto);
+}
+
+.flex-item-2x {
+  margin: 5px;
+  .flex(2 0 auto);
+}
+
+.flex-item-3x {
+  margin: 5px;
+  .flex(3 0 auto);
+}

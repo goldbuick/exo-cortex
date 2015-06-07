@@ -25,7 +25,10 @@ var gts = 'terminal-server',
     gupstream = { };
 
 function on (route, handler) {
-    ghandlers[route] = handler;
+    ghandlers[route] = function (data) {
+        console.log('on', route, data);
+        return handler(data);
+    };
 }
 
 // signal ui / node of state change
@@ -85,9 +88,9 @@ function genUpstream() {
         gvalues[name].upstream.host = _send.host;
         gvalues[name].upstream.port = _send.port;
         gvalues[name].upstream.path = _send.path;
+        var _upstream = JSON.stringify(gvalues[name].upstream);
 
         // only post when values have changed
-        var _upstream = JSON.stringify(gvalues[name].upstream);
         if (_upstream !== gupstream[name]) {
             gupstream[name] = _upstream;
 
@@ -161,18 +164,6 @@ on('/set', function (data) {
 
     // kickoff generated config
     genConfig();
-
-    // // validate node exists
-    // var node = gvalues[first],
-    //     send = gnodes[first];
-    // if (!node || !send) return;
-
-    // // signal node of updated config
-    // var path = (send.path || '') + config.CONFIG_UPDATE_URL;
-    // httppost(send.host, send.port, path, node);
-
-    // // signal web ui of updated config
-    // io.emit(config.CONFIG_UPDATE_URL, gvalues);
 });
 
 // get values config data

@@ -51,7 +51,7 @@ server.created(function (http, port) {
             if (!external) return;
 
             // post json to route
-            server.emit(external.host, external.port, external.path, route, data.json);
+            server.post(external.host, external.port, external.path, route, data.json);
         });
     });
 });

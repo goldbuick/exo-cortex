@@ -5,7 +5,7 @@ var config = require('./config'),
 	httpjson = require('./httpjson'),
 	httppost = require('./httppost'),
 	uuid = require('node-uuid'),
-	upstream = undefined;
+	gupstream = undefined;
 
 function Message (channel, type, data) {
 	return {
@@ -35,13 +35,7 @@ Channel.prototype = {
 		var message = Message(this.name, type, data);
 
 		// transmit upstream
-		if (!upstream) {
-			console.log('emit', message);
-
-		} else {
-			httppost(upstream.hostname, upstream.port, upstream.path + '/upstream', message);
-			
-		}
+		this.server.emit(message);
 	}
 };
 
@@ -89,9 +83,8 @@ function Server (name) {
 				// invoke handler
 				return handler(json);
 
-			} else if (upstream) {
-				// transmit upstream
-				httppost(upstream.hostname, upstream.port, upstream.path + '/upstream', json);
+			} else {
+				self.emit(json);
 
 			}
 
@@ -137,8 +130,7 @@ function Server (name) {
 	this.configAPI.updated(function (json) {
 		// manage upstream state
 		if (json.upstream !== undefined) {
-			upstream = json.upstream;
-			console.log('updated upstream to', json.upstream);
+			gupstream = json.upstream;
 		}
 
 		// manage http server state
@@ -195,8 +187,19 @@ Server.prototype = {
 		this.any = handler;
 	},
 
-	emit: function (hostname, port, path, route, json) {
+	post: function (hostname, port, path, route, json) {
 		httppost(hostname, port, path + route, json);
+	},
+
+	emit: function (json) {
+		if (!gupstream) {
+			console.log('emit', json);
+
+		} else {
+		    var path = (gupstream.path || '') + '/upstream';
+			httppost(gupstream.hostname, gupstream.port, path, json);
+
+		}
 	},
 
 	register: function () {

@@ -35,8 +35,10 @@ define(function(require, exports, module) {
                 obj = this.getByPath(ppath.parent);
             if (!obj) return;
 
-            obj[ppath.self] = value;
-            this.pushState(path, value);
+            if (obj[ppath.self] !== value) {
+                obj[ppath.self] = value;
+                this.pushState(path, value);
+            }
         },
 
         onValueDelete: function (path) {

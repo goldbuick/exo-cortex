@@ -135,6 +135,13 @@ function Server (name) {
 
 	// handle config changes
 	this.configAPI.updated(function (json) {
+		// manage upstream state
+		if (json.upstream !== undefined) {
+			upstream = json.upstream;
+			console.log('updated upstream to', json.upstream);
+		}
+
+		// manage http server state
 		if (json.port !== undefined && json.port !== self.httpPort) {
 			// kill existing server
 			var restarted = false;

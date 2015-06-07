@@ -19,11 +19,97 @@ function createConfig () {
 var gnodes = { };
 
 // define config-server api
-var gvalues = { },
-    ghandlers = { };
+var gts = 'terminal-server',
+    gvalues = { },
+    ghandlers = { },
+    gupstream = { };
 
 function on (route, handler) {
     ghandlers[route] = handler;
+}
+
+// signal ui / node of state change
+function postConfig (name, ui) {
+    var node = gvalues[name],
+        send = gnodes[name];
+    if (!node || !send) return;
+
+    // signal node of updated config
+    var path = (send.path || '') + config.CONFIG_UPDATE_URL;
+    httppost(send.host, send.port, path, node);
+
+    // signal web ui of updated config
+    if (ui) io.emit(config.CONFIG_UPDATE_URL, gvalues);
+}
+
+// get the composite route based api
+function genRoutes() {
+    var node = gvalues[gts];
+    if (!node) return;
+
+    node.api = { };
+
+    Object.keys(gnodes).filter(function (name) {
+        return name !== gts;
+
+    }).forEach(function (name) {
+        var _node = gvalues[name],
+            _send = gnodes[name];
+
+        if (!_node.routes || !_node.routes.length) return;
+
+        _node.routes.forEach(function (route) {
+            node.api[route] = {
+                host: _send.host,
+                port: _send.port,
+                path: _send.path
+            };
+        });
+    });
+
+    // push config state
+    postConfig(gts, true);    
+}
+
+// update upstream configs
+function genUpstream() {
+    Object.keys(gvalues).filter(function (name) {
+        return name !== gts && gvalues[name].upstream !== undefined;
+
+    }).forEach(function (name) {
+        var _name = gvalues[name].upstream.name,
+            _send = gnodes[_name];
+        if (!_name || !_send) return;
+
+        // update upstream values
+        gvalues[name].upstream.host = _send.host;
+        gvalues[name].upstream.port = _send.port;
+        gvalues[name].upstream.path = _send.path;
+
+        // only post when values have changed
+        var _upstream = JSON.stringify(gvalues[name].upstream);
+        if (_upstream !== gupstream[name]) {
+            gupstream[name] = _upstream;
+
+            // push config state
+            postConfig(name, false);
+        }
+    });
+}
+
+// update generated portions of config
+var gc;
+function genConfig () {
+    clearTimeout(gc);
+    gc = setTimeout(function() {
+
+        // gen route api for terminal-server
+        genRoutes();
+
+        // update upstream configs for nodes
+        genUpstream();
+
+    }, 1000);
 }
 
 // signal a node has come online
@@ -48,8 +134,6 @@ on('/start', function (data) {
         path: result.path
     };
 
-    console.log('/start', gnodes);
-
     // signal node of initial config
     return result;
 });
@@ -72,20 +156,23 @@ on('/set', function (data) {
     // update values
     cursor[last] = data.value;
 
-    // push routing api
-    pushRoutes();
+    // push config state
+    postConfig(first, true);
 
-    // validate node exists
-    var node = gvalues[first],
-        send = gnodes[first];
-    if (!node || !send) return;
+    // kickoff generated config
+    genConfig();
 
-    // signal node of updated config
-    var path = (send.path || '') + config.CONFIG_UPDATE_URL;
-    httppost(send.host, send.port, path, node);
+    // // validate node exists
+    // var node = gvalues[first],
+    //     send = gnodes[first];
+    // if (!node || !send) return;
 
-    // signal web ui of updated config
-    io.emit(config.CONFIG_UPDATE_URL, gvalues);
+    // // signal node of updated config
+    // var path = (send.path || '') + config.CONFIG_UPDATE_URL;
+    // httppost(send.host, send.port, path, node);
+
+    // // signal web ui of updated config
+    // io.emit(config.CONFIG_UPDATE_URL, gvalues);
 });
 
 // get values config data
@@ -104,36 +191,6 @@ on('/get', function (data) {
     // return value
     return cursor;
 });
-
-// get the composite route based api
-function pushRoutes() {
-    var name = 'terminal-server',
-        node = gvalues[name],
-        send = gnodes[name];
-    if (!node || !send) return;
-
-    node.api = { };
-
-    Object.keys(gnodes).forEach(function (_name) {
-        if (_name === name) return;
-
-        var _node = gvalues[_name]
-            _send = gnodes[_name];
-        if (!_node.routes || !_node.routes.length) return;
-
-        _node.routes.forEach(function (route) {
-            node.api[route] = {
-                host: _send.host,
-                port: _send.port,
-                path: _send.path
-            };
-        });
-    });
-
-    // signal node of updated config
-    var path = (send.path || '') + config.CONFIG_UPDATE_URL;
-    httppost(send.host, send.port, path, node); 
-}
 
 // create http post API
 var http = httpjson(function (url, json) {

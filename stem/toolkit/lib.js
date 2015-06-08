@@ -42,6 +42,8 @@ Channel.prototype = {
 function Server (name) {
 	var self = this;
 
+	this.name = name;
+
 	// these map to routes /hello/world etc...
 	this.channels = { };
 
@@ -49,9 +51,7 @@ function Server (name) {
 	function httpPost (url, json) {
 		// invoke config handler
 		var result = self.configAPI.handler(url, json);
-		if (result !== undefined) {
-			return result;
-		}
+		if (result) return;
 
 		// invoke generic handler
 		if (self.any) {
@@ -187,8 +187,8 @@ Server.prototype = {
 		this.any = handler;
 	},
 
-	post: function (hostname, port, path, route, json) {
-		httppost(hostname, port, path + route, json);
+	post: function (host, port, path, route, json) {
+		httppost(host, port, path + route, json);
 	},
 
 	emit: function (json) {
@@ -197,8 +197,7 @@ Server.prototype = {
 
 		} else {
 		    var path = (gupstream.path || '') + '/upstream';
-			httppost(gupstream.hostname, gupstream.port, path, json);
-
+			httppost(gupstream.host, gupstream.port, path, json);
 		}
 	},
 

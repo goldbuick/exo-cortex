@@ -7,5 +7,10 @@ var r = require('rethinkdb'),
 // create server 
 var server = toolkit.createServer('pass-log');
 
+// handle server start
+server.created(function (http, port) {
+    console.log('server started on', port);
+});
+
 // start server
 server.start();

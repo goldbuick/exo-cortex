@@ -184,6 +184,14 @@ on('/get', function (data) {
     return cursor;
 });
 
+// get the connection info for the terminal server
+on('/terminal', function () {
+    var terminal = gnodes[gts];
+    if (terminal !== undefined) {
+        return terminal;
+    }
+});
+
 // create http post API
 var http = httpjson(function (url, json) {
     var handler = ghandlers[url];

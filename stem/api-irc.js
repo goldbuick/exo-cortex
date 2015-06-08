@@ -26,7 +26,11 @@ function gclientEach (fn) {
 function gclientclose (host) {
     if (!gclients[host]) return;
 
-    gclients[host].disconnect();
+    gclients[host].disconnect('leaving', function() {
+        channel.emit('disconnect', {
+            server: host
+        });        
+    });
     delete host[current];
 }
 
@@ -39,15 +43,23 @@ function makeClient (url, nick, options) {
         });
     });
 
+    client.addListener('registered', function () {
+        channel.emit('connect', {
+            server: url
+        });
+    });
+
     client.addListener('message', function (from, to, text) {
         if (to[0] === '#') {
             channel.emit('public', {
+                server: url,
                 user: from,
                 channel: to,
                 text: text
             });
         } else {
             channel.emit('private', {
+                server: url,
                 user: from,
                 text: text
             });
@@ -56,6 +68,7 @@ function makeClient (url, nick, options) {
 
     client.addListener('names', function (_channel, nicks) {
         channel.emit('names', {
+            server: url,
             channel: _channel,
             nicks: nicks
         });
@@ -63,6 +76,7 @@ function makeClient (url, nick, options) {
 
     client.addListener('nick', function (oldnick, newnick) {
         channel.emit('nick', {
+            server: url,
             oldnick: oldnick,
             newnick: newnick
         });
@@ -70,6 +84,7 @@ function makeClient (url, nick, options) {
 
     client.addListener('topic', function (_channel, topic, nick) {
         channel.emit('topic', {
+            server: url,
             channel: _channel,
             topic: topic,
             nick: nick
@@ -78,6 +93,7 @@ function makeClient (url, nick, options) {
 
     client.addListener('join', function (_channel, nick) {
         channel.emit('join', {
+            server: url,
             channel: _channel,
             nick: nick
         });
@@ -85,6 +101,7 @@ function makeClient (url, nick, options) {
 
     client.addListener('part', function (_channel, nick, reason) {
         channel.emit('part', {
+            server: url,
             channel: _channel,
             nick: nick,
             reason: reason
@@ -93,6 +110,7 @@ function makeClient (url, nick, options) {
 
     client.addListener('quit', function (nick, reason, channels) {
         channel.emit('quit', {
+            server: url,
             nick: nick,
             reason: reason,
             channels: channels
@@ -110,14 +128,14 @@ channel.message('say', function (message) {
     // discovery
     if (!message) {
         return {
-            host: 'which server',
+            server: 'which server',
             target: 'user or channel to message',
             text: 'the message to send to the target'
         };
     }
 
     // get client
-    var client = gclient(message.host);
+    var client = gclient(message.server);
     if (!client) return;
 
     client.say(message.target, message.text);

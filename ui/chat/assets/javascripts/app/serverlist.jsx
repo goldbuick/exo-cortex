@@ -31,7 +31,7 @@ define(function (require, exports, module) {
 
         render: function () {
             return (
-                <ul className="server-nav side-nav fixed">
+                <ul className="server-nav flex-item">
                     {this.servers().map((server) => {
                         var active = (server === this.state.ui.server),
                             liTagClass = active ? 'active' : '';

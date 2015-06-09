@@ -8,7 +8,7 @@ define(function(require, exports, module) {
         listenables: [ ServerActions ],
 
         getInitialState: function () {
-            this.servers = { };
+            if (!this.servers) this.servers = { };
             return this.servers;
         },
 

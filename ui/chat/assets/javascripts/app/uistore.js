@@ -19,14 +19,21 @@ define(function(require, exports, module) {
         },
 
         onActiveServer: function (server) {
+            console.log('onActiveServer');
             this.ui.server = server;
             this.trigger(this.ui);
         },
 
         onActiveChannel: function (channel) {
+            console.log('onActiveChannel');
             this.ui.channel = channel;
             this.trigger(this.ui);
-        }
+        },
+
+        onServerConnect: function (server) {
+            if (this.ui.server) return;
+            this.onActiveServer(server);
+        },
 
     });
 });

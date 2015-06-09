@@ -61,6 +61,7 @@ function makeClient (url, nick, options) {
             channel.emit('private', {
                 server: url,
                 user: from,
+                channel: from,
                 text: text
             });
         }       

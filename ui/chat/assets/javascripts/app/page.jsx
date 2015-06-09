@@ -3,7 +3,8 @@ define(function (require, exports, module) {
 
     var UIStore = require('app/uistore'),
         ServerList = require('app/serverlist'),
-        ChannelList = require('app/channellist');
+        ChannelList = require('app/channellist'),
+        MessageList = require('app/messagelist');
 
     var Page = React.createClass({
         mixins: [
@@ -21,13 +22,13 @@ define(function (require, exports, module) {
                                 <h5 className="valign">&nbsp;{this.state.ui.channel}</h5>
                             </div>
                         </nav>
-                        <div id="chat-nav">
-                            <ChannelList />
+                        <div id="chat-nav" className="side-nav fixed flex-cols">
                             <ServerList />
+                            <ChannelList />
                         </div>
                     </header>
                     <main>
-                        <p>hi</p>
+                        <MessageList />
                     </main>
                 </div>
             );

@@ -9,7 +9,7 @@ define(function(require, exports, module) {
         listenables: [ ChannelActions, ServerActions ],
 
         getInitialState: function () {
-            this.servers = { };
+            if (!this.servers) this.servers = { };
             return this.servers;
         },
 

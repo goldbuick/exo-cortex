@@ -24,7 +24,7 @@ define(function (require, exports, module) {
 
         render: function () {
             return (
-                <ul className="channel-nav side-nav fixed">
+                <ul className="channel-nav flex-item">
                     {this.channels().map((channel) => {
                         var active = (channel === this.state.ui.channel),
                             liTagClass = active ? 'active' : '';

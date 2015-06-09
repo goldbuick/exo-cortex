@@ -14,17 +14,14 @@ define(function(require, exports, module) {
         },
 
         onActiveServer: function (server) {
-            console.log('onActiveServer');
             this.trigger(this.messages);
         },
 
         onActiveChannel: function (channel) {
-            console.log('onActiveChannel');
             this.trigger(this.messages);
         },
 
         onMessage: function (message) {
-            console.log('onMessage');
             this.messages.push(message);
             this.trigger(this.messages);                    
         }

@@ -10,7 +10,7 @@ var server = toolkit.createServer('api-irc'),
     gclients = {};
 
 // create channel
-var channel = server.channel('irc');
+var channel = server.createChannel('irc');
 
 // irc client helpers functions
 function gclient (host) {

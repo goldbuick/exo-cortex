@@ -7,6 +7,8 @@ var config = require('./config'),
 	uuid = require('node-uuid'),
 	gupstream = undefined;
 
+// standard event model
+
 function Message (channel, type, data) {
 	return {
 		id: uuid.v4(),
@@ -16,6 +18,8 @@ function Message (channel, type, data) {
 		meta: data
 	};
 }
+
+// shortcut to sending an event to a channel
 
 function Channel (server, name) {
 	this.name = name;
@@ -31,13 +35,11 @@ Channel.prototype = {
 	},
 
 	emit: function (type, data) {
-		// generate event
-		var message = Message(this.name, type, data);
-
-		// transmit upstream
-		this.server.emit(message);
+		this.server.emit(this.name, type, data);
 	}
 };
+
+// main helper class to handle api calls + emit events upstream
 
 function Server (name) {
 	var self = this;
@@ -54,8 +56,8 @@ function Server (name) {
 		if (result) return;
 
 		// invoke generic handler
-		if (self.any) {
-			self.any(json);
+		if (self.onAny) {
+			self.onAny(json);
 		}
 
 		// lookup specific handlers
@@ -84,7 +86,7 @@ function Server (name) {
 				return handler(json);
 
 			} else {
-				self.emit(json);
+				self.upstream(json);
 
 			}
 
@@ -169,29 +171,46 @@ function Server (name) {
 Server.prototype = {
 	constructor: Server,
 
-	channel: function (name) {
+	// create a shortcut to send emit an event on a channel
+	createChannel: function (name) {
 		this.channels[name] = new Channel(this, name);
 		return this.channels[name];
 	},
 
+	// create a standard json message
+	createMessage: function (name, type, data) {
+		// generate event
+		return Message(name, type, data);
+	},
+
+	// called whenever the http server is created,
+	// this will be called when the port is changed in config-server
 	created: function (handler) {
 		this.onCreated = handler;
 	},
 
+	// start the server, will first fetch config from config-server
 	start: function () {
 		// request config state
 		this.configAPI.start();
 	},
 
-	message: function (handler) {
-		this.any = handler;
+	// this is a catch-all handler for api / events
+	any: function (handler) {
+		this.onAny = handler;
 	},
 
-	post: function (host, port, path, route, json) {
-		httppost(host, port, path + route, json);
+	// send an event upstream
+	emit: function (name, type, data) {
+		// generate event
+		var json = this.createMessage(name, type, data);
+
+		// transmit upstream
+		this.upstream(json);		
 	},
 
-	emit: function (json) {
+	// send json upstream
+	upstream: function (json) {
 		if (!gupstream) {
 			console.log('emit', json);
 
@@ -201,6 +220,12 @@ Server.prototype = {
 		}
 	},
 
+	// generic http post
+	post: function (host, port, path, json, success, failure) {
+		httppost(host, port, path, json, success, failure);
+	},
+
+	// register handled api routes to config-server
 	register: function () {
 		var channels = this.channels,
 			routes = [];
@@ -216,6 +241,7 @@ Server.prototype = {
 		this.configAPI.change('/routes', routes);
 	},
 
+	// used to validate & handle config changes
 	config: function (path, rule, trigger) {
 		this.configAPI.validate(path, rule, trigger);
 	}

@@ -26,6 +26,7 @@ function node (run) {
 
 // start stem node servers
 var stem = [
+    [ './config-server' ],
     node('./terminal-server'),
     node('./pass-log'),
     node('./api-irc'),

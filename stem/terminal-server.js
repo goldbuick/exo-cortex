@@ -9,7 +9,7 @@ var io,
     server = toolkit.createServer('terminal-server');
 
 // listen for any message type
-server.message(function (json) {
+server.any(function (json) {
     if (!json || !io) return;
     io.emit('event', json);
 });
@@ -42,7 +42,7 @@ server.created(function (http, port) {
         socket.emit('api', Object.keys(groutes));
 
         // listen for api calls from clients
-        socket.on('invoke', function (data) {
+        socket.on('request', function (data) {
             // validate data
             if (!data.route || !data.json) return;
 
@@ -51,7 +51,10 @@ server.created(function (http, port) {
             if (!external) return;
 
             // post json to route
-            server.post(external.host, external.port, external.path, route, data.json);
+            server.post(external.host, external.port, external.path, route, data.json, function(json) {
+                var message = server.createMessage('response', data.route, json);
+                socket.emit('event', message);
+            });
         });
     });
 });

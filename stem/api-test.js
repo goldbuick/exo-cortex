@@ -7,7 +7,7 @@ var toolkit = require('./toolkit/lib');
 var server = toolkit.createServer('api-test');
 
 // create channel
-var channel = server.channel('test');
+var channel = server.createChannel('test');
 
 channel.message('world', function (message) {
     // discovery

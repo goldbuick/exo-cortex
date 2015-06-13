@@ -51,9 +51,15 @@ server.created(function (http, port) {
             if (!external) return;
 
             // post json to route
-            server.post(external.host, external.port, external.path, route, data.json, function(json) {
-                var message = server.createMessage('response', data.route, json);
-                socket.emit('event', message);
+            var path = (external.path || '/') + data.route;
+            server.post(external.host, external.port, path, data.json, function(json) {
+                var message = server.createMessage('success', data.route, json);
+                socket.emit('response', message);
+
+            }, function (json) {
+                var message = server.createMessage('fail', data.route, json);
+                socket.emit('response', message);
+
             });
         });
     });

@@ -51,6 +51,8 @@ function Server (name) {
 
 	// generic http post handler
 	function httpPost (url, json) {
+		console.log('httpPost', url, json);
+		
 		// invoke config handler
 		var result = self.configAPI.handler(url, json);
 		if (result) return;

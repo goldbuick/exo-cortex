@@ -22,13 +22,60 @@ header, main, footer {
 
 .server-nav {
   width: 70px;
-  a {
+  min-height: 100%;
+  background-color: #263238;
+  
+  li {
     padding: 0 !important;
+  }
+  li.active, li:hover {
+    background-color: #263238;
+
+    svg {
+      background-color: #455a64;
+    }
+  }
+
+  a {
+    padding: 5px 5px 0 5px !important;
+  }
+  
+  svg {
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    background-color: #37474f;
   }
 }
 
 .channel-nav {
   width: 240px;
+  padding: 0 5px;
+  min-height: 100%;
+  background-color: #263238;
+
+  .server {
+    color: #fff;
+    height: 64px;
+    font-size: 1.5em;
+    line-height: 64px;    
+  }
+  .server:hover {
+    background-color: #263238;
+  }
+
+  li.active, li:hover {
+    border-radius: 5px;
+    background-color: #455a64;
+  }
+
+  a {
+    height: 32px;
+    line-height: 32px;
+    border-radius: 5px;
+    color: #fff !important;
+  }
+
 }
 
 .flex-cols {

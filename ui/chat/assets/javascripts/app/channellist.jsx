@@ -23,17 +23,16 @@ define(function (require, exports, module) {
         },
 
         render: function () {
-            return (
-                <ul className="channel-nav flex-item">
-                    {this.channels().map((channel) => {
-                        var active = (channel === this.state.ui.channel),
-                            liTagClass = active ? 'active' : '';
+            return <ul className="channel-nav flex-item">
+                <li className="server">{this.state.ui.server}</li>
+                {this.channels().map((channel) => {
+                    var active = (channel === this.state.ui.channel),
+                        liTagClass = active ? 'active' : '';
 
-                        return <li key={'channel-' + channel} className={liTagClass}><a href="#!"
-                            onClick={this.viewChannel.bind(this, channel)}>{channel}</a></li>;
-                    })}
-                </ul>
-            );
+                    return <li key={'channel-' + channel} className={liTagClass}><a href="#!"
+                        onClick={this.viewChannel.bind(this, channel)}>{channel}</a></li>;
+                })}
+            </ul>;
         }
     });
 

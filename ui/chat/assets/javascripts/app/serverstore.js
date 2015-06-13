@@ -14,13 +14,20 @@ define(function(require, exports, module) {
 
         onServerConnect: function (server) {
             if (this.servers[server] !== undefined) return;
-            this.servers[server] = true;
+            this.servers[server] = '';
             this.trigger(this.servers);
         },
 
         onServerDisconnect: function (server) {
             if (this.servers[server] === undefined) return;
             delete this.servers[server];
+            this.trigger(this.servers);
+        },
+
+        onServerIcon: function (server, svg) {
+            if (this.servers[server] === undefined) return;
+            console.log('onServerIcon', server, svg);
+            this.servers[server] = svg;            
             this.trigger(this.servers);
         }
     });

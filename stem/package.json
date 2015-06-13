@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "a framework for building a composite IOT API",
   "dependencies": {
+    "alea": "0.0.9",
     "irc": "^0.3.12",
     "lwip": "0.0.7",
     "node-uuid": "^1.4.3",

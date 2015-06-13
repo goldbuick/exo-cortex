@@ -23,6 +23,7 @@ module.exports = function(fn) {
 
 		req.on('end', function() {
 			try {
+				console.log('toolkit/httpjson', requestBody);
 				var json = JSON.parse(requestBody);
 
 				try {

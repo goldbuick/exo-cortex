@@ -24,6 +24,11 @@ define(function (require, exports, module) {
             return Object.keys(this.state.server);
         },
 
+        serverIcon: function (name) {
+            console.log('serverIcon for', name, this.state.server[name]);
+            return this.state.server[name];
+        },
+
         viewServer: function (server, e) {
             e.preventDefault();
             UIActions.activeServer(server);
@@ -36,8 +41,10 @@ define(function (require, exports, module) {
                         var active = (server === this.state.ui.server),
                             liTagClass = active ? 'active' : '';
 
-                        return <li key={'server-' + server} className={liTagClass}><a href="#!"
-                            onClick={this.viewServer.bind(this, server)}>{this.shortName(server)}</a></li>;
+                        return <li key={'server-' + server} className={liTagClass}>
+                            <a href="#!"
+                                dangerouslySetInnerHTML={{__html: this.serverIcon(server)}}
+                                onClick={this.viewServer.bind(this, server)}></a></li>;
                     })}
                 </ul>
             );

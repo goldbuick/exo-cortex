@@ -1,6 +1,6 @@
 require([
     'app/page',
-    'app/chatevents'
+    'app/chatapi'
 ], function (Page) {
     'use strict';
     

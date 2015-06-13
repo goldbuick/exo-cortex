@@ -6,6 +6,18 @@ define(function(require, exports, module) {
         ChannelActions = require('app/channelactions'),
         MessageActions = require('app/messageactions');
 
+    function genIdent (source) {
+        terminal.emit('request', {
+            route: 'ident/gen',
+            json: {
+                size: 64,
+                padding: 1,
+                stroke: 1,
+                source: source
+            }
+        });
+    }
+
     terminal.on('api', function(json) {
         console.log('api', json);
     });
@@ -15,6 +27,7 @@ define(function(require, exports, module) {
         
         if (message.meta.server) {
             if (message.type !== 'disconnect') {
+                genIdent(message.meta.server);
                 ServerActions.serverConnect(message.meta.server);
 
             } else {
@@ -38,6 +51,14 @@ define(function(require, exports, module) {
                     text: message.meta.text
                 });
                 break;
+        }
+    });
+
+    terminal.on('response', function (message) {
+        if (message.channel !== 'success') return;
+
+        if (message.type === 'ident/gen') {
+            ServerActions.serverIcon(message.meta.source, message.meta.svg);
         }
     });
 

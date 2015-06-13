@@ -1,79 +1,123 @@
 
 // IDENTICON API
 
-var crypto = require('crypto'),
-    svg = require('./toolkit/svg');
+var Alea = require('alea'),
+    crypto = require('crypto'),
+    svg = require('./toolkit/svg'),
+    toolkit = require('./toolkit/lib');
 
-function cube (x, y, size) {
-    var left = x - size,
-        top = y - size,
-        right = x + size,
-        bottom = y + size,
-        upper = y - (size * 0.5),
-        lower = y + (size * 0.5);
+// create server 
+var server = toolkit.createServer('api-ident');
+
+// create channel
+var channel = server.createChannel('ident');
+
+function cube (rnd, x, y, side, stroke) {
+    var left = x - side,
+        top = y - side,
+        right = x + side,
+        bottom = y + side,
+        upper = y - (side * 0.5),
+        lower = y + (side * 0.5);
+
+    var color = Math.floor(256 * rnd());
 
     var lattr = {
         'stroke': 'white',
-        'stroke-width': 2
+        'stroke-width': stroke
     };
 
-    return svg._(
+    var parts = [ ];
 
-        // base
-        svg.polygon([
-            left, upper,
-            x, top,
-            right, upper,
-            right, lower,
-            x, bottom,
-            left, lower
-        ], {
-            'fill': 'rgba(0, 0, 0, 1)',
-            // 'stroke': 'none',
-            // 'stroke-width': 0       
-        }),
+    // base
+    parts.push(svg.polygon([
+        left, upper,
+        x, top,
+        right, upper,
+        right, lower,
+        x, bottom,
+        left, lower
+    ], {
+        'fill': svg._('rgba(',color,',',color,',',color,',1)')
+    }));
 
-        svg.line(x, y, x, top, lattr),
-        svg.line(x, y, left, upper, lattr),
-        svg.line(x, y, right, upper, lattr),
+    var threshold = 0.35;
+    if (rnd() > threshold) parts.push(svg.line(x, y, left, upper, lattr));
+    if (rnd() > threshold) parts.push(svg.line(x, y, right, upper, lattr));
+    if (rnd() > threshold) parts.push(svg.line(x, y, x, bottom, lattr));
 
-        svg.line(x, y, x, bottom, lattr),
-        // svg.line(x, y, left, lower, lattr),
-        // svg.line(x, y, right, lower, lattr),
-
-        ''
-    );
+    return svg._(parts);
 }
 
+function cuberow (rnd, x, y, xstep, side, stroke, cubes) {
+    return svg._(cubes.map(function (on, i) {
+        return on ? cube(rnd, x + xstep * i, y, side, stroke) : '';
+    }));
+}
 
-var size = 256,
-    padding = 10,
-    step = (size - padding) * 0.25,
-    radius = (step * 0.5) - 1,
-    offset = (padding * 0.5) + (step * 0.5),
-    xstagger = (step * 0.5),
-    ystep = step * 0.75;
+function cubepattern(rnd, count) {
+    var on = [ ];
+    for (var i=0; i < count; ++i) {
+        on.push(rnd() > 0.3 ? 1 : 0);
+    }
+    return on;
+}
 
-// draw cubes
-var x, y = 0,
-    cubes = [ ];
+function cubeglyph (size, padding, stroke, str) {
+    // glyph measurements
+    var xstep = (size - padding) / 4,
+        ystep = (xstep * 0.75),
+        side = (xstep * 0.5) - (stroke * 0.5),
+        inset = (padding * 0.5) + (xstep * 0.5),
+        stagger = (xstep * 0.5);
 
-for (x=0; x < 3; ++x) cubes.push(cube(offset + step * x + xstagger, offset + ystep * y, radius));
-++y;
+    // hash based random numbers
+    var hash = crypto.createHash('sha1').update(str).digest('hex');
+        rnd = Alea(hash);
 
-for (x=0; x < 4; ++x) cubes.push(cube(offset + step * x, offset + ystep * y, radius));
-++y;
+    // generate glyph
+    var y = 0,
+        rows = [ ];
 
-for (x=0; x < 3; ++x) cubes.push(cube(offset + step * x + xstagger, offset + ystep * y, radius));
-++y;
+    rows.push(cuberow(rnd, inset + stagger, inset + ystep * y, xstep, side, stroke, cubepattern(rnd, 3)));
+    
+    ++y;
+    rows.push(cuberow(rnd, inset, inset + ystep * y, xstep, side, stroke, cubepattern(rnd, 4)));
+    
+    ++y;
+    rows.push(cuberow(rnd, inset + stagger, inset + ystep * y, xstep, side, stroke, cubepattern(rnd, 3)));
+    
+    ++y;
+    rows.push(cuberow(rnd, inset, inset + ystep * y, xstep, side, stroke, cubepattern(rnd, 4)));
+    
+    ++y;
+    rows.push(cuberow(rnd, inset + stagger, inset + ystep * y, xstep, side, stroke, cubepattern(rnd, 3)));
+    
+    return svg(size, size, svg._(rows));
+}
 
-for (x=0; x < 4; ++x) cubes.push(cube(offset + step * x, offset + ystep * y, radius));
-++y;
+channel.message('gen', function (message) {
+    // discovery
+    if (!message) {
+        return {
+            size: 'base size for svg icon',
+            padding: 'whitespace around edge of svg',
+            stroke: 'stroke size of the inner cube glyphs',
+            source: 'source string to base the ident off of'
+        };
+    }
 
-for (x=0; x < 3; ++x) cubes.push(cube(offset + step * x + xstagger, offset + ystep * y, radius));
-++y;
+    var glyph = cubeglyph(message.size, message.padding, message.stroke, message.source);
+    return {
+        svg: glyph,
+        source: message.source
+    };
+});
 
-var render = svg(size, size, svg._(cubes));
+// handle server start
+server.created(function (http, port) {
+    console.log('server started on', port);
+});
 
-console.log(render);
-
+// start server
+server.start();

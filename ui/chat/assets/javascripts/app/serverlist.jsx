@@ -11,15 +11,6 @@ define(function (require, exports, module) {
             Reflux.connect(ServerStore, 'server')
         ],
 
-        shortName: function (server) {
-            var hash = server.split("").reduce(function (a, b) {
-                a = ((a << 5) - a) + b.charCodeAt(0);
-                return a & a;
-            }, 0);
-
-            return hash.toString(16).substring(0, 5);
-        },
-
         servers: function () {
             return Object.keys(this.state.server);
         },

@@ -10,6 +10,13 @@ define(function (require, exports, module) {
         mixins: [
             Reflux.connect(UIStore, 'ui'),
         ],
+
+        componentDidMount: function() {
+            $(this.getDOMNode()).find('.button-collapse').sideNav({
+                edge: 'left'
+            });
+        },
+
         render: function () {
             var UI;
 

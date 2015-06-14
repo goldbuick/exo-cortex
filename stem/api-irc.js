@@ -157,7 +157,7 @@ server.config('/nick', function (type, value) {
         return gnick;
 
 }, function (value) {
-    nick = value;
+    gnick = value;
     gclientEach(function (host, client) {
         client.send('NICK', nick);
     });

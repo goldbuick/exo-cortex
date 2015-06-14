@@ -30,7 +30,7 @@ var stem = [
     node('./terminal-server'),
     node('./pass-log'),
     node('./api-irc'),
-    // node('./api-ident'),
+    node('./api-ident'),
 ];
 
 function next() {

@@ -3,6 +3,7 @@
 // CONFIG API
 
 var io,
+    r = require('rethinkdb'),
     config = require('./toolkit/config'),
     httpjson = require('./toolkit/httpjson'),
     httppost = require('./toolkit/httppost');

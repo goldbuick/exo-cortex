@@ -39,8 +39,8 @@ function el (name, attr, inner) {
 
 function svg (width, height, inner) {
     return el('svg', {
-        width: width,
-        height: height,
+        // width: width,
+        // height: height,
         viewBox: [0, 0, width, height].join(' ')
     }, inner);
 }

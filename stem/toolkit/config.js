@@ -3,9 +3,9 @@
 
 var LISTEN_PORT = 7154,
 	CONFIG_UPDATE_URL = '/config/update',
-	httppost = require('./httppost');
 	url = require('url'),
-	argv = require('yargs').argv;
+	argv = require('yargs').argv,
+	httppost = require('./httppost');
 
 function Config(name) {
 	// lookup key in root config

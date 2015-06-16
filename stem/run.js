@@ -26,7 +26,7 @@ function node (run) {
 
 // start stem node servers
 var stem = [
-    [ './config-server' ],
+    [ './config-server', '--rethinkdb', '192.168.59.103:28015' ],
     node('./terminal-server'),
     node('./pass-log'),
     node('./api-irc'),
@@ -41,7 +41,7 @@ function next() {
     exec('node', args);
 
     // trigger next
-    setTimeout(next, 1000);
+    setTimeout(next, 3000);
 }
 
 // start stem

@@ -3,17 +3,23 @@
 // CONFIG API
 
 var io,
-    r = require('rethinkdb'),
+    url = require('url'),
+    argv = require('yargs').argv,
     config = require('./toolkit/config'),
     httpjson = require('./toolkit/httpjson'),
-    httppost = require('./toolkit/httppost');
+    httppost = require('./toolkit/httppost'),
+    rethinkdb = require('./toolkit/rethinkdb');
 
 // define default config values
-var gbasePort = config.LISTEN_PORT + 1;
+var gbaseport = config.LISTEN_PORT + 1;
+function getPort() {
+    ++gbaseport;
+    return gbaseport;
+}
+
 function createConfig () {
-    ++gbasePort;
     return {
-        port: gbasePort
+        port: getPort()
     };
 }
 
@@ -114,6 +120,9 @@ function genConfig () {
         // update upstream configs for nodes
         genUpstream();
 
+        // flush config changes
+        writeConfig();
+
     }, 1000);
 }
 
@@ -138,6 +147,9 @@ on('/start', function (data) {
         port: result.port,
         path: result.path
     };
+
+    // flush config changes
+    writeConfig();
 
     // signal node of initial config
     return result;
@@ -219,3 +231,73 @@ io.on('connection', function(socket) {
     // signal web ui state of config
     io.emit(config.CONFIG_UPDATE_URL, gvalues);
 });
+
+// get config state from rethinkdb
+var conn = url.parse('http://' + argv.rethinkdb),
+    db = rethinkdb.create('exo', 'config'),
+    writeQueue = [];
+
+function writeConfig () {
+    Object.keys(gvalues).forEach(function (name) {
+        if (writeQueue.indexOf(name) === -1)
+            writeQueue.push(name);
+    });
+}
+
+function checkQueue () {
+    var name, json;
+    
+    if (writeQueue.length && db.conn) {
+        name = writeQueue.shift();
+        json = {
+            id: name,
+            config: gvalues[name]
+        };
+
+        // clean json, I don't know what I am doing!?
+        json = JSON.parse(JSON.stringify(json));
+        db.run(db.q().insert(
+            json,
+            { conflict: 'replace' }
+        ), function (err) {
+            setTimeout(checkQueue, 500);
+            if (db.check(err)) return;
+
+            console.log('wrote config', JSON.stringify(json));
+        });
+
+    } else {
+        setTimeout(checkQueue, 5000);
+    }
+}
+
+// gvalues
+db.ready(function () {
+    // query for config values
+    db.run(db.q(), function (err, cursor) {
+        if (db.check(err)) return;
+
+        cursor.each(function (err, node) {
+            if (db.check(err)) return;
+
+            // validate data
+            if (!node.config) return;
+
+            // overwrite port always
+            node.config.port = getPort();
+
+            // read in config for node
+            gvalues[node.id] = node.config;
+
+            // post changes
+            postConfig(node.id, true);
+            console.log('read config', node.id);
+
+        }, function () {
+            console.log('finished reading config');
+            checkQueue();
+        });
+    });  
+});
+
+db.connect(conn.hostname, conn.port);

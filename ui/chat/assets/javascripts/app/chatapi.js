@@ -18,11 +18,21 @@ define(function(require, exports, module) {
         });
     }
 
-    terminal.on('api', function(json) {
-        console.log('api', json);
-    });
+    function getHistory () {
+        var end = new Date(),
+            start = new Date();
+        start.setDate(start.getDate() - 1);
 
-    terminal.on('event', function (message) {
+        terminal.emit('request', {
+            route: 'log/list',
+            json: {
+                startDate: start.toISOString(),
+                endDate: end.toISOString()
+            }
+        });
+    }
+
+    function onEvent (message) {
         if (message.channel !== 'irc') return;
         
         if (message.meta.server) {
@@ -52,13 +62,28 @@ define(function(require, exports, module) {
                 });
                 break;
         }
-    });
+    }    
 
+    terminal.on('event', onEvent);
+    terminal.on('api', function(json) {
+        console.log('api', json);
+        
+        // is log list up?
+        if (json.indexOf('log/list') !== -1) {
+            getHistory();
+        }
+    });
     terminal.on('response', function (message) {
         if (message.channel !== 'success') return;
 
-        if (message.type === 'ident/gen') {
-            ServerActions.serverIcon(message.meta.source, message.meta.svg);
+        switch (message.type) {
+            case 'ident/gen':
+                ServerActions.serverIcon(message.meta.source, message.meta.svg);
+                break;
+
+            case 'log/list':
+                message.meta.forEach(onEvent);
+                break;
         }
     });
 

@@ -16,7 +16,6 @@ define(function (require, exports, module) {
         },
 
         serverIcon: function (name) {
-            console.log('serverIcon for', name, this.state.server[name]);
             return this.state.server[name];
         },
 

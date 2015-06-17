@@ -21,6 +21,8 @@ channel.message('list', function (message, finish) {
         });
     }
 
+    if (!db.conn) return finish([]);
+
     // query events
     db.run(db.q().between(
         message.startDate,
@@ -43,7 +45,7 @@ channel.message('list', function (message, finish) {
 
 // catch all event handler
 server.any(function (url, json) {
-    if (url !== '/upstream' || !json) return;
+    if (url !== '/upstream' || !json || !db.conn) return;
 
     // log all events
     db.run(db.q().insert(json), function (err) {
@@ -70,6 +72,13 @@ server.config('/rethinkdb', function (type, value) {
 }, function (value) {
     if (!value || !value.host || !value.port) return;
 
+    console.log('connect to', value.host, value.port);
+    db.ready(function () {
+        db.run(db.q().indexCreate('when'), function (err) {
+            if (db.check(err)) return;
+            console.log('index created for when');
+        });
+    });
     db.connect(value.host, value.port);
 });
 

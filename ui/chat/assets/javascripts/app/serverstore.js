@@ -26,7 +26,6 @@ define(function(require, exports, module) {
 
         onServerIcon: function (server, svg) {
             if (this.servers[server] === undefined) return;
-            console.log('onServerIcon', server, svg);
             this.servers[server] = svg;            
             this.trigger(this.servers);
         }

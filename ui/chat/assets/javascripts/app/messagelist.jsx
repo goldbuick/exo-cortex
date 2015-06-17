@@ -10,7 +10,6 @@ define(function (require, exports, module) {
             Reflux.connect(UIStore, 'ui'),
             Reflux.connectFilter(MessageStore, 'messages', function (messages) {
                 return messages.filter(function (message) {
-                    console.log(this.state.ui, message);
                     return message.server === this.state.ui.server &&
                            message.channel === this.state.ui.channel;
                 }.bind(this));

@@ -10,18 +10,26 @@ define(function (require, exports, module) {
         mixins: [
             Reflux.connect(UIStore, 'ui')
         ],
+
+        componentDidMount: function() {
+            $(this.getDOMNode()).find('.button-collapse').sideNav({
+                edge: 'left'
+            });
+        },
         
         render: function () {
             return (
                 <div>
                     <header>
-                        <nav className="top-nav blue-grey darken-4">
-                            <div className="nav-wrapper valign-wrapper">
-                                <a href="#" data-activates="chat-nav" className="button-collapse">
-                                    <i className="mdi-navigation-menu"></i></a>
-                                <h5 className="valign">&nbsp;{this.state.ui.channel}</h5>
-                            </div>
-                        </nav>
+                        <div className="navbar-fixed">
+                            <nav className="top-nav blue-grey darken-4">
+                                <div className="nav-wrapper valign-wrapper">
+                                    <a href="#" data-activates="chat-nav" className="button-collapse">
+                                        <i className="mdi-navigation-menu"></i></a>
+                                    <h5 className="valign">&nbsp;{this.state.ui.channel}</h5>
+                                </div>
+                            </nav>
+                        </div>
                         <div id="chat-nav" className="side-nav fixed flex-cols">
                             <ServerList />
                             <ChannelList />

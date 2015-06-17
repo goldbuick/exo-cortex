@@ -23,8 +23,8 @@ define(function (require, exports, module) {
         render: function () {
             return <ul className="collection">
                 {this.messages().map((message) => {
-
-                    return <li key={message.id} className="collection-item">{message.user}: {message.text}</li>
+                    return <li key={message.id}
+                        className="collection-item">{message.user}: {message.text}</li>;
                 })}
             </ul>;
         }

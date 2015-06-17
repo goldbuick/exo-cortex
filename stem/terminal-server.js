@@ -9,8 +9,8 @@ var io,
     server = toolkit.createServer('terminal-server');
 
 // listen for any message type
-server.any(function (json) {
-    if (!json || !io) return;
+server.any(function (url, json) {
+    if (url !== '/upstream' || !json || !io) return;
     io.emit('event', json);
 });
 

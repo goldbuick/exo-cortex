@@ -206,11 +206,11 @@ on('/terminal', function () {
 });
 
 // create http post API
-var http = httpjson(function (url, json) {
+var http = httpjson(function (url, json, finish) {
     var handler = ghandlers[url];
-    if (!handler) return;
+    if (!handler) return finish();
 
-    return handler(json);
+    finish(handler(json));
 });
 
 // start server

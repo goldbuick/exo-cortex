@@ -125,14 +125,14 @@ function makeClient (url, nick, options) {
     return client;
 }
 
-channel.message('say', function (message) {
+channel.message('say', function (message, finish) {
     // discovery
     if (!message) {
-        return {
+        return finish({
             server: 'which server',
             target: 'user or channel to message',
             text: 'the message to send to the target'
-        };
+        });
     }
 
     // get client
@@ -140,6 +140,7 @@ channel.message('say', function (message) {
     if (!client) return;
 
     client.say(message.target, message.text);
+    finish();
 });
 
 // write configuration validators

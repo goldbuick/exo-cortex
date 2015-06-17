@@ -96,22 +96,22 @@ function cubeglyph (size, padding, stroke, str) {
     return svg(size, size, svg._(rows));
 }
 
-channel.message('gen', function (message) {
+channel.message('gen', function (message, finish) {
     // discovery
     if (!message) {
-        return {
+        return finish({
             size: 'base size for svg icon',
             padding: 'whitespace around edge of svg',
             stroke: 'stroke size of the inner cube glyphs',
             source: 'source string to base the ident off of'
-        };
+        });
     }
 
     var glyph = cubeglyph(message.size, message.padding, message.stroke, message.source);
-    return {
+    finish({
         svg: glyph,
         source: message.source
-    };
+    });
 });
 
 // handle server start

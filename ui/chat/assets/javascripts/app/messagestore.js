@@ -9,7 +9,10 @@ define(function(require, exports, module) {
         listenables: [ MessageActions, UIActions ],
 
         getInitialState: function () {
-            if (!this.messages) this.messages = [ ];
+            if (!this.messages) {
+                this.ids = { };
+                this.messages = [ ];
+            }
             return this.messages;
         },
 
@@ -22,6 +25,9 @@ define(function(require, exports, module) {
         },
 
         onMessage: function (message) {
+            // check for dupes
+            if (this.ids[message.id]) return;
+            this.ids[message.id] = true;
             this.messages.push(message);
             this.trigger(this.messages);                    
         }

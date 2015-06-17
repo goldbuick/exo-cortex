@@ -29,8 +29,10 @@ define(function (require, exports, module) {
                     var active = (channel === this.state.ui.channel),
                         liTagClass = active ? 'active' : '';
 
+                    // <div className="unread"></div>
                     return <li key={'channel-' + channel} className={liTagClass}><a href="#!"
-                        onClick={this.viewChannel.bind(this, channel)}>{channel}</a></li>;
+                        onClick={this.viewChannel.bind(this, channel)}>{channel}</a>
+                        </li>;
                 })}
             </ul>;
         }

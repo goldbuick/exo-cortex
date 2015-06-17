@@ -4,6 +4,7 @@ define(function(require, exports, module) {
     module.exports = Reflux.createActions([
         'serverConnect',
         'serverDisconnect',
+        'requestServerIcon',
         'serverIcon'
     ]);
 

@@ -6,7 +6,8 @@ define(function(require, exports, module) {
         ChannelActions = require('app/channelactions'),
         MessageActions = require('app/messageactions');
 
-    function genIdent (source) {
+    // handle fetching server icon
+    ServerActions.requestServerIcon.listen(function (source) {
         terminal.emit('request', {
             route: 'ident/gen',
             json: {
@@ -16,7 +17,7 @@ define(function(require, exports, module) {
                 source: source
             }
         });
-    }
+    });
 
     function getHistory () {
         var end = new Date(),
@@ -37,7 +38,6 @@ define(function(require, exports, module) {
         
         if (message.meta.server) {
             if (message.type !== 'disconnect') {
-                genIdent(message.meta.server);
                 ServerActions.serverConnect(message.meta.server);
 
             } else {

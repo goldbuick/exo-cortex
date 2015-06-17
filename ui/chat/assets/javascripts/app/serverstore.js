@@ -14,6 +14,7 @@ define(function(require, exports, module) {
 
         onServerConnect: function (server) {
             if (this.servers[server] !== undefined) return;
+            ServerActions.requestServerIcon(server);
             this.servers[server] = '';
             this.trigger(this.servers);
         },

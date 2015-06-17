@@ -13,7 +13,8 @@ define(function (require, exports, module) {
 
         componentDidMount: function() {
             $(this.getDOMNode()).find('.button-collapse').sideNav({
-                edge: 'left'
+                edge: 'left',
+                menuWidth: 310
             });
         },
         
@@ -22,7 +23,7 @@ define(function (require, exports, module) {
                 <div>
                     <header>
                         <div className="navbar-fixed">
-                            <nav className="top-nav blue-grey darken-4">
+                            <nav className="top-nav">
                                 <div className="nav-wrapper valign-wrapper">
                                     <a href="#" data-activates="chat-nav" className="button-collapse">
                                         <i className="mdi-navigation-menu"></i></a>

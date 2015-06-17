@@ -31,10 +31,12 @@ define(function (require, exports, module) {
                         var active = (server === this.state.ui.server),
                             liTagClass = active ? 'active' : '';
 
+                        // <div className="unread"></div>
                         return <li key={'server-' + server} className={liTagClass}>
                             <a href="#!"
                                 dangerouslySetInnerHTML={{__html: this.serverIcon(server)}}
-                                onClick={this.viewServer.bind(this, server)}></a></li>;
+                                onClick={this.viewServer.bind(this, server)}></a>
+                            </li>;
                     })}
                 </ul>
             );

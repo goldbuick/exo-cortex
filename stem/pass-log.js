@@ -24,11 +24,13 @@ channel.message('list', function (message, finish) {
     if (!db.conn) return finish([]);
 
     // query events
-    db.run(db.q().between(
+    var q = db.q().between(
         message.startDate,
         message.endDate,
         { index: 'when' }
-    ), function (err, cursor) {
+    ).orderBy('when');
+
+    db.run(q, function (err, cursor) {
         if (db.check(err)) return;
 
         var result = [ ];

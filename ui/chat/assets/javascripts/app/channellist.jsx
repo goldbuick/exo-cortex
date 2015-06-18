@@ -3,7 +3,8 @@ define(function (require, exports, module) {
 
     var UIStore = require('app/uistore'),
         UIActions = require('app/uiactions'),
-        ChannelStore = require('app/channelstore');
+        ChannelStore = require('app/channelstore'),
+        MessageSparkline = require('app/messagesparkline');
 
     var ServerList = React.createClass({
         mixins: [
@@ -29,10 +30,13 @@ define(function (require, exports, module) {
                     var active = (channel === this.state.ui.channel),
                         liTagClass = active ? 'active' : '';
 
-                    // <div className="unread"></div>
-                    return <li key={'channel-' + channel} className={liTagClass}><a href="#!"
-                        onClick={this.viewChannel.bind(this, channel)}>{channel}</a>
-                        </li>;
+                    return <li key={'channel-' + channel} className={liTagClass}>
+                        <MessageSparkline width="220" color="#888"
+                            server={this.state.ui.server} channel={channel} />
+                        <div className="selected"></div>
+                        <a href="#!"
+                            onClick={this.viewChannel.bind(this, channel)}>{channel}</a>
+                    </li>;
                 })}
             </ul>;
         }

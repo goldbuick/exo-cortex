@@ -3,7 +3,8 @@ define(function (require, exports, module) {
 
     var UIStore = require('app/uistore'),
         UIActions = require('app/uiactions'),
-        ServerStore = require('app/serverstore');
+        ServerStore = require('app/serverstore'),
+        MessageSparkline = require('app/messagesparkline');
 
     var ServerList = React.createClass({
         mixins: [
@@ -31,12 +32,14 @@ define(function (require, exports, module) {
                         var active = (server === this.state.ui.server),
                             liTagClass = active ? 'active' : '';
 
-                        // <div className="unread"></div>
                         return <li key={'server-' + server} className={liTagClass}>
+                            <MessageSparkline width="60" color="#888"
+                                server={server}/>
+                            <div className="selected"></div>
                             <a href="#!"
                                 dangerouslySetInnerHTML={{__html: this.serverIcon(server)}}
                                 onClick={this.viewServer.bind(this, server)}></a>
-                            </li>;
+                        </li>;
                     })}
                 </ul>
             );

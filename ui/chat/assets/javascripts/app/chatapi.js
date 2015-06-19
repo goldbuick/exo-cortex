@@ -33,56 +33,85 @@ define(function(require, exports, module) {
         });
     }
 
-    function onEvent (message) {
-        if (message.channel !== 'irc') return;
+    function parseEvent (result, event) {
+        if (event.channel !== 'irc') return;
         
-        if (message.meta.server) {
-            if (message.type !== 'disconnect') {
-                ServerActions.serverConnect(message.meta.server);
+        if (event.meta.server) {
+            if (event.type !== 'disconnect') {
+                result.serverConnect[event.meta.server] = true;
 
             } else {
-                ServerActions.serverDisconnect(message.meta.server);
+                result.serverDisconnect[event.meta.server] = true;
             }
 
-            if (message.meta.channel) {
-                ChannelActions.joinChannel(message.meta.server, message.meta.channel);
+            if (event.meta.channel) {
+                if (result.joinChannel[event.meta.server] === undefined)
+                    result.joinChannel[event.meta.server] = { };
+
+                result.joinChannel[event.meta.server][event.meta.channel] = true;
             }
         }
 
-        switch (message.type) {
+        switch (event.type) {
             case 'public':
             case 'private':
-                MessageActions.message({
-                    id: message.id,
-                    when: message.when,
-                    server: message.meta.server,
-                    channel: message.meta.channel,
-                    user: message.meta.user,
-                    text: message.meta.text
+                result.messages.push({
+                    id: event.id,
+                    when: event.when,
+                    server: event.meta.server,
+                    channel: event.meta.channel,
+                    user: event.meta.user,
+                    text: event.meta.text
                 });
                 break;
         }
-    }    
+    }
 
-    terminal.on('event', onEvent);
-    terminal.on('api', function(json) {
-        console.log('api', json);
-        
+    function onEvent (events) {
+        var result = {
+            serverConnect: [ ],
+            serverDisconnect: [ ],
+            joinChannel: [ ],
+            messages: [ ]
+        };
+        events.forEach(function (event) {
+            parseEvent(result, event);
+        });
+        Object.keys(result.serverConnect).forEach(function (server) {
+            ServerActions.serverConnect(server);
+        });
+        Object.keys(result.serverDisconnect).forEach(function (server) {
+            ServerActions.serverDisconnect(server);
+        });
+        Object.keys(result.joinChannel).forEach(function (server) {
+            Object.keys(result.joinChannel[server]).forEach(function (channel) {
+                ChannelActions.joinChannel(server, channel);
+            });
+        });
+        if (result.messages.length) {
+            MessageActions.batchMessage(result.messages);
+        }
+    }
+
+    terminal.on('event', function (event) {
+        onEvent([ event ]);
+    });
+    terminal.on('api', function (api) {
+        console.log('api', api);
         // is log list up?
-        if (json.indexOf('log/list') !== -1) {
+        if (api.indexOf('log/list') !== -1) {
             getHistory();
         }
     });
-    terminal.on('response', function (message) {
-        if (message.channel !== 'success') return;
-
-        switch (message.type) {
+    terminal.on('response', function (response) {
+        if (response.channel !== 'success') return;
+        switch (response.type) {
             case 'ident/gen':
-                ServerActions.serverIcon(message.meta.source, message.meta.svg);
+                ServerActions.serverIcon(response.meta.source, response.meta.svg);
                 break;
 
             case 'log/list':
-                message.meta.forEach(onEvent);
+                onEvent(response.meta);
                 break;
         }
     });

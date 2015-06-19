@@ -1,6 +1,14 @@
 
 @import "flexbox.less";
 
+@fg-color: #fff;
+@bg-color: #000;
+@alt-color: #90a4ae;
+
+html, body {
+  background: @bg-color;
+}
+
 header, main, footer {
   padding-left: 310px;
 }
@@ -16,48 +24,50 @@ header, main, footer {
   height: 0;
   display: none;
   position: absolute;
-  border-top: 6px solid #ddd;
+  border-top: 6px solid @alt-color;
   border-right: 6px solid transparent;  
 }
 
 .top-nav {
-  background-color: #111;
+  background-color: @bg-color;
 }
 
 .side-nav {
   width: 310px;
-  border-right: 1px solid #fff;
 }
 
 .server-nav, 
 .channel-nav {
   display: block;
   min-height: 100%;
-  background-color: #111;
+  background-color: @bg-color;
 
   .server {
-    color: #fff;
+    color: @fg-color;
     height: 64px;
-    font-size: 1.5em;
-    line-height: 64px;    
+    // font-size: 1.5em;
+    // line-height: 64px;
+    padding: 0 5px !important;   
   }
 
   li {
     position: relative;
-    padding: 0 0 10px 0 !important;
+    padding: 0 !important;
+    margin-bottom: 10px;
   }
 
   li.active, li:hover {
-    background-color: #111;
+    background-color: @bg-color;
   }
 
   a {
     position: relative;
-    color: #fff !important;
-    padding: 5px 5px 10px 5px !important;
+    color: @fg-color !important;
+    padding: 5px !important;
   }
 
   svg {
+    position: relative;
     width: 100%;
     height: 100%;
   }
@@ -69,14 +79,18 @@ header, main, footer {
     position: absolute;
   }
 
+  .nv-sparkline path {
+    stroke: @fg-color !important;
+  }
+
   .nv-point {
-    fill: #fff;
+    fill: @fg-color;
   }
 
   li.active {
     .selected {
       left: 5px;
-      top: 10px;
+      top: 5px;
       display: block;
     }
   }
@@ -85,7 +99,7 @@ header, main, footer {
 
 .server-nav {
   width: 70px;
-  padding-top: 8px;
+  padding-top: 0px;
 
   li {
     padding: 10px !important;
@@ -93,6 +107,12 @@ header, main, footer {
 
   a {
     height: 50px;
+  }
+
+  li.active {
+    .selected {
+      top: 15px;
+    }
   }
 
 }
@@ -103,7 +123,53 @@ header, main, footer {
 
   a {
     height: 32px;
-    line-height: 32px;
+    line-height: 22px;
+  }
+}
+
+.message-list {
+  color: @fg-color;
+  background: @bg-color;
+
+  td {
+    padding: 0 5px 20px 0;
+  }
+
+  .avi, .content {
+    vertical-align: top;
+  }
+
+  .avi {
+    width: 64px;
+    text-align: center;
+  }
+
+  .content {
+    font-weight: 200;
+  }
+
+  .name {
+    font-weight: 400;
+    padding-right: 10px;
+  }
+
+  .when {
+    font-weight: 100;
+  }
+
+  .text {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    word-wrap: break-word;
+  }
+
+  .ago {
+    float: right;
+    font-size: 0.9em;
+    font-weight: 100;
+    padding-right: 5px;
+    color: @alt-color;
   }
 }
 

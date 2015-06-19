@@ -29,12 +29,12 @@ define(function (require, exports, module) {
             });
 
             var range = Object.keys(minutes).map(function (ago) {
-                return parseFloat(ago);
+                return Math.floor(parseFloat(ago) * 0.1);
             });
             if (!range.length) return [{ x: 0, y: 0 }, { x: 1, y: 0 }];
 
             range.sort(function (a, b) {
-                return a - b;
+                return b - a;
             });
 
             var x = 0,
@@ -42,7 +42,7 @@ define(function (require, exports, module) {
                 start = range[0],
                 stop = range[range.length - 1];
 
-            for (var ago=start; ago <= stop; ++ago) {
+            for (var ago=start; ago >= stop; --ago) {
                 data.push({
                     x: ++x,
                     y: minutes[ago] || 0
@@ -55,8 +55,6 @@ define(function (require, exports, module) {
                     y: data[0].y
                 });
             }
-
-            console.log(this.props.server, this.props.channel, start, stop);
 
             return data;
         },
@@ -71,8 +69,7 @@ define(function (require, exports, module) {
                 generate: function() {
                     var chart = nv.models.sparkline()
                         .width(width)
-                        .height(15)
-                        .color(function() { return color; });
+                        .height(15);
 
                     d3.select(dom)
                         .datum(data)

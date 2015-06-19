@@ -33,7 +33,7 @@ define(function (require, exports, module) {
                             liTagClass = active ? 'active' : '';
 
                         return <li key={'server-' + server} className={liTagClass}>
-                            <MessageSparkline width="60" color="#888"
+                            <MessageSparkline width="60"
                                 server={server}/>
                             <div className="selected"></div>
                             <a href="#!"

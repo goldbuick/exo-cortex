@@ -25,13 +25,14 @@ define(function (require, exports, module) {
 
         render: function () {
             return <ul className="channel-nav flex-item">
-                <li className="server">{this.state.ui.server}</li>
+                <li className="server valign-wrapper">
+                    <h5 className="valign">{this.state.ui.server}</h5></li>
                 {this.channels().map((channel) => {
                     var active = (channel === this.state.ui.channel),
                         liTagClass = active ? 'active' : '';
 
                     return <li key={'channel-' + channel} className={liTagClass}>
-                        <MessageSparkline width="220" color="#888"
+                        <MessageSparkline width="220"
                             server={this.state.ui.server} channel={channel} />
                         <div className="selected"></div>
                         <a href="#!"

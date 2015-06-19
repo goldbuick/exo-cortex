@@ -24,11 +24,21 @@ define(function(require, exports, module) {
             this.trigger(this.messages);
         },
 
-        onMessage: function (message) {
+        addMessage: function (message) {
             // check for dupes
-            if (this.ids[message.id]) return;
+            if (this.ids[message.id]) return false;
             this.ids[message.id] = true;
             this.messages.push(message);
+            return true;
+        },
+
+        onBatchMessage: function (messages) {
+            messages.forEach(this.addMessage.bind(this));
+            this.trigger(this.messages);
+        },
+
+        onMessage: function (message) {
+            if (!this.addMessage(message)) return;
             this.trigger(this.messages);                    
         }
 

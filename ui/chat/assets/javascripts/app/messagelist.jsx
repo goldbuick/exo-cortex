@@ -16,17 +16,58 @@ define(function (require, exports, module) {
             })
         ],
 
+        // componentDidMount: function () {
+        //     var node = this.getDOMNode();
+        //     node.scrollTop = node.scrollHeight
+        // },
+
+        componentWillUpdate: function () {
+            var node = document.body;
+            this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
+        },
+
+        componentDidUpdate: function () {
+            // if (this.shouldScrollBottom) {
+                var node = document.body;
+                node.scrollTop = node.scrollHeight;
+            // }
+        },
+
         messages: function () {
-            return this.state.messages;
+            return this.state.messages.map(function (message) {
+                var when = moment(message.when);
+                return {
+                    avi: 'avi',
+                    user: message.user,
+                    text: message.text,
+                    ago: when.fromNow(),
+                    when: when.format('hh:mm A')
+                };
+            });
         },
 
         render: function () {
-            return <ul className="collection">
+            var lastUser = '',
+                lastTime = '';
+
+            return <table className="message-list">
+                <tbody>
                 {this.messages().map((message) => {
-                    return <li key={message.id}
-                        className="collection-item">{message.user}: {message.text}</li>;
+                    return <tr key={message.id}>
+                        <td className="avi"
+                            dangerouslySetInnerHTML={{__html: message.avi}}></td>
+                        <td className="content">
+                            <div className="details">
+                                <span className="name">{message.user}</span>
+                                <span className="when">{message.when}</span>
+                                <span className="ago">{message.ago}</span>
+                            </div>
+                            <div className="text">{message.text}</div>
+                        </td>
+                    </tr>;
                 })}
-            </ul>;
+                </tbody>
+            </table>;
         }
     });
 

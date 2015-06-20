@@ -49,7 +49,7 @@ function makeClient (url, nick, options) {
         });
     });
 
-    client.addListener('message', function (from, to, text) {
+    function handleMessage (from, to, text) {
         if (to[0] === '#') {
             channel.emit('public', {
                 server: url,
@@ -61,11 +61,17 @@ function makeClient (url, nick, options) {
             channel.emit('private', {
                 server: url,
                 user: from,
-                channel: from,
+                channel: to,
                 text: text
             });
         }       
+    }    
+
+    client.addListener('selfMessage', function (to, text) {
+        handleMessage(gnick, to, text);
     });
+
+    client.addListener('message', handleMessage);
 
     client.addListener('names', function (_channel, nicks) {
         channel.emit('names', {

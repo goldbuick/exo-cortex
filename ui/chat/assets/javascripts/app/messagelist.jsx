@@ -19,21 +19,22 @@ define(function (require, exports, module) {
             })
         ],
 
-        // componentDidMount: function () {
-        //     var node = this.getDOMNode();
-        //     node.scrollTop = node.scrollHeight
-        // },
-
         componentWillUpdate: function () {
-            var node = document.body;
-            this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
+            var node = document.body,
+                height = node.offsetHeight,
+                offset = height - node.scrollTop;
+            this.shouldScrollBottom = (offset === window.innerHeight || height < window.innerHeight);
         },
 
         componentDidUpdate: function () {
-            // if (this.shouldScrollBottom) {
-                var node = document.body;
+            var node = document.body;
+            if (this.shouldScrollBottom ||
+                this.lastServer !== this.state.ui.server ||
+                this.lastChannel !== this.state.ui.channel) {
+                this.lastServer = this.state.ui.server;
+                this.lastChannel = this.state.ui.channel;
                 node.scrollTop = node.scrollHeight;
-            // }
+            }
         },
 
         messages: function () {

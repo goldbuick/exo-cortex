@@ -3,7 +3,8 @@ define(function(require, exports, module) {
 
     module.exports = Reflux.createActions([
         'request',
-        'response'
+        'response',
+        'next'
     ]);
 
 });

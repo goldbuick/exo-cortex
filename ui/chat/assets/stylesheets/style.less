@@ -6,6 +6,10 @@
 @soft-color: #181818;
 @alt-color: #90a4ae;
 
+@font-light: 100;
+@font-normal: 500;
+@font-heavy: 700;
+
 html, body {
   background: @bg-color;
 }
@@ -146,6 +150,7 @@ header, main, footer {
 
   td {
     padding: 0 5px 0 0;
+    border-radius: 0;
   }
 
   td.first {
@@ -170,7 +175,7 @@ header, main, footer {
   }
 
   .content {
-    font-weight: 100;
+    font-weight: @font-light;
   }
 
   .details {
@@ -178,12 +183,12 @@ header, main, footer {
   }
 
   .name {
-    font-weight: 500;
+    font-weight: @font-normal;
     padding-right: 10px;
   }
 
   .when {
-    font-weight: 100;
+    font-weight: @font-light;
     color: @alt-color;
   }
 
@@ -197,9 +202,43 @@ header, main, footer {
   .ago {
     float: right;
     font-size: 0.9em;
-    font-weight: 100;
+    font-weight: @font-light;
     padding-right: 5px;
     color: @alt-color;
+  }
+
+  .input {
+    td {
+      padding: 0;
+      height: 64px;
+    }
+  }
+}
+
+.message-reply {
+  bottom: 0;
+  right: 0;
+  left: 310px;
+  padding: 0 10px;
+  position: fixed;
+  background: @bg-color;
+  -webkit-box-shadow: 0 -2px 5px 0 rgba(0, 0, 0, 0.16), 0 -2px 10px 0 rgba(0, 0, 0, 0.12);
+  -moz-box-shadow: 0 -2px 5px 0 rgba(0, 0, 0, 0.16), 0 -2px 10px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 -2px 5px 0 rgba(0, 0, 0, 0.16), 0 -2px 10px 0 rgba(0, 0, 0, 0.12);
+
+  .input-field {
+    margin-top: 0;
+    color: @fg-color;
+  }
+
+  input[type=text] {
+    font-weight: @font-light;
+    border-bottom: 1px solid @fg-color;
+  }
+
+  input[type=text]:focus {
+    border-bottom: 1px solid @alt-color;
+    box-shadow: 0 1px 0 0 @bg-color;  
   }
 }
 

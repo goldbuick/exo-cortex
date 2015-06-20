@@ -1,11 +1,11 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var MessageActions = require('app/messageactions'),
+    var terminal = require('app/terminal'),
+        MessageActions = require('app/messageactions'),
         UIActions = require('app/uiactions');
 
     module.exports = Reflux.createStore({
-
         listenables: [ MessageActions, UIActions ],
 
         getInitialState: function () {
@@ -40,7 +40,17 @@ define(function(require, exports, module) {
         onMessage: function (message) {
             if (!this.addMessage(message)) return;
             this.trigger(this.messages);                    
-        }
+        },
 
+        onReply: function (server, channel, text) {
+            terminal.emit('request', {
+                route: 'irc/say',
+                json: {
+                    server: server,
+                    target: channel,
+                    text: text
+                }
+            });
+        }
     });
 });

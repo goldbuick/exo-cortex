@@ -5,6 +5,7 @@ define(function (require, exports, module) {
         ServerList = require('app/serverlist'),
         ChannelList = require('app/channellist'),
         MessageList = require('app/messagelist'),
+        MessageReply = require('app/messagereply'),
         MessageSparkline = require('app/messagesparkline');
 
     var Page = React.createClass({
@@ -21,7 +22,7 @@ define(function (require, exports, module) {
         
         render: function () {
             return (
-                <div>
+                <div className="page">
                     <header>
                         <div className="navbar-fixed">
                             <nav className="top-nav">
@@ -44,6 +45,7 @@ define(function (require, exports, module) {
                     </header>
                     <main>
                         <MessageList />
+                        <MessageReply />
                     </main>
                 </div>
             );

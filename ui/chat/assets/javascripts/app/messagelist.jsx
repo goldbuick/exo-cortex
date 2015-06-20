@@ -100,6 +100,9 @@ define(function (require, exports, module) {
                         </td>
                     </tr>;
                 })}
+                <tr key="input" className="input">
+                    <td></td><td></td>
+                </tr>
                 </tbody>
             </table>;
         }

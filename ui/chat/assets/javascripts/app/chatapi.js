@@ -6,19 +6,6 @@ define(function(require, exports, module) {
         ChannelActions = require('app/channelactions'),
         MessageActions = require('app/messageactions');
 
-    // handle fetching server icon
-    ServerActions.requestServerIcon.listen(function (source) {
-        terminal.emit('request', {
-            route: 'ident/gen',
-            json: {
-                size: 64,
-                padding: 1,
-                stroke: 1,
-                source: source
-            }
-        });
-    });
-
     function getHistory () {
         var end = new Date(),
             start = new Date();
@@ -104,16 +91,10 @@ define(function(require, exports, module) {
         }
     });
     terminal.on('response', function (response) {
-        if (response.channel !== 'success') return;
-        switch (response.type) {
-            case 'ident/gen':
-                ServerActions.serverIcon(response.meta.source, response.meta.svg);
-                break;
-
-            case 'log/list':
-                onEvent(response.meta);
-                break;
-        }
+        if (response.channel !== 'success' ||
+            response.type !== 'log/list') return;
+            
+        onEvent(response.meta);
     });
 
 });

@@ -9,7 +9,8 @@
     "react": "~0.12.2",
     "moment": "~2.9.0",
     "notify.js": "~1.2.5",
-    "nvd3": "~1.8.1"
+    "nvd3": "~1.8.1",
+    "textures": "*"
   },
   "resolutions": {
     "jquery": ">=2.1.1"

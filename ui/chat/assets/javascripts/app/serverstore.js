@@ -4,7 +4,6 @@ define(function(require, exports, module) {
     var ServerActions = require('app/serveractions');
 
     module.exports = Reflux.createStore({
-
         listenables: [ ServerActions ],
 
         getInitialState: function () {
@@ -14,7 +13,6 @@ define(function(require, exports, module) {
 
         onServerConnect: function (server) {
             if (this.servers[server] !== undefined) return;
-            ServerActions.requestServerIcon(server);
             this.servers[server] = '';
             this.trigger(this.servers);
         },
@@ -25,10 +23,10 @@ define(function(require, exports, module) {
             this.trigger(this.servers);
         },
 
-        onServerIcon: function (server, svg) {
-            if (this.servers[server] === undefined) return;
-            this.servers[server] = svg;            
-            this.trigger(this.servers);
-        }
+        // onResponse: function (server, svg) {
+        //     if (this.servers[server] === undefined) return;
+        //     this.servers[server] = svg;            
+        //     this.trigger(this.servers);
+        // }
     });
 });

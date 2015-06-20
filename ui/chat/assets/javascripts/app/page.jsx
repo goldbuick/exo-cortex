@@ -4,7 +4,8 @@ define(function (require, exports, module) {
     var UIStore = require('app/uistore'),
         ServerList = require('app/serverlist'),
         ChannelList = require('app/channellist'),
-        MessageList = require('app/messagelist');
+        MessageList = require('app/messagelist'),
+        MessageSparkline = require('app/messagesparkline');
 
     var Page = React.createClass({
         mixins: [
@@ -31,9 +32,14 @@ define(function (require, exports, module) {
                                 </div>
                             </nav>
                         </div>
-                        <div id="chat-nav" className="side-nav fixed flex-cols">
-                            <ServerList />
-                            <ChannelList />
+                        <div id="chat-nav" className="side-nav fixed">
+                            <div className="overview">
+                                <MessageSparkline width="295" />
+                            </div>
+                            <div className="flex-cols">
+                                <ServerList />
+                                <ChannelList />
+                            </div>
                         </div>
                     </header>
                     <main>

@@ -3,12 +3,15 @@ define(function (require, exports, module) {
 
     var UIStore = require('app/uistore'),
         UIActions = require('app/uiactions'),
+        IconStore = require('app/iconstore'),
+        IconActions = require('app/iconactions'),
         ServerStore = require('app/serverstore'),
         MessageSparkline = require('app/messagesparkline');
 
     var ServerList = React.createClass({
         mixins: [
             Reflux.connect(UIStore, 'ui'),
+            Reflux.connect(IconStore, 'icon'),
             Reflux.connect(ServerStore, 'server')
         ],
 
@@ -17,7 +20,7 @@ define(function (require, exports, module) {
         },
 
         serverIcon: function (name) {
-            return this.state.server[name];
+            return this.state.icon[name];
         },
 
         viewServer: function (server, e) {
@@ -32,6 +35,7 @@ define(function (require, exports, module) {
                         var active = (server === this.state.ui.server),
                             liTagClass = active ? 'active' : '';
 
+                        IconActions.request(server);
                         return <li key={'server-' + server} className={liTagClass}>
                             <MessageSparkline width="60"
                                 server={server}/>

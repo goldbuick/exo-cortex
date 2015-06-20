@@ -3,11 +3,14 @@ define(function (require, exports, module) {
 
     var UIStore = require('app/uistore'),
         UIActions = require('app/uiactions'),
+        IconStore = require('app/iconstore'),
+        IconActions = require('app/iconactions'),
         MessageStore = require('app/messagestore');
 
     var MessageList = React.createClass({
         mixins: [
             Reflux.connect(UIStore, 'ui'),
+            Reflux.connect(IconStore, 'icon'),
             Reflux.connectFilter(MessageStore, 'messages', function (messages) {
                 return messages.filter(function (message) {
                     return message.server === this.state.ui.server &&
@@ -34,35 +37,65 @@ define(function (require, exports, module) {
         },
 
         messages: function () {
+            var now = moment();
             return this.state.messages.map(function (message) {
                 var when = moment(message.when);
                 return {
-                    avi: 'avi',
+                    id: message.id,
+                    avi: this.state.icon[message.user],
                     user: message.user,
                     text: message.text,
                     ago: when.fromNow(),
-                    when: when.format('hh:mm A')
+                    when: when.format('hh:mm A'),
+                    gap: now.diff(when, 'minutes')
                 };
-            });
+            }.bind(this));
         },
 
         render: function () {
             var lastUser = '',
-                lastTime = '';
+                lastGap = 0;
 
             return <table className="message-list">
                 <tbody>
                 {this.messages().map((message) => {
+                    var first = false,
+                        gap = Math.abs(message.gap - lastGap);
+
+                    if (lastUser !== message.user) {
+                        first = true;
+                        lastUser = message.user;
+                    }
+                    if (gap > 30) {
+                        first = true;
+                        lastGap = message.gap;
+                    }
+
+                    IconActions.request(message.user);
+
+                    if (first) {
+                        return <tr key={message.id}>
+                            <td className="avi first">
+                                <div className="avi-wrapper"
+                                    dangerouslySetInnerHTML={{__html: message.avi}}></div>
+                            </td>
+                            <td className="content first">
+                                <div className="details">
+                                    <span className="name">{message.user}</span>
+                                    <span className="when">{message.when}</span>
+                                    <span className="ago">{message.ago}</span>
+                                </div>
+                                <p className="text">{message.text}</p>
+                            </td>
+                        </tr>;
+                    }
+
                     return <tr key={message.id}>
-                        <td className="avi"
-                            dangerouslySetInnerHTML={{__html: message.avi}}></td>
+                        <td className="avi">
+                            <div className="avi-wrapper">&nbsp;</div>
+                        </td>
                         <td className="content">
-                            <div className="details">
-                                <span className="name">{message.user}</span>
-                                <span className="when">{message.when}</span>
-                                <span className="ago">{message.ago}</span>
-                            </div>
-                            <div className="text">{message.text}</div>
+                            <p className="text">{message.text}</p>
                         </td>
                     </tr>;
                 })}

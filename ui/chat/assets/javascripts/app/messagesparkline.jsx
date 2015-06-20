@@ -25,24 +25,25 @@ define(function (require, exports, module) {
 
             this.state.messages.forEach(function (message) {
                 var ago = now.diff(message.when, 'minutes');
+                ago = Math.floor(ago * 0.02);
                 minutes[ago] = (minutes[ago] || 0) + 1;
             });
 
             var range = Object.keys(minutes).map(function (ago) {
-                return Math.floor(parseFloat(ago) * 0.1);
+                return parseFloat(ago);
             });
             if (!range.length) return [{ x: 0, y: 0 }, { x: 1, y: 0 }];
 
             range.sort(function (a, b) {
-                return b - a;
+                return a - b;
             });
 
             var x = 0,
                 data = [ ],
-                start = range[0],
+                start = 0,
                 stop = range[range.length - 1];
 
-            for (var ago=start; ago >= stop; --ago) {
+            for (var ago=start; ago <= stop; ++ago) {
                 data.push({
                     x: ++x,
                     y: minutes[ago] || 0

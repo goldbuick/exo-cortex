@@ -1,8 +1,9 @@
 
 @import "flexbox.less";
 
-@fg-color: #fff;
-@bg-color: #000;
+@fg-color: #eee;
+@bg-color: #111;
+@soft-color: #181818;
 @alt-color: #90a4ae;
 
 html, body {
@@ -32,21 +33,16 @@ header, main, footer {
   background-color: @bg-color;
 }
 
-.side-nav {
-  width: 310px;
-}
-
 .server-nav, 
 .channel-nav {
   display: block;
   min-height: 100%;
-  background-color: @bg-color;
+  position: relative;
+  background-color: transparent;
 
   .server {
     color: @fg-color;
     height: 64px;
-    // font-size: 1.5em;
-    // line-height: 64px;
     padding: 0 5px !important;   
   }
 
@@ -57,7 +53,7 @@ header, main, footer {
   }
 
   li.active, li:hover {
-    background-color: @bg-color;
+    background-color: transparent;
   }
 
   a {
@@ -72,21 +68,6 @@ header, main, footer {
     height: 100%;
   }
 
-  svg.sparkline {
-    height: 15px;
-    left: 5px;
-    bottom: 0;
-    position: absolute;
-  }
-
-  .nv-sparkline path {
-    stroke: @fg-color !important;
-  }
-
-  .nv-point {
-    fill: @fg-color;
-  }
-
   li.active {
     .selected {
       left: 5px;
@@ -99,7 +80,7 @@ header, main, footer {
 
 .server-nav {
   width: 70px;
-  padding-top: 0px;
+  padding-top: 10px;
 
   li {
     padding: 10px !important;
@@ -127,12 +108,48 @@ header, main, footer {
   }
 }
 
+.side-nav {
+  width: 310px;
+  background-color: @bg-color;
+  background-size: 10px 10px;    
+  background-image: repeating-linear-gradient(0deg, @soft-color, @soft-color 1px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(-90deg, @soft-color, @soft-color 1px, transparent 1px, transparent 40px);
+  .overview {
+    top: 0;
+    left: 0;
+    z-index: 1;
+    height: 17px;
+    width: 310px;
+    position: absolute;
+  }
+
+  svg.sparkline {
+    height: 15px;
+    left: 5px;
+    bottom: 0;
+    position: absolute;
+  }
+
+  .nv-sparkline path {
+    stroke: @fg-color !important;
+  }
+
+  .nv-point {
+    fill: @fg-color;
+  }
+  
+}
+
 .message-list {
   color: @fg-color;
   background: @bg-color;
 
   td {
-    padding: 0 5px 20px 0;
+    padding: 0 5px 0 0;
+  }
+
+  td.first {
+    padding: 20px 5px 0 0;
   }
 
   .avi, .content {
@@ -140,27 +157,40 @@ header, main, footer {
   }
 
   .avi {
-    width: 64px;
+    margin: 0;
+    padding: 0;
+    width: 42px;
     text-align: center;
   }
 
+  .avi-wrapper {
+    margin: 0;
+    padding: 0;
+    width: 42px;
+  }
+
   .content {
-    font-weight: 200;
+    font-weight: 100;
+  }
+
+  .details {
+    padding-bottom: 5px;
   }
 
   .name {
-    font-weight: 400;
+    font-weight: 500;
     padding-right: 10px;
   }
 
   .when {
     font-weight: 100;
+    color: @alt-color;
   }
 
   .text {
     margin: 0;
     padding: 0;
-    width: 100%;
+    // font-size: 0.9em;
     word-wrap: break-word;
   }
 

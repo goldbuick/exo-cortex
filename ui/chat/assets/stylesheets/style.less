@@ -17,10 +17,16 @@ html, body {
 header, main, footer {
   padding-left: 310px;
 }
+.message-reply {
+  left: 310px;
+}
 
 @media only screen and (max-width : 992px) {
   header, main, footer {
     padding-left: 0;
+  }
+  .message-reply {
+    left: 0;
   }
 }
 
@@ -149,7 +155,7 @@ header, main, footer {
   background: @bg-color;
 
   td {
-    padding: 0 5px 0 0;
+    padding: 0;
     border-radius: 0;
   }
 
@@ -170,7 +176,7 @@ header, main, footer {
 
   .avi-wrapper {
     margin: 0;
-    padding: 0;
+    padding: 0 0 0 3px;
     width: 42px;
   }
 
@@ -218,7 +224,6 @@ header, main, footer {
 .message-reply {
   bottom: 0;
   right: 0;
-  left: 310px;
   padding: 0 10px;
   position: fixed;
   background: @bg-color;

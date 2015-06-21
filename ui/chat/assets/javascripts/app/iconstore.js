@@ -4,6 +4,12 @@ define(function(require, exports, module) {
     var terminal = require('app/terminal'),
         IconActions = require('app/iconactions');
 
+    function triggerNext () {
+        setTimeout(function () {
+            IconActions.next();                    
+        }, 1000);        
+    }
+
     module.exports = Reflux.createStore({
         listenables: [ IconActions ],
 
@@ -30,9 +36,7 @@ define(function(require, exports, module) {
                     }
                 });
             } else {
-                setTimeout(function () {
-                    IconActions.next();                    
-                }, 1000);
+                triggerNext();
             }
         },
 
@@ -51,7 +55,7 @@ define(function(require, exports, module) {
 
     terminal.on('response', function (response) {
         if (response.type !== 'ident/gen') return;
-        IconActions.next();
+        triggerNext();
         if (response.channel !== 'success') return;
         IconActions.response(response.meta.source, response.meta.svg);
     });

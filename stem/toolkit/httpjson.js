@@ -28,7 +28,7 @@ module.exports = function(fn) {
 
                 try {
                     // invoke callback
-                    fn(req.url, json, function (result) {
+                    fn(req, json, function (result) {
                         if (result === undefined) {
                             result = { success: true };
                         }

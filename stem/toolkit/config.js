@@ -2,6 +2,8 @@
 // toolkit config api
 
 var LISTEN_PORT = 7154,
+    TERMINAL_PORT = 26154,
+    DOCKER_MODE_PORT = 3000,
     CONFIG_UPDATE_URL = '/config/update',
     url = require('url'),
     argv = require('yargs').argv,
@@ -198,6 +200,8 @@ Config.prototype = {
 
 module.exports = {
     LISTEN_PORT: LISTEN_PORT,
+    TERMINAL_PORT: TERMINAL_PORT,
+    DOCKER_MODE_PORT: DOCKER_MODE_PORT,
     CONFIG_UPDATE_URL: CONFIG_UPDATE_URL,
 
     createConfig: function (name) {

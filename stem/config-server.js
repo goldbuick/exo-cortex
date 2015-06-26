@@ -1,4 +1,3 @@
-#!/usr/local/bin/node
 
 // CONFIG API
 
@@ -12,14 +11,18 @@ var io,
 
 // define default config values
 var gbaseport = config.LISTEN_PORT + 1;
-function getPort() {
-    ++gbaseport;
-    return gbaseport;
+function getPort (name) {
+    // terminal server alwasy has the same port
+    if (name === gts) return config.TERMINAL_PORT;
+    // when running in a container
+    if (argv.docker) return config.DOCKER_MODE_PORT;
+    // when running locally on your machine
+    return ++gbaseport;
 }
 
-function createConfig () {
+function createConfig (name) {
     return {
-        port: getPort()
+        port: getPort(name)
     };
 }
 
@@ -33,9 +36,9 @@ var gts = 'terminal-server',
     gupstream = { };
 
 function on (route, handler) {
-    ghandlers[route] = function (data) {
+    ghandlers[route] = function (data, req) {
         console.log('on', route, data);
-        return handler(data);
+        return handler(data, req);
     };
 }
 
@@ -127,12 +130,15 @@ function genConfig () {
 }
 
 // signal a node has come online
-on('/start', function (data) {
+on('/start', function (data, req) {
     if (!data.name) return;
+
+    // console.log('$$$$ data.name', req.socket.remoteAddress);
+    // console.log('$$$$ data.name', req.socket.remotePort);
 
     // create stub config if needed
     if (!gvalues[data.name]) {
-        gvalues[data.name] = createConfig();
+        gvalues[data.name] = createConfig(data.name);
     }
 
     // signal web ui of updated config
@@ -140,6 +146,9 @@ on('/start', function (data) {
 
     // initial config
     var result = gvalues[data.name];
+
+    // auto-gen host
+    result.host = req.socket.remoteAddress;
 
     // cache conneciton info for node
     gnodes[data.name] = {
@@ -206,11 +215,10 @@ on('/terminal', function () {
 });
 
 // create http post API
-var http = httpjson(function (url, json, finish) {
-    var handler = ghandlers[url];
+var http = httpjson(function (req, json, finish) {
+    var handler = ghandlers[req.url];
     if (!handler) return finish();
-
-    finish(handler(json));
+    finish(handler(json, req));
 });
 
 // start server
@@ -284,7 +292,7 @@ db.ready(function () {
             if (!node.config) return;
 
             // overwrite port always
-            node.config.port = getPort();
+            node.config.port = getPort(node.id);
 
             // read in config for node
             gvalues[node.id] = node.config;

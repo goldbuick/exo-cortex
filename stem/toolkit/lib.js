@@ -50,7 +50,8 @@ function Server (name) {
     this.channels = { };
 
     // generic http post handler
-    function jsonrequest (url, json, finish) {
+    function jsonrequest (req, json, finish) {
+        var url = req.url;
         console.log('jsonrequest', url, json);
         
         // invoke config handler

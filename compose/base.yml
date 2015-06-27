@@ -1,0 +1,42 @@
+barrier:
+    image: goldbuick/exobarrier
+    ports:
+        - "8080:8080"
+        - "8888:8888"
+        - "7154:7154"
+        - "26154:26154"
+    volumes:
+        - "$PWD:/var/nginx"
+    links:
+        - private
+        - rethinkdb
+        - config
+        - terminal
+
+private:
+    image: jwilder/nginx-proxy
+    volumes:
+        - /var/run/docker.sock:/tmp/docker.sock:ro
+    ports:
+        - "127.0.0.1:7080:80"
+
+terminal:
+    image: goldbuick/exoterminal
+    ports:
+        - "127.0.0.1:16154:26154"
+
+config:
+    image: goldbuick/exoconfig
+    ports:
+        - "127.0.0.1:6154:7154"
+    links:
+        - rethinkdb
+
+rethinkdb:
+    image: rethinkdb
+    ports:
+        - "127.0.0.1:7777:8080"
+        - "127.0.0.1:28015:28015"
+        - "127.0.0.1:29015:29015"
+    volumes:
+        - "$PWD:/data"

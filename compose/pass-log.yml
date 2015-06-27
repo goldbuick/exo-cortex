@@ -1,0 +1,6 @@
+api-ident:
+    image: goldbuick/exopasslog
+    net: "host"
+    links:
+        - config
+        - rethinkdb

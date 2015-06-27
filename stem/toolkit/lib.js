@@ -154,7 +154,8 @@ function Server (name) {
 
             // ready to start listening
             self.httpPort = json.port;
-            self.http.listen(json.port);
+            // nodes only listen to localhost
+            self.http.listen(json.port, 'localhost');
 
             // signal creation of http object
             if (self.onCreated) {

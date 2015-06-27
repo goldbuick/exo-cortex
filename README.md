@@ -1,7 +1,7 @@
 ![exo-cortex](https://raw.githubusercontent.com/goldbuick/exo-cortex/master/logo.png)
 
-A Weird IOT toolkit
-===================
+A self-hosted IOT toolkit
+=========================
 
 My primary goal is to build a collection of Dockerfiles you can use to deploy your own
 IOT setup.

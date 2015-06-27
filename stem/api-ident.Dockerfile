@@ -15,4 +15,4 @@ RUN apk-install make gcc g++ python && \
     rm -rf /tmp/* /root/.npm /root/.node-gyp
 
 # it is expected to run in -net="host" mode
-CMD ["node", "api-ident.js", "--control", "config:6154"] 
+CMD ["node", "api-ident.js", "--control", "stem_config_server:6154"] 

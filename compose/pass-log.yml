@@ -1,6 +1,6 @@
 api-ident:
-    image: goldbuick/exopasslog
-    net: "host"
+    image: goldbuick/stem_pass_log
+    net: "container:stem_config_server"
     links:
-        - config
         - rethinkdb
+        - stem_config_server

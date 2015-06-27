@@ -1,5 +1,5 @@
 api-ident:
-    image: goldbuick/exoapiident
-    net: "host"
+    image: goldbuick/stem_api_ident
+    net: "container:stem_config_server"
     links:
-        - config
+        - stem_config_server

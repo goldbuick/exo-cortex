@@ -1,32 +1,33 @@
-barrier:
-    image: goldbuick/exobarrier
+util_barrier:
+    image: goldbuick/util_barrier
     ports:
-        - "8080:8080"
         - "8888:8888"
+        - "8080:8080"
         - "7154:7154"
         - "26154:26154"
     volumes:
         - "$PWD:/var/nginx"
     links:
-        - private
         - rethinkdb
-        - config
-        - terminal
+        - private_proxy
+        - stem_config_server
+        - stem_terminal_server
 
-private:
+private_proxy:
     image: jwilder/nginx-proxy
     volumes:
         - /var/run/docker.sock:/tmp/docker.sock:ro
     ports:
         - "127.0.0.1:7080:80"
 
-terminal:
-    image: goldbuick/exoterminal
+stem_terminal_server:
+    image: goldbuick/stem_terminal_server
+    net: "container:stem_config_server"
     ports:
         - "127.0.0.1:16154:26154"
 
-config:
-    image: goldbuick/exoconfig
+stem_config_server:
+    image: goldbuick/stem_config_server
     ports:
         - "127.0.0.1:6154:7154"
     links:

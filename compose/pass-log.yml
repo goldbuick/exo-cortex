@@ -1,4 +1,4 @@
-api-ident:
+stem_pass_log:
     image: goldbuick/stem_pass_log
     net: "container:stem_config_server"
     links:

@@ -1,4 +1,4 @@
-api-ident:
+stem_api_irc:
     image: goldbuick/stem_api_irc
     net: "container:stem_config_server"
     links:

@@ -1,4 +1,4 @@
-FROM goldbuick/exostatic
+FROM goldbuick/util-static
 
 ADD public /var/www
 ADD favicon.ico /var/www/favicon.ico

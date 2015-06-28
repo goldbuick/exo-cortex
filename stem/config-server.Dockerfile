@@ -1,12 +1,11 @@
 FROM mhart/alpine-node
+WORKDIR /module
 
 # standard files
 ADD package.json package.json
 ADD toolkit toolkit
 # entry point
 ADD config-server.js config-server.js
-
-WORKDIR /src
 
 # native support -> npm install -> drop native -> clean 
 RUN apk-install make gcc g++ python && \

@@ -13,6 +13,5 @@ RUN apk-install make gcc g++ python && \
     apk del make gcc g++ python && \
     rm -rf /tmp/* /root/.npm /root/.node-gyp
 
-# it is expected to run in -net="container:base" mode
 EXPOSE 26154
-CMD ["node", "terminal-server.js", "--control", "localhost:7154"] 
+CMD ["node", "terminal-server.js", "--control", "base:7154"] 

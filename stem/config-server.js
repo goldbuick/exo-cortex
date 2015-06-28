@@ -148,7 +148,7 @@ on('/start', function (data, req) {
     var result = gvalues[data.name];
 
     // auto-gen host
-    result.host = req.socket.remoteAddress;
+    // result.host = req.socket.remoteAddress;
 
     // cache conneciton info for node
     gnodes[data.name] = {

@@ -7,8 +7,29 @@ module.exports = function(fn) {
 
     function writeError(res, code, error) {
         console.log('toolkit/httpjson', error);
-        res.writeHead(code, error, {'Content-Type': 'text/html'});
+        res.writeHead(code, error, {
+            'Content-Type': 'text/html',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': 'true'
+        });
         res.end('');
+    }
+
+    function writeResponse(req, res, fn, json) {
+        // invoke callback
+        fn(req, json, function (result) {
+            if (result === undefined) {
+                result = { success: true };
+            }
+
+            res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': 'true'
+            });
+            
+            res.end(JSON.stringify(result));
+        });
     }
 
     function postHandler(req, res) {
@@ -28,18 +49,7 @@ module.exports = function(fn) {
 
                 try {
                     // invoke callback
-                    fn(req, json, function (result) {
-                        if (result === undefined) {
-                            result = { success: true };
-                        }
-
-                        res.writeHead(200, {
-                            'Content-Type': 'application/json',
-                            'Access-Control-Allow-Origin': '*'
-                        });
-                        
-                        res.end(JSON.stringify(result));
-                    });
+                    writeResponse(res, req, fn, json);
 
                 } catch (e) {
                     writeError(res, 400, [ e.message, e.fileName, e.lineNumber, requestBody ].join('\n'));
@@ -54,12 +64,7 @@ module.exports = function(fn) {
     function getHandler(req, res) {
         try {
             // invoke callback
-            var format = fn(req.url, undefined);
-            res.writeHead(200, {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            });
-            res.end(JSON.stringify(format));
+            writeResponse(res, req, fn, undefined);
 
         } catch (e) {
             writeError(res, 400, e);

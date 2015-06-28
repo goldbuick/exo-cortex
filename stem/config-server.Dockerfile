@@ -13,5 +13,5 @@ RUN apk-install make gcc g++ python && \
     apk del make gcc g++ python && \
     rm -rf /tmp/* /root/.npm /root/.node-gyp
 
-# it is expected to run in -net="host" mode
+EXPOSE 7154 26154
 CMD ["node", "config-server.js", "--rethinkdb", "rethinkdb:28015"] 

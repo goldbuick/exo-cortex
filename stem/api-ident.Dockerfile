@@ -13,5 +13,5 @@ RUN apk-install make gcc g++ python && \
     apk del make gcc g++ python && \
     rm -rf /tmp/* /root/.npm /root/.node-gyp
 
-# it is expected to run in -net="host" mode
+# it is expected to run in -net="container:base" mode
 CMD ["node", "api-ident.js", "--control", "localhost:7154"] 

@@ -209,16 +209,18 @@ on('/get', function (data) {
 // get the connection info for the terminal server
 on('/terminal', function () {
     var terminal = gnodes[gts];
-    if (terminal !== undefined) {
-        return terminal;
-    }
+    return terminal;
 });
 
 // create http post API
 var http = httpjson(function (req, json, finish) {
+    console.log('httpjson', req.url, json);
     var handler = ghandlers[req.url];
-    if (!handler) return finish();
-    finish(handler(json, req));
+    if (handler) {
+        console.log('found handler for', req.url);        
+        return finish(handler(json, req));
+    }
+    finish();
 });
 
 // start server

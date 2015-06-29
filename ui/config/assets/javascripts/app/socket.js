@@ -3,9 +3,10 @@ define(function(require, exports, module) {
 
     var socket,
         handlers = { },
-        LISTEN_PORT = 7154,
+        CONFIG_PORT = 7154,
         CONFIG_UPDATE_EVENT = '/config/update',
-        socketURL = window.location.protocol + '//' + window.location.hostname + ':' + LISTEN_PORT;
+        socketURL = window.location.protocol + '//' + window.location.hostname;
+    socketURL += (window.docker ? '/' : ':') + CONFIG_PORT;
 
     require([ socketURL + '/socket.io/socket.io.js'], function (io) {
         socket = io(socketURL);

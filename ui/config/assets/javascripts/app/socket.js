@@ -28,8 +28,6 @@ define(function(require, exports, module) {
 
     module.exports = {
         CONFIG_UPDATE_EVENT: CONFIG_UPDATE_EVENT,
-        
-        url: socketURL,
 
         on: function (event, handler) {
             if (socket) {

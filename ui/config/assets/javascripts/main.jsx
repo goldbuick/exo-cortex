@@ -9,7 +9,10 @@ require([
             url: url,
             data: JSON.stringify(data),
             dataType: 'json',
-            success: callback
+            success: callback,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader ('Authorization', 'Basic XXXXXX');
+            }
         });
     };  
     

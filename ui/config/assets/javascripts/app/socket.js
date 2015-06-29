@@ -4,12 +4,17 @@ define(function(require, exports, module) {
     var socket,
         handlers = { },
         CONFIG_PORT = 7154,
-        CONFIG_UPDATE_EVENT = '/config/update',
-        socketURL = window.location.protocol + '//' + window.location.hostname;
-    socketURL += (window.docker ? '/' : ':') + CONFIG_PORT;
+        CONFIG_UPDATE_EVENT = '/config/update';
 
-    require([ socketURL + '/socket.io/socket.io.js'], function (io) {
-        socket = io(socketURL);
+    var url = {
+        base: window.location.protocol + '//' + window.location.hostname +
+              (window.docker ? '' : ':' + CONFIG_PORT),
+        path: (window.docker ? '/' + CONFIG_PORT : '') + '/socket.io'
+    };
+    console.log('socket info', url);
+
+    require([ url.base + url.path + '/socket.io.js'], function (io) {
+        socket = io(url.base, { path: url.path });
 
         // wire up cached handlers
         Object.keys(handlers).forEach(function (event) {

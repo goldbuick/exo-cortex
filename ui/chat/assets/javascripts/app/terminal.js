@@ -1,17 +1,20 @@
 define(function(require, exports, module) {
     'use strict';
 
-    // terminal server port
-    var TERMINAL_PORT = 26154,
-        terminalUrl = '//' + window.location.hostname;
-    terminalUrl += (window.docker ? '/' : ':') + TERMINAL_PORT;
-
     // socket connection to terminal
     var socket,
-        handlers = { };
+        handlers = { },
+        TERMINAL_PORT = 26154;
+        
+    var url = {
+        base: window.location.protocol + '//' + window.location.hostname +
+              (window.docker ? '' : ':' + TERMINAL_PORT),
+        path: (window.docker ? '/' + TERMINAL_PORT : '') + '/socket.io'
+    };
+    console.log('socket info', url);
 
-    require([ terminalUrl + '/socket.io/socket.io.js'], function (io) {
-        socket = io(terminalUrl);
+    require([ url.base + url.path + '/socket.io.js'], function (io) {
+        socket = io(url.base, { path: url.path });
 
         // wire up cached handlers
         Object.keys(handlers).forEach(function (event) {

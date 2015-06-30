@@ -4,6 +4,7 @@ RUN mkdir -p /tmp/nginx/client-body
 
 COPY nginx.conf /etc/nginx/nginx.conf
 VOLUME [ "/var/nginx" ]
-EXPOSE 6154 16154
+
+EXPOSE 70 7080
 
 CMD ["nginx", "-g", "daemon off;"]

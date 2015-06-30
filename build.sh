@@ -36,3 +36,16 @@ popd
 
 docker rmi -f $(docker images | grep "<none>" | awk "{print \$3}")
 docker images
+
+if [ $2 = "push" ]; then
+    docker push $1/util-barrier
+    docker push $1/util-proxy
+    docker push $1/util-static
+    docker push $1/stem-api-ident
+    docker push $1/stem-api-irc
+    docker push $1/stem-base
+    docker push $1/stem-pass-log
+    docker push $1/ui-chat
+    docker push $1/ui-config
+    docker push $1/ui-uplink
+fi

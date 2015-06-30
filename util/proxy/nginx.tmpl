@@ -130,11 +130,11 @@ server {
         {{ if eq $.Env.DEFAULT_HOST $host }}
             listen 80 default_server;
         {{ end }}
-    {{ else if $.Env.PUBLIC_PORT }}
+    {{ else if $container.Env.PUBLIC_PORT }}
         {{ if eq $.Env.DEFAULT_HOST $host }}
-            listen {{ $.Env.PUBLIC_PORT }} default_server;
+            listen {{ $container.Env.PUBLIC_PORT }} default_server;
         {{ else }}
-            listen {{ $.Env.PUBLIC_PORT }};
+            listen {{ $container.Env.PUBLIC_PORT }};
         {{ end }}
     {{ end }}
     server_name {{ $host }};

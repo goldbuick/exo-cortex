@@ -126,17 +126,22 @@ server {
 {{ else }}
 
 server {
+{{ range $container := $containers }}
     {{ if $.Env.DEFAULT_HOST }}
         {{ if eq $.Env.DEFAULT_HOST $host }}
             listen 80 default_server;
-        {{ end }}
-    {{ else if $container.Env.PUBLIC_PORT }}
-        {{ if eq $.Env.DEFAULT_HOST $host }}
-            listen {{ $container.Env.PUBLIC_PORT }} default_server;
         {{ else }}
+            {{ if $container.Env.PUBLIC_PORT }}
+                listen {{ $container.Env.PUBLIC_PORT }};
+            {{ end }}
+        {{ end }}
+    {{ else }}
+        {{ if $container.Env.PUBLIC_PORT }}
             listen {{ $container.Env.PUBLIC_PORT }};
         {{ end }}
     {{ end }}
+{{ end }}
+
     server_name {{ $host }};
 
     {{ if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}

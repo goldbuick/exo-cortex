@@ -22,8 +22,8 @@ define(function (require, exports, module) {
             })
         ],
 
-        volume: function () {
-            var scale = 10,
+        volumeData: function () {
+            var scale = 30,
                 now = Math.floor(Math.floor(moment().unix() / 60) / scale),
                 ago = { };
             
@@ -31,81 +31,44 @@ define(function (require, exports, module) {
                 ago[now - d.key] = d.value;
             });
 
-            var model = [ ],
+            var model = [ 'data1' ],
                 start = Math.floor(1440 / scale);
             while (start >= 0) {
                 model.push(ago[start] || 0);
                 --start;
             }
 
-            console.log(this.props, model);
-        },
-
-        messages: function () {
-            var now = moment(),
-                minutes = { };
-
-            // 24 hours in minutes
-            var scale = 0.05,
-                range = 1440;
-
-            this.state.messages.forEach(function (message) {
-                var ago = now.diff(message.when, 'minutes');
-                ago = Math.floor(ago * scale);
-                minutes[ago] = (minutes[ago] || 0) + 1;
-            });
-
-            var x = 0,
-                start = 0,
-                data = [ ],
-                stop = Math.floor(range * scale);
-
-            for (var ago=stop; ago >= start; --ago) {
-                data.push({
-                    x: ++x,
-                    y: minutes[ago] || 0
-                });
-            }
-
-            if (data.length === 1) {
-                data.push({
-                    x: data[0].x + 1,
-                    y: data[0].y
-                });
-            }
-
-            return data;
-        },
-
-        model: function () {
-            var color = this.props.color,
-                width = this.props.width;
-            if (!this.chartModel) {
-                this.chartModel = nv.models.sparkline()
-                    .width(width)
-                    .height(15);
-            }
-            return this.chartModel;
-        },
-
-        vis: function () {
-            var dom = this.getDOMNode();
-            if (!this.chartVis) {
-                this.chartVis = d3.select(dom);
-            }
-            return this.chartVis;
+            return model;
         },
 
         sparkline: function (update) {
-            // console.log(this.state.messages);
-            this.volume();
-            return;
-            var vis = this.vis(),
-                model = this.model(),
-                data = this.messages();
+            var model = this.volumeData();
+            if (!this.chart) {
+                this.chart = c3.generate({
+                    bindto: $(this.getDOMNode()).find('.chart')[0],
+                    size: {
+                        width: this.props.width,
+                        height: 20
+                    },
+                    data: {
+                        columns: [ model ],
+                        colors: { data1: '#fff' },
+                        types: { data1: 'area-step' }
+                    },
+                    axis: {
+                        x: { show: false },
+                        y: { show: false }
+                    },
+                    point: { show: false },
+                    tooltip: { show: false },
+                    legend: { show: false }
+                });
 
-            vis.datum(data)
-                .call(model);
+            } else {
+                this.chart.load({
+                    columns: [ model ]
+                });
+            }
         },
 
         componentDidMount: function () {
@@ -119,7 +82,7 @@ define(function (require, exports, module) {
         },
 
         render: function () {
-            return <svg className="sparkline"></svg>;
+            return <div className="sparkline"><div className="chart"></div></div>;
         }
     });
 

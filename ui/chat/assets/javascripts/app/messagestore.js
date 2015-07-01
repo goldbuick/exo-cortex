@@ -38,7 +38,7 @@ define(function(require, exports, module) {
                 };
 
                 this.messages.groupByMinutes = this.messages.minutes.group(function (d) {
-                    return Math.floor(d / 10);
+                    return Math.floor(d / 30);
                 });
             }
             return this.messages;

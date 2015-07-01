@@ -25,8 +25,8 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 
 ## 0.2.0
 * ui/chat, add channel topic, username lists, attempt tab-to-complete usernames
-* stem/api-messages, integrate with apple messages
 * stem/api-xmpp, integrate with still functioning google talk
+* stem/api-messages, integrate with apple messages
 
 ## 0.3.0
 * stem/api-webhook, generate events from webhooks

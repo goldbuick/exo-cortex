@@ -17,10 +17,8 @@ module.exports = function(fn) {
     }
 
     function writeResponse(req, res, json) {
-        console.log('writeResponse 1', req.url, json);
         // invoke callback
         fn(req, json, function (result) {
-            console.log('writeResponse 2');
             if (result === undefined) {
                 result = { success: true };
             }
@@ -32,17 +30,14 @@ module.exports = function(fn) {
                 'Access-Control-Allow-Methods': 'GET, POST'
             });
             
-            console.log('writeResponse 3', JSON.stringify(result));
             res.end(JSON.stringify(result));
         });
     }
 
     function postHandler(req, res) {
-        console.log('postHandler', req.url);
         var requestBody = '';
 
         req.on('data', function(data) {
-            console.log('postHandler data', data);
             requestBody += data;
             if (requestBody.length > 1e7) {
                 writeError(res, 413, 'Request Entity Too Large');
@@ -50,7 +45,6 @@ module.exports = function(fn) {
         });
 
         req.on('end', function() {
-            console.log('toolkit/httpjson', requestBody);
             try {
                 var json = JSON.parse(requestBody);
 
@@ -69,7 +63,6 @@ module.exports = function(fn) {
     }
 
     function getHandler(req, res) {
-        console.log('getHandler', req.url);
         try {
             // invoke callback
             writeResponse(req, res, undefined);
@@ -81,7 +74,6 @@ module.exports = function(fn) {
     }
 
     function handler(req, res) {
-        console.log('handler', req.method, req.url);
         if (req.method === 'POST') {
             postHandler(req, res);
 

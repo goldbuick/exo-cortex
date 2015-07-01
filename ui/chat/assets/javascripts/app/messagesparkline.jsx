@@ -6,18 +6,40 @@ define(function (require, exports, module) {
     var MessageSparkline = React.createClass({
         mixins: [
             Reflux.connectFilter(MessageStore, 'messages', function (messages) {
-                return messages.filter(function (message) {
-                    if (this.props.channel) {
-                        return message.server === this.props.server &&
-                               message.channel === this.props.channel;
-                    }
-                    if (this.props.server) {
-                        return message.server === this.props.server;
-                    }
-                    return true;
-                }.bind(this));
+                messages.reset();
+                if (this.props.server) {
+                    messages.server.filterExact(this.props.server);
+                }
+                if (this.props.channel) {
+                    messages.channel.filterExact(this.props.channel);
+                }
+                return messages.groupByMinutes.all().map(function (d) {
+                    return {
+                        key: d.key,
+                        value: d.value
+                    };
+                });
             })
         ],
+
+        volume: function () {
+            var scale = 10,
+                now = Math.floor(Math.floor(moment().unix() / 60) / scale),
+                ago = { };
+            
+            this.state.messages.forEach(function (d) {
+                ago[now - d.key] = d.value;
+            });
+
+            var model = [ ],
+                start = Math.floor(1440 / scale);
+            while (start >= 0) {
+                model.push(ago[start] || 0);
+                --start;
+            }
+
+            console.log(this.props, model);
+        },
 
         messages: function () {
             var now = moment(),
@@ -75,6 +97,9 @@ define(function (require, exports, module) {
         },
 
         sparkline: function (update) {
+            // console.log(this.state.messages);
+            this.volume();
+            return;
             var vis = this.vis(),
                 model = this.model(),
                 data = this.messages();

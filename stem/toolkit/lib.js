@@ -52,7 +52,6 @@ function Server (name) {
     // generic http post handler
     function jsonrequest (req, json, finish) {
         var url = req.url;
-        console.log('jsonrequest', url, json);
         
         // invoke config handler
         var result = self.configAPI.handler(url, json);
@@ -218,7 +217,7 @@ Server.prototype = {
     // send json upstream
     upstream: function (json) {
         if (!gupstream) {
-            console.log('emit', json);
+            // console.log('emit', json);
 
         } else {
             var path = (gupstream.path || '') + '/upstream';

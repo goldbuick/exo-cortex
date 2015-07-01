@@ -37,6 +37,9 @@ exports.config = {
           "dist/css/materialize.css",
           "dist/js/materialize.js",
           { "dist/font": "./font" }
+        ],
+        "crossfilter": [
+          "crossfilter.js"
         ]
       }
     }

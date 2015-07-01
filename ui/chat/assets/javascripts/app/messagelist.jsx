@@ -12,10 +12,13 @@ define(function (require, exports, module) {
             Reflux.connect(UIStore, 'ui'),
             Reflux.connect(IconStore, 'icon'),
             Reflux.connectFilter(MessageStore, 'messages', function (messages) {
-                return messages.filter(function (message) {
-                    return message.server === this.state.ui.server &&
-                           message.channel === this.state.ui.channel;
-                }.bind(this));
+                if (this.state) {
+                    messages.reset();
+                    messages.server.filterExact(this.state.ui.server);
+                    messages.channel.filterExact(this.state.ui.channel);
+                    return messages.minutes.bottom(100);
+                }
+                return [];
             })
         ],
 

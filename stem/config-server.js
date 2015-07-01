@@ -37,7 +37,7 @@ var gts = 'terminal-server',
 
 function on (route, handler) {
     ghandlers[route] = function (data, req) {
-        console.log('on', route, data);
+        // console.log('on', route, data);
         return handler(data, req);
     };
 }
@@ -214,10 +214,10 @@ on('/terminal', function () {
 
 // create http post API
 var http = httpjson(function (req, json, finish) {
-    console.log('httpjson', req.url, json);
+    // console.log('httpjson', req.url, json);
     var handler = ghandlers[req.url];
     if (handler) {
-        console.log('found handler for', req.url);        
+        // console.log('found handler for', req.url);        
         return finish(handler(json, req));
     }
     finish();

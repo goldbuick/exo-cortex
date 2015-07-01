@@ -13,7 +13,33 @@ define(function(require, exports, module) {
         getInitialState: function () {
             if (!this.messages) {
                 this.ids = { };
-                this.messages = [ ];
+                this.db = crossfilter();
+                this.messages = {
+                    reset: function () {
+                        this.server.filterAll();
+                        this.channel.filterAll();
+                        this.minutes.filterAll();
+                        this.user.filterAll();
+                    },
+                    server: this.db.dimension(function (d) {
+                        return d.server;
+                    }),
+                    channel: this.db.dimension(function (d) {
+                        return d.channel;
+                    }),
+                    minutes: this.db.dimension(function (d) {
+                        var t = moment(d.when.getTime()),
+                            v = Math.floor(t.unix() / 60);
+                        return v;
+                    }),
+                    user: this.db.dimension(function (d) {
+                        return d.user;
+                    })
+                };
+
+                this.messages.groupByMinutes = this.messages.minutes.group(function (d) {
+                    return Math.floor(d / 10);
+                });
             }
             return this.messages;
         },
@@ -26,22 +52,32 @@ define(function(require, exports, module) {
             this.trigger(this.messages);
         },
 
-        addMessage: function (message) {
+        checkMessage: function (message) {
             // check for dupes
             if (this.ids[message.id]) return false;
             this.ids[message.id] = true;
-            this.messages.push(message);
+            // turn when into a date object
+            message.when = new Date(message.when);
+            // return that this is a unique record
             return true;
         },
 
         onBatchMessage: function (messages) {
-            messages.forEach(this.addMessage.bind(this));
-            this.trigger(this.messages);
+            var added = messages.filter(function (message) {
+                return this.checkMessage(message);
+            }.bind(this));
+
+            if (added.length) {
+                this.db.add(added);
+                this.trigger(this.messages);
+            }
         },
 
         onMessage: function (message) {
-            if (!this.addMessage(message)) return;
-            this.trigger(this.messages);                    
+            if (this.checkMessage(message)) {
+                this.db.add([message]);
+                this.trigger(this.messages);                    
+            }
         },
 
         onReply: function (server, channel, text) {

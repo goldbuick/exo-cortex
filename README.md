@@ -19,9 +19,9 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 * stem/pass-log - complete, generic event logger backed by rethinkdb
 * ui/chat - complete, front-end to drive any api nodes that support chat coms
 
-## 0.1.5
-* auth/proxy, put access to stem/ui behind an authenticated proxy
-* docker, begin putting together deployable docker images
+## 0.1.5 - complete
+* auth/proxy - complete, put access to stem/ui behind an authenticated proxy
+* docker - complete, begin putting together deployable docker images
 
 ## 0.2.0
 * ui/chat, add channel topic, username lists, attempt tab-to-complete usernames

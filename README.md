@@ -3,8 +3,13 @@
 A self-hosted IOT toolkit
 =========================
 
-My primary goal is to build a collection of Dockerfiles you can use to deploy your own
-IOT setup.
+My primary goal is to build a collection of Dockerfiles you can use to deploy your own IOT setup.
+https://github.com/goldbuick/deploy-exo-cortex will be a nodejs based management app for deploying exo.
+
+So in the future the setup will be:
+* install docker
+* npm -g install deploy-exo-cortex
+* run deploy-exo-cortex in folder where you plan on keeping your settings / data
 
 The server nodes are currently based off of nodejs. And I use http://mimosa.io/ to develop the front-end code.
 

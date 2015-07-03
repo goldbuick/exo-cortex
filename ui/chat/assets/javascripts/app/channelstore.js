@@ -33,7 +33,7 @@ define(function(require, exports, module) {
             if (this.servers[server] === undefined || this.servers[server][channel] === undefined) return;
             delete this.servers[server][channel];
             this.trigger(this.servers);
-        },
+        }
 
     });
 });

@@ -13,7 +13,7 @@ define(function(require, exports, module) {
 
         onServerConnect: function (server) {
             if (this.servers[server] !== undefined) return;
-            this.servers[server] = '';
+            this.servers[server] = true;
             this.trigger(this.servers);
         },
 
@@ -21,12 +21,6 @@ define(function(require, exports, module) {
             if (this.servers[server] === undefined) return;
             delete this.servers[server];
             this.trigger(this.servers);
-        },
-
-        // onResponse: function (server, svg) {
-        //     if (this.servers[server] === undefined) return;
-        //     this.servers[server] = svg;            
-        //     this.trigger(this.servers);
-        // }
+        }
     });
 });

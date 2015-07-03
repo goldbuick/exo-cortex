@@ -16,7 +16,9 @@ define(function (require, exports, module) {
                     messages.reset();
                     messages.server.filterExact(this.state.ui.server);
                     messages.channel.filterExact(this.state.ui.channel);
-                    return messages.minutes.bottom(100);
+                    return messages.minutes.top(100).sort(function (a, b) {
+                        return a.when.getTime() - b.when.getTime();
+                    });
                 }
                 return [];
             })

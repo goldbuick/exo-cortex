@@ -129,9 +129,9 @@ define(function(require, exports, module) {
 
     function onEvent (events) {
         var result = {
-            serverConnect: [ ],
-            serverDisconnect: [ ],
-            joinChannel: [ ],
+            serverConnect: { },
+            serverDisconnect: { },
+            joinChannel: { },
             messages: [ ]
         };
         events.forEach(function (event) {
@@ -148,8 +148,13 @@ define(function(require, exports, module) {
                 ChannelActions.joinChannel(server, channel);
             });
         });
-        if (result.messages.length) {
+
+        if (result.messages.length === 1) {
+            MessageActions.message(result.messages[0]);
+
+        } else if (result.messages.length) {
             MessageActions.batchMessage(result.messages);
+
         }
     }
 

@@ -79,7 +79,7 @@ define(function (require, exports, module) {
 
                     if (first) {
                         return <tr key={message.id}>
-                            <td className="avi first">
+                            <td className="avi first" valign="bottom">
                                 <div className="avi-wrapper"
                                     dangerouslySetInnerHTML={{__html: message.avi}}></div>
                             </td>
@@ -95,7 +95,7 @@ define(function (require, exports, module) {
                     }
 
                     return <tr key={message.id}>
-                        <td className="avi">
+                        <td className="avi" valign="bottom">
                             <div className="avi-wrapper">&nbsp;</div>
                         </td>
                         <td className="content">

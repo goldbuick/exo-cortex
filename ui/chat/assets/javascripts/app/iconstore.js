@@ -30,8 +30,9 @@ define(function(require, exports, module) {
                     route: 'ident/gen',
                     json: {
                         size: 64,
-                        padding: 1,
+                        curve: 3,
                         stroke: 1,
+                        padding: 1,
                         source: source
                     }
                 });

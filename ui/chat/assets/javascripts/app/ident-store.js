@@ -1,25 +1,27 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var terminal = require('app/terminal'),
-        IconActions = require('app/iconactions');
+    var terminal = require('app/terminal-server'),
+        IdentActions = require('app/ident-actions');
 
+    var trigger;
     function triggerNext () {
-        setTimeout(function () {
-            IconActions.next();                    
+        clearTimeout(trigger);
+        trigger = setTimeout(function () {
+            IdentActions.next();
         }, 1000);        
     }
 
     module.exports = Reflux.createStore({
-        listenables: [ IconActions ],
+        listenables: [ IdentActions ],
 
         getInitialState: function () {
-            if (!this.icons) {
+            if (!this.idents) {
                 this.queue = [ ];
-                this.icons = { };
+                this.idents = { };
                 this.onNext();
             }
-            return this.icons;
+            return this.idents;
         },
 
         onNext: function () {
@@ -42,23 +44,26 @@ define(function(require, exports, module) {
         },
 
         onRequest: function (source) {
-            if (this.icons[source] !== undefined) return;
-            this.icons[source] = '';
+            if (this.idents[source] !== undefined) return;
+            this.idents[source] = '';
             this.queue.push(source);
         },
 
         onResponse: function (source, svg) {
-            if (this.icons[source]) return;
-            this.icons[source] = svg;
-            this.trigger(this.icons);
+            if (this.idents[source]) return;
+            this.idents[source] = svg;
+            this.trigger(this.idents);
         }
     });
 
     terminal.on('response', function (response) {
         if (response.type !== 'ident/gen') return;
-        triggerNext();
-        if (response.channel !== 'success') return;
-        IconActions.response(response.meta.source, response.meta.svg);
+        if (response.channel !== 'success') {
+            triggerNext();
+            return;
+        }
+        IdentActions.response(response.meta.source, response.meta.svg);
+        IdentActions.next();
     });
 
 });

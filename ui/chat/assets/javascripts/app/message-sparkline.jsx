@@ -1,7 +1,7 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var MessageStore = require('app/messagestore');
+    var MessageStore = require('app/message-store');
 
     var MessageSparkline = React.createClass({
         mixins: [
@@ -23,16 +23,16 @@ define(function (require, exports, module) {
         ],
 
         volumeData: function () {
-            var scale = 30,
-                now = Math.floor(Math.floor(moment().unix() / 60) / scale),
-                ago = { };
+            var ago = { },
+                sinceEpoch = new Date().getTime(),
+                minutesToday = Math.floor((24 * 60) / MessageStore.scale),
+                now = Math.floor(Math.floor(sinceEpoch / MessageStore.scale),
             
             this.state.messages.forEach(function (d) {
                 ago[now - d.key] = d.value;
             });
 
-            var model = [ 'data1' ],
-                start = Math.floor(1440 / scale);
+            var model = [ 'data1' ];
             while (start >= 0) {
                 model.push(ago[start] || 0);
                 --start;
@@ -41,11 +41,11 @@ define(function (require, exports, module) {
             return model;
         },
 
-        sparkline: function (update) {
+        sparkline: function (dom) {
             var model = this.volumeData();
             if (!this.chart) {
                 this.chart = c3.generate({
-                    bindto: $(this.getDOMNode()).find('.chart')[0],
+                    bindto: dom,
                     size: {
                         width: this.props.width,
                         height: 20
@@ -53,7 +53,7 @@ define(function (require, exports, module) {
                     data: {
                         columns: [ model ],
                         colors: { data1: '#fff' },
-                        types: { data1: 'area-step' }
+                        types: { data1: 'area' }
                     },
                     axis: {
                         x: { show: false },
@@ -71,14 +71,16 @@ define(function (require, exports, module) {
             }
         },
 
+        chartDOM: function () {
+            return $(this.getDOMNode()).find('.chart')[0];
+        },
+
         componentDidMount: function () {
-            clearTimeout(this.trigger);
-            this.trigger = setTimeout(this.sparkline, 100);
+            this.sparkline(this.chartDOM());
         },
 
         componentDidUpdate: function (update) {
-            clearTimeout(this.trigger);
-            this.trigger = setTimeout(this.sparkline, 100);
+            this.sparkline(this.chartDOM());
         },
 
         render: function () {

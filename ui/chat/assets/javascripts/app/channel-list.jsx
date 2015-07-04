@@ -1,10 +1,10 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var UIStore = require('app/uistore'),
-        UIActions = require('app/uiactions'),
-        ChannelStore = require('app/channelstore'),
-        MessageSparkline = require('app/messagesparkline');
+    var UIStore = require('app/ui-store'),
+        UIActions = require('app/ui-actions'),
+        ChannelStore = require('app/channel-store'),
+        MessageSparkline = require('app/message-sparkline');
 
     var ServerList = React.createClass({
         mixins: [

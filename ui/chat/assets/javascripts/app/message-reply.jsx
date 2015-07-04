@@ -1,8 +1,8 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var UIStore = require('app/uistore'),
-        MessageActions = require('app/messageactions');
+    var UIStore = require('app/ui-store'),
+        MessageActions = require('app/message-actions');
 
     var MessageReply = React.createClass({
         mixins: [

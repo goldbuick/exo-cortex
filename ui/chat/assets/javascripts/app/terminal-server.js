@@ -11,7 +11,7 @@ define(function(require, exports, module) {
               (window.docker ? '' : ':' + TERMINAL_PORT),
         path: (window.docker ? '/' + TERMINAL_PORT : '') + '/socket.io'
     };
-    console.log('socket info', url);
+    // console.log('socket info', url);
 
     require([ url.base + url.path + '/socket.io.js'], function (io) {
         socket = io(url.base, { path: url.path });

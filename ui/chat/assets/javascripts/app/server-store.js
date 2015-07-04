@@ -1,7 +1,7 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var ServerActions = require('app/serveractions');
+    var ServerActions = require('app/server-actions');
 
     module.exports = Reflux.createStore({
         listenables: [ ServerActions ],

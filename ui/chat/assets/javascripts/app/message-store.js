@@ -1,11 +1,13 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var terminal = require('app/terminal'),
-        UIActions = require('app/uiactions'),
-        ServerActions = require('app/serveractions'),
-        ChannelActions = require('app/channelactions'),
-        MessageActions = require('app/messageactions');
+    var terminal = require('app/terminal-server'),
+        UIActions = require('app/ui-actions'),
+        ServerActions = require('app/server-actions'),
+        ChannelActions = require('app/channel-actions'),
+        MessageActions = require('app/message-actions');
+
+    var timeScale = 20;
 
     module.exports = Reflux.createStore({
         listenables: [ MessageActions, UIActions ],
@@ -28,28 +30,50 @@ define(function(require, exports, module) {
                         return d.channel;
                     }),
                     minutes: this.db.dimension(function (d) {
-                        var t = moment(d.when.getTime()),
-                            v = Math.floor(t.unix() / 60);
-                        return v;
+                        return d.minutes;
                     }),
                     user: this.db.dimension(function (d) {
                         return d.user;
                     })
                 };
-
                 this.messages.groupByMinutes = this.messages.minutes.group(function (d) {
-                    return Math.floor(d / 30);
+                    return d.groupByMinutes;
                 });
             }
             return this.messages;
         },
 
-        onActiveServer: function (server) {
+        onActiveServer: function () {
             this.trigger(this.messages);
         },
 
-        onActiveChannel: function (channel) {
+        onActiveChannel: function () {
             this.trigger(this.messages);
+        },
+
+        onHistory: function () {
+            var end = new Date(),
+                start = new Date();
+            start.setDate(start.getDate() - 1);
+
+            terminal.emit('request', {
+                route: 'log/list',
+                json: {
+                    startDate: start.toISOString(),
+                    endDate: end.toISOString()
+                }
+            });
+        },
+
+        onReply: function (server, channel, text) {
+            terminal.emit('request', {
+                route: 'irc/say',
+                json: {
+                    server: server,
+                    target: channel,
+                    text: text
+                }
+            });
         },
 
         checkMessage: function (message) {
@@ -58,6 +82,9 @@ define(function(require, exports, module) {
             this.ids[message.id] = true;
             // turn when into a date object
             message.when = new Date(message.when);
+            // minutes since epoch
+            message.minutes = Math.floor(message.when.getTime() / 60);
+            message.groupByMinutes = Math.floor(message.minutes / timeScale);
             // return that this is a unique record
             return true;
         },
@@ -76,19 +103,8 @@ define(function(require, exports, module) {
         onMessage: function (message) {
             if (this.checkMessage(message)) {
                 this.db.add([message]);
-                this.trigger(this.messages);                    
+                this.trigger(this.messages);
             }
-        },
-
-        onReply: function (server, channel, text) {
-            terminal.emit('request', {
-                route: 'irc/say',
-                json: {
-                    server: server,
-                    target: channel,
-                    text: text
-                }
-            });
         }
     });
 
@@ -158,24 +174,9 @@ define(function(require, exports, module) {
         }
     }
 
-    // request history from pass-log
-    function getHistory () {
-        var end = new Date(),
-            start = new Date();
-        start.setDate(start.getDate() - 1);
-
-        terminal.emit('request', {
-            route: 'log/list',
-            json: {
-                startDate: start.toISOString(),
-                endDate: end.toISOString()
-            }
-        });
-    }
-
     // event handlers from terminal server    
     terminal.on('api', function (api) {
-        if (api.indexOf('log/list') !== -1) getHistory();
+        if (api.indexOf('log/list') !== -1) MessageActions.history();
     });
     terminal.on('event', function (event) {
         onEvent([ event ]);
@@ -183,7 +184,8 @@ define(function(require, exports, module) {
     terminal.on('response', function (response) {
         if (response.channel !== 'success' ||
             response.type !== 'log/list') return;
-            
         onEvent(response.meta);
     });
+
+    module.exports.scale = timeScale;
 });

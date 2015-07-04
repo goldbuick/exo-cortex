@@ -1,23 +1,23 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var UIStore = require('app/uistore'),
-        UIActions = require('app/uiactions'),
-        IconStore = require('app/iconstore'),
-        IconActions = require('app/iconactions'),
-        MessageStore = require('app/messagestore');
+    var UIStore = require('app/ui-store'),
+        UIActions = require('app/ui-actions'),
+        IdentStore = require('app/ident-store'),
+        IdentActions = require('app/ident-actions'),
+        MessageStore = require('app/message-store');
 
     var MessageList = React.createClass({
         mixins: [
             Reflux.connect(UIStore, 'ui'),
-            Reflux.connect(IconStore, 'icon'),
+            Reflux.connect(IdentStore, 'ident'),
             Reflux.connectFilter(MessageStore, 'messages', function (messages) {
                 if (this.state) {
                     messages.reset();
                     messages.server.filterExact(this.state.ui.server);
                     messages.channel.filterExact(this.state.ui.channel);
-                    return messages.minutes.top(100).sort(function (a, b) {
-                        return a.when.getTime() - b.when.getTime();
+                    return messages.minutes.top(256).sort(function (a, b) {
+                        return a.when.minutes - b.when.minutes;
                     });
                 }
                 return [];
@@ -48,7 +48,7 @@ define(function (require, exports, module) {
                 var when = moment(message.when);
                 return {
                     id: message.id,
-                    avi: this.state.icon[message.user],
+                    avi: this.state.ident[message.user],
                     user: message.user,
                     text: message.text,
                     ago: when.fromNow(),
@@ -77,11 +77,11 @@ define(function (require, exports, module) {
                         lastGap = message.gap;
                     }
 
-                    IconActions.request(message.user);
+                    IdentActions.request(message.user);
 
                     if (first) {
                         return <tr key={message.id}>
-                            <td className="avi first" valign="bottom">
+                            <td className="avi first">
                                 <div className="avi-wrapper"
                                     dangerouslySetInnerHTML={{__html: message.avi}}></div>
                             </td>
@@ -97,7 +97,7 @@ define(function (require, exports, module) {
                     }
 
                     return <tr key={message.id}>
-                        <td className="avi" valign="bottom">
+                        <td className="avi">
                             <div className="avi-wrapper">&nbsp;</div>
                         </td>
                         <td className="content">

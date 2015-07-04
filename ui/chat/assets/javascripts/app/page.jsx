@@ -1,12 +1,12 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var UIStore = require('app/uistore'),
-        ServerList = require('app/serverlist'),
-        ChannelList = require('app/channellist'),
-        MessageList = require('app/messagelist'),
-        MessageReply = require('app/messagereply'),
-        MessageSparkline = require('app/messagesparkline');
+    var UIStore = require('app/ui-store'),
+        ServerList = require('app/server-list'),
+        ChannelList = require('app/channel-list'),
+        MessageList = require('app/message-list'),
+        MessageReply = require('app/message-reply'),
+        MessageSparkline = require('app/message-sparkline');
 
     var Page = React.createClass({
         mixins: [

@@ -1,8 +1,8 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var UIActions = require('app/uiactions'),
-        ServerActions = require('app/serveractions');
+    var UIActions = require('app/ui-actions'),
+        ServerActions = require('app/server-actions');
 
     module.exports = Reflux.createStore({
         listenables: [ UIActions, ServerActions ],
@@ -31,7 +31,7 @@ define(function(require, exports, module) {
         },
 
         onServerConnect: function (server) {
-            if (this.ui.server) return;
+            if (this.ui.server === '') return;
             this.onActiveServer(server);
         }
     });

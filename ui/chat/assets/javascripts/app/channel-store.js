@@ -1,8 +1,8 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var ChannelActions = require('app/channelactions'),
-        ServerActions = require('app/serveractions');
+    var ChannelActions = require('app/channel-actions'),
+        ServerActions = require('app/server-actions');
 
     module.exports = Reflux.createStore({
 

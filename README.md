@@ -29,7 +29,8 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 * docker - complete, begin putting together deployable docker images
 
 ## 0.2.0
-* ui/chat, add channel topic, username lists, attempt tab-to-complete usernames
+* ui/chat - complete, add channel topic, username lists, attempt tab-to-complete usernames
+* ui/chat, attempt tab-to-complete usernames
 * stem/api-xmpp, integrate with still functioning google talk
 * stem/api-messages, integrate with apple messages
 

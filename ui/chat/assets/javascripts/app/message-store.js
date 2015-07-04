@@ -7,7 +7,8 @@ define(function(require, exports, module) {
         ChannelActions = require('app/channel-actions'),
         MessageActions = require('app/message-actions');
 
-    var timeScale = 20;
+    var groupScale = 20,
+        toMinutes = 60000;
 
     module.exports = Reflux.createStore({
         listenables: [ MessageActions, UIActions ],
@@ -37,7 +38,7 @@ define(function(require, exports, module) {
                     })
                 };
                 this.messages.groupByMinutes = this.messages.minutes.group(function (d) {
-                    return d.groupByMinutes;
+                    return Math.floor(d / groupScale);
                 });
             }
             return this.messages;
@@ -83,8 +84,7 @@ define(function(require, exports, module) {
             // turn when into a date object
             message.when = new Date(message.when);
             // minutes since epoch
-            message.minutes = Math.floor(message.when.getTime() / 60);
-            message.groupByMinutes = Math.floor(message.minutes / timeScale);
+            message.minutes = Math.floor(message.when.getTime() / toMinutes);
             // return that this is a unique record
             return true;
         },
@@ -187,5 +187,6 @@ define(function(require, exports, module) {
         onEvent(response.meta);
     });
 
-    module.exports.scale = timeScale;
+    module.exports.groupScale = groupScale;
+    module.exports.toMinutes = toMinutes;
 });

@@ -24,12 +24,13 @@ define(function (require, exports, module) {
 
         volumeData: function () {
             var ago = { },
-                sinceEpoch = new Date().getTime(),
-                minutesToday = Math.floor((24 * 60) / MessageStore.scale),
-                now = Math.floor(Math.floor(sinceEpoch / MessageStore.scale),
+                sinceEpoch = Math.floor(new Date().getTime() / MessageStore.toMinutes),
+                now = Math.floor(sinceEpoch / MessageStore.groupScale),
+                start = Math.floor((24 * 60) / MessageStore.groupScale);
             
             this.state.messages.forEach(function (d) {
-                ago[now - d.key] = d.value;
+                var delta = now - d.key;
+                ago[delta] = d.value;
             });
 
             var model = [ 'data1' ];

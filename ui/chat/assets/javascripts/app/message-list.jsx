@@ -17,7 +17,7 @@ define(function (require, exports, module) {
                     messages.server.filterExact(this.state.ui.server);
                     messages.channel.filterExact(this.state.ui.channel);
                     return messages.minutes.top(256).sort(function (a, b) {
-                        return a.when.minutes - b.when.minutes;
+                        return a.minutes - b.minutes;
                     });
                 }
                 return [];

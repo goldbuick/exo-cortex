@@ -3,7 +3,9 @@ define(function(require, exports, module) {
 
     module.exports = Reflux.createActions([
         'joinChannel',
-        'leaveChannel'
+        'leaveChannel',
+        'topic',
+        'users'
     ]);
 
 });

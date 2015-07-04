@@ -21,17 +21,40 @@ define(function(require, exports, module) {
 
         onJoinChannel: function (server, channel) {
             if (this.servers[server] === undefined) {
-                this.servers[server] = { }
+                this.servers[server] = { };
             }
 
             if (this.servers[server][channel] !== undefined) return;
-            this.servers[server][channel] = true;
+            this.servers[server][channel] = {
+                users: [ ]
+            };
             this.trigger(this.servers);
         },
 
         onLeaveChannel: function (server, channel) {
-            if (this.servers[server] === undefined || this.servers[server][channel] === undefined) return;
+            if (this.servers[server] === undefined ||
+                this.servers[server][channel] === undefined) return;
+
             delete this.servers[server][channel];
+            this.trigger(this.servers);
+        },
+
+        onTopic: function (server, channel, user, topic) {
+            if (this.servers[server] === undefined ||
+                this.servers[server][channel] === undefined) return;
+
+            this.servers[server][channel].topic = {
+                user: user,
+                text: topic
+            };
+            this.trigger(this.servers);
+        },
+
+        onUsers: function (server, channel, users) {
+            if (this.servers[server] === undefined ||
+                this.servers[server][channel] === undefined) return;
+
+            this.servers[server][channel].users = users;
             this.trigger(this.servers);
         }
 

@@ -109,6 +109,13 @@ define(function(require, exports, module) {
     });
 
     // parse events from terminal server
+    function into (obj, key) {
+        if (obj[key] === undefined) {
+            obj[key] = { };
+        }
+        return obj[key];
+    }
+
     function parseEvent (result, event) {
         if (event.channel !== 'irc') return;
         
@@ -121,14 +128,23 @@ define(function(require, exports, module) {
             }
 
             if (event.meta.channel) {
-                if (result.joinChannel[event.meta.server] === undefined)
-                    result.joinChannel[event.meta.server] = { };
-
-                result.joinChannel[event.meta.server][event.meta.channel] = true;
+                into(result.joinChannel,
+                    event.meta.server)[event.meta.channel] = true;
             }
         }
 
         switch (event.type) {
+            case 'topic':
+                into(result.channelTopic,
+                    event.meta.server)[event.meta.channel] = {
+                    nick: event.meta.nick,
+                    topic: event.meta.topic
+                };
+                break;
+            case 'names':
+                into(result.channelUsers,
+                    event.meta.server)[event.meta.channel] = Object.keys(event.meta.nicks);
+                break;
             case 'public':
             case 'private':
                 result.messages.push({
@@ -148,6 +164,8 @@ define(function(require, exports, module) {
             serverConnect: { },
             serverDisconnect: { },
             joinChannel: { },
+            channelTopic: { },
+            channelUsers: { },
             messages: [ ]
         };
         events.forEach(function (event) {
@@ -162,6 +180,17 @@ define(function(require, exports, module) {
         Object.keys(result.joinChannel).forEach(function (server) {
             Object.keys(result.joinChannel[server]).forEach(function (channel) {
                 ChannelActions.joinChannel(server, channel);
+            });
+        });
+        Object.keys(result.channelTopic).forEach(function (server) {
+            Object.keys(result.channelTopic[server]).forEach(function (channel) {
+                var meta = result.channelTopic[server][channel];
+                ChannelActions.topic(server, channel, meta.nick, meta.topic);
+            });
+        });
+        Object.keys(result.channelUsers).forEach(function (server) {
+            Object.keys(result.channelUsers[server]).forEach(function (channel) {
+                ChannelActions.users(server, channel, result.channelUsers[server][channel]);
             });
         });
 

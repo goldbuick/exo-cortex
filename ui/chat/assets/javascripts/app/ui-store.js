@@ -1,17 +1,17 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var UIActions = require('app/ui-actions'),
-        ServerActions = require('app/server-actions');
+    var UIActions = require('app/ui-actions');
 
     module.exports = Reflux.createStore({
-        listenables: [ UIActions, ServerActions ],
+        listenables: [ UIActions ],
 
         getInitialState: function() {
             if (!this.ui) {
                 this.ui = {
                     server: '',
-                    channel: ''
+                    channel: '',
+                    channelInfo: false
                 };
             }
             return this.ui;
@@ -30,9 +30,9 @@ define(function(require, exports, module) {
             this.trigger(this.ui);
         },
 
-        onServerConnect: function (server) {
-            if (this.ui.server === '') return;
-            this.onActiveServer(server);
+        onChannelInfoToggle: function () {
+            this.ui.channelInfo = !this.ui.channelInfo;
+            this.trigger(this.ui);
         }
     });
 });

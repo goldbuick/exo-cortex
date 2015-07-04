@@ -5,12 +5,15 @@ define(function (require, exports, module) {
         UIActions = require('app/ui-actions'),
         IdentStore = require('app/ident-store'),
         IdentActions = require('app/ident-actions'),
-        MessageStore = require('app/message-store');
+        MessageStore = require('app/message-store'),
+        ChannelActions = require('app/channel-actions'),
+        ChannelStore = require('app/channel-store');
 
     var MessageList = React.createClass({
         mixins: [
             Reflux.connect(UIStore, 'ui'),
             Reflux.connect(IdentStore, 'ident'),
+            Reflux.connect(ChannelStore, 'channel'),
             Reflux.connectFilter(MessageStore, 'messages', function (messages) {
                 if (this.state) {
                     messages.reset();
@@ -56,6 +59,72 @@ define(function (require, exports, module) {
                     gap: now.diff(when, 'minutes')
                 };
             }.bind(this));
+        },
+
+        onTopicToggle: function (e) {
+            e.preventDefault();
+            UIActions.channelInfoToggle();
+        },
+
+        topic: function () {
+            if (!this.state.ui.server ||
+                !this.state.ui.channel ||
+                !this.state.channel[this.state.ui.server][this.state.ui.channel] ||
+                !this.state.channel[this.state.ui.server][this.state.ui.channel].topic)
+                return <tr key="topic">
+                    <td className="avi"><div className="avi-wrapper">&nbsp;</div></td>
+                    <td className="content"></td>
+                </tr>;
+
+            var topic = this.state.channel[this.state.ui.server][this.state.ui.channel].topic,
+                topicClass = this.state.ui.channelInfo ? 'mdi-action-info small' :
+                    'mdi-action-info-outline small';
+
+            return <tr key="topic">
+                <td className="avi first">
+                    <div className="avi-wrapper">
+                        <a href="#" onClick={this.onTopicToggle}>
+                            <i className={topicClass}></i></a>
+                    </div>
+                </td>
+                <td className="content first">
+                    <div className="details">
+                        <span className="name">Channel Topic</span>
+                        <span className="when">set by {topic.user}</span>
+                    </div>
+                    <p className="text">{topic.text}</p>
+                </td>
+            </tr>;
+        },
+
+        onUserDM: function (user, e) {
+            e.preventDefault();
+            ChannelActions.joinChannel(this.state.ui.server, user);
+        },
+
+        users: function () {
+            if (!this.state.ui.server ||
+                !this.state.ui.channel ||
+                !this.state.ui.channelInfo ||
+                !this.state.channel[this.state.ui.server][this.state.ui.channel] ||
+                !this.state.channel[this.state.ui.server][this.state.ui.channel].users)
+                return <tr key="users">
+                    <td className="avi"><div className="avi-wrapper">&nbsp;</div></td>
+                    <td className="content"></td>
+                </tr>;
+
+            var users = this.state.channel[this.state.ui.server][this.state.ui.channel].users;
+            return <tr key="users">
+                <td className="avi"><div className="avi-wrapper">&nbsp;</div></td>
+                <td className="content">
+                    <ul>
+                        {users.map((user) => {
+                            return <li key={user}>
+                                <a href="#" onClick={this.onUserDM.bind(this, user)}>{user}</a></li>;
+                        })}
+                    </ul>
+                </td>
+            </tr>;
         },
 
         render: function () {
@@ -105,6 +174,8 @@ define(function (require, exports, module) {
                         </td>
                     </tr>;
                 })}
+                {this.topic()}
+                {this.users()}
                 <tr key="input" className="input">
                     <td></td><td></td>
                 </tr>

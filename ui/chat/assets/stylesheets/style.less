@@ -160,18 +160,19 @@ header, main, footer {
   color: @fg-color;
   table-layout: fixed;
   background: @bg-color;
+  
+  a {
+    color: @fg-color;
+  }
 
   td {
     padding: 0;
     border-radius: 0;
+    vertical-align: top;
   }
 
   td.first {
     padding: 20px 5px 0 0;
-  }
-
-  .avi, .content {
-    vertical-align: top;
   }
 
   .avi {
@@ -179,12 +180,14 @@ header, main, footer {
     padding: 0;
     width: 42px;
     text-align: center;
+    vertical-align: top;
   }
 
   .avi-wrapper {
     margin: 0;
     padding: 0;
     width: 42px;
+    display: inline-block;
     svg {
       width: 100%;
       height: 42px;

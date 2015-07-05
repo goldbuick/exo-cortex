@@ -10,8 +10,7 @@ define(function(require, exports, module) {
             if (!this.ui) {
                 this.ui = {
                     server: '',
-                    channel: '',
-                    channelInfo: false
+                    channel: ''
                 };
             }
             return this.ui;
@@ -27,11 +26,6 @@ define(function(require, exports, module) {
         onActiveChannel: function (channel) {
             if (this.ui.channel === channel) return;
             this.ui.channel = channel;
-            this.trigger(this.ui);
-        },
-
-        onChannelInfoToggle: function () {
-            this.ui.channelInfo = !this.ui.channelInfo;
             this.trigger(this.ui);
         }
     });

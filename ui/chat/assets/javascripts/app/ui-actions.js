@@ -4,7 +4,7 @@ define(function(require, exports, module) {
     module.exports = Reflux.createActions([
         'activeServer',
         'activeChannel',
-        'channelInfoToggle'
+        'showChannelInfo'
     ]);
 
 });

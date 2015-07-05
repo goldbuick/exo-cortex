@@ -11,7 +11,8 @@
     "notify.js": "~1.2.5",
     "c3": "~0.4.10",
     "crossfilter": "~1.3.11",
-    "textures": "*"
+    "textures": "*",
+    "d3-cloud": "~1.1.2"
   },
   "resolutions": {
     "jquery": ">=2.1.1"

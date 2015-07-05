@@ -84,10 +84,6 @@ header, main, footer {
   width: 70px;
   padding-top: 10px;
 
-  // li {
-  //   padding: 10px !important;
-  // }
-
   a {
     height: 60px;
     svg {
@@ -162,7 +158,7 @@ header, main, footer {
   background: @bg-color;
   
   a {
-    color: @fg-color;
+    color: @alt-color;
   }
 
   td {
@@ -203,8 +199,9 @@ header, main, footer {
   }
 
   .name {
-    font-weight: @font-normal;
+    color: @fg-color;
     padding-right: 10px;
+    font-weight: @font-normal;
   }
 
   .when {
@@ -259,6 +256,14 @@ header, main, footer {
     border-bottom: 1px solid @alt-color;
     box-shadow: 0 1px 0 0 @bg-color;  
   }
+}
+
+.channel-info {
+  
+  a {
+    color: @alt-color;
+  }
+
 }
 
 .flex-cols {

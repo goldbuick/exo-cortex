@@ -131,6 +131,24 @@ function makeClient (url, nick, options) {
     return client;
 }
 
+channel.message('info', function (message, finish) {
+    // discovery
+    if (!message) {
+        return finish({
+            server: 'which server',
+            channel: 'channel to get info on'
+        });
+    }
+
+    // get client
+    var client = gclient(message.server);
+    if (!client) return;
+
+    client.send('NAMES', message.channel);
+    client.send('TOPIC', message.channel);
+    finish();
+});
+
 channel.message('say', function (message, finish) {
     // discovery
     if (!message) {

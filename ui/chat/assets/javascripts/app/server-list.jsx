@@ -1,8 +1,7 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var UIStore = require('app/ui-store'),
-        UIActions = require('app/ui-actions'),
+    var UIActions = require('app/ui-actions'),
         ServerStore = require('app/server-store'),
         MessageSparkline = require('app/message-sparkline'),
         IdentActions = require('app/ident-actions'),
@@ -10,13 +9,12 @@ define(function (require, exports, module) {
 
     var ServerList = React.createClass({
         mixins: [
-            Reflux.connect(UIStore, 'ui'),
-            Reflux.connect(ServerStore, 'server'),
+            Reflux.connect(ServerStore, 'servers'),
             Reflux.connect(IdentStore, 'ident')
         ],
 
         servers: function () {
-            return Object.keys(this.state.server);
+            return Object.keys(this.state.servers);
         },
 
         serverIdent: function (name) {
@@ -32,7 +30,7 @@ define(function (require, exports, module) {
             return (
                 <ul className="server-nav flex-item">
                     {this.servers().map((server) => {
-                        var active = (server === this.state.ui.server),
+                        var active = (server === this.props.server),
                             liTagClass = active ? 'active' : '';
 
                         IdentActions.request(server);

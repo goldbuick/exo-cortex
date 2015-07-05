@@ -1,16 +1,15 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var UIStore = require('app/ui-store'),
-        MessageActions = require('app/message-actions');
+    var MessageActions = require('app/message-actions');
 
     var MessageReply = React.createClass({
-        mixins: [
-            Reflux.connect(UIStore, 'ui')
-        ],
-
+        getInitialState: function () {
+            return { };
+        },
+        
         getKey: function () {
-            return this.state.ui.server + ':' + this.state.ui.channel;
+            return this.props.server + ':' + this.props.channel;
         },
 
         getValue: function () {
@@ -28,7 +27,7 @@ define(function (require, exports, module) {
         onKeyDown: function (e) {
             var key = this.getKey();
             if (e.which !== 13) return;
-            MessageActions.reply(this.state.ui.server, this.state.ui.channel, this.state[key]);
+            MessageActions.reply(this.props.server, this.props.channel, this.state[key]);
             this.state[key] = '';
             this.setState(this.state);
         },

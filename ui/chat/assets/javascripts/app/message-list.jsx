@@ -1,8 +1,7 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var UIStore = require('app/ui-store'),
-        UIActions = require('app/ui-actions'),
+    var UIActions = require('app/ui-actions'),
         IdentStore = require('app/ident-store'),
         IdentActions = require('app/ident-actions'),
         MessageStore = require('app/message-store'),
@@ -11,20 +10,9 @@ define(function (require, exports, module) {
 
     var MessageList = React.createClass({
         mixins: [
-            Reflux.connect(UIStore, 'ui'),
             Reflux.connect(IdentStore, 'ident'),
-            Reflux.connect(ChannelStore, 'channel'),
-            Reflux.connectFilter(MessageStore, 'messages', function (messages) {
-                if (this.state) {
-                    messages.reset();
-                    messages.server.filterExact(this.state.ui.server);
-                    messages.channel.filterExact(this.state.ui.channel);
-                    return messages.minutes.top(256).sort(function (a, b) {
-                        return a.minutes - b.minutes;
-                    });
-                }
-                return [];
-            })
+            Reflux.connect(ChannelStore, 'channels'),
+            Reflux.connect(MessageStore, 'messages')
         ],
 
         componentWillUpdate: function () {
@@ -37,17 +25,25 @@ define(function (require, exports, module) {
         componentDidUpdate: function () {
             var node = document.body;
             if (this.shouldScrollBottom ||
-                this.lastServer !== this.state.ui.server ||
-                this.lastChannel !== this.state.ui.channel) {
-                this.lastServer = this.state.ui.server;
-                this.lastChannel = this.state.ui.channel;
+                this.lastServer !== this.props.server ||
+                this.lastChannel !== this.props.channel) {
+                this.lastServer = this.props.server;
+                this.lastChannel = this.props.channel;
                 node.scrollTop = node.scrollHeight;
             }
         },
 
         messages: function () {
-            var now = moment();
-            return this.state.messages.map(function (message) {
+            var now = moment(),
+                list = this.state.messages;
+
+            list.reset();
+            list.server.filterExact(this.props.server);
+            list.channel.filterExact(this.props.channel);
+            return list.minutes.top(256).sort(function (a, b) {
+                return a.minutes - b.minutes;
+
+            }).map(function (message) {
                 var when = moment(message.when);
                 return {
                     id: message.id,
@@ -58,18 +54,19 @@ define(function (require, exports, module) {
                     when: when.format('hh:mm A'),
                     gap: now.diff(when, 'minutes')
                 };
+
             }.bind(this));
         },
 
         onUserDM: function (user, e) {
             e.preventDefault();
-            ChannelActions.joinChannel(this.state.ui.server, user);
+            ChannelActions.joinChannel(this.props.server, user);
             UIActions.activeChannel(user);
         },
 
         render: function () {
-            var lastUser = '',
-                lastGap = 0;
+            var lastGap = 0,
+                lastUser = '';
 
             return <table className="message-list">
                 <tbody>

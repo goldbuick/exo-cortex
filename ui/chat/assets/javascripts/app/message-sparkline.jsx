@@ -81,7 +81,10 @@ define(function (require, exports, module) {
         },
 
         componentDidUpdate: function (update) {
-            this.sparkline(this.chartDOM());
+            clearTimeout(this.trigger);
+            this.trigger = setTimeout(function() {
+                this.sparkline(this.chartDOM());
+            }.bind(this), 500);
         },
 
         render: function () {

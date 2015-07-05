@@ -1,14 +1,12 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var UIStore = require('app/ui-store'),
-        UIActions = require('app/ui-actions'),
+    var UIActions = require('app/ui-actions'),
         ChannelStore = require('app/channel-store'),
         ChannelActions = require('app/channel-actions');
 
     var ChannelInfo = React.createClass({
         mixins: [
-            Reflux.connect(UIStore, 'ui'),
             Reflux.connect(ChannelStore, 'channel'),
             Reflux.listenTo(UIActions.showChannelInfo, 'onShowChannelInfo')
         ],
@@ -20,7 +18,7 @@ define(function (require, exports, module) {
         onUserDM: function (user, e) {
             e.preventDefault();
             $(this.getDOMNode()).closeModal();
-            ChannelActions.joinChannel(this.state.ui.server, user);
+            ChannelActions.joinChannel(this.props.server, user);
             UIActions.activeChannel(user);
         },
 
@@ -28,20 +26,20 @@ define(function (require, exports, module) {
             var topic = '',
                 users = '';
 
-            if (this.state.ui.server &&
-                this.state.ui.channel &&
-                this.state.channel[this.state.ui.server][this.state.ui.channel]) {
+            if (this.props.server &&
+                this.props.channel &&
+                this.state.channel[this.props.server][this.props.channel]) {
 
-                if (this.state.channel[this.state.ui.server][this.state.ui.channel].topic) {
-                    topic = this.state.channel[this.state.ui.server][this.state.ui.channel].topic;
+                if (this.state.channel[this.props.server][this.props.channel].topic) {
+                    topic = this.state.channel[this.props.server][this.props.channel].topic;
                     topic = <div key="topic">
                         <p>{topic.text}</p>
                         <p>Set by <strong>{topic.user}</strong></p>
                     </div>;
                 }
 
-                if (this.state.channel[this.state.ui.server][this.state.ui.channel].users) {
-                    users = this.state.channel[this.state.ui.server][this.state.ui.channel].users;
+                if (this.state.channel[this.props.server][this.props.channel].users) {
+                    users = this.state.channel[this.props.server][this.props.channel].users;
                     users = <ul key="users">
                         {users.map((user) => {
                             return <li key={user}>

@@ -52,16 +52,12 @@ define(function(require, exports, module) {
             this.trigger(this.messages);
         },
 
-        onHistory: function () {
-            var end = new Date(),
-                start = new Date();
-            start.setDate(start.getDate() - 1);
-
+        onInfo: function (server, channel) {
             terminal.emit('request', {
-                route: 'log/list',
+                route: 'irc/info',
                 json: {
-                    startDate: start.toISOString(),
-                    endDate: end.toISOString()
+                    server: server,
+                    target: channel
                 }
             });
         },
@@ -73,6 +69,20 @@ define(function(require, exports, module) {
                     server: server,
                     target: channel,
                     text: text
+                }
+            });
+        },
+
+        onHistory: function () {
+            var end = new Date(),
+                start = new Date();
+            start.setDate(start.getDate() - 1);
+
+            terminal.emit('request', {
+                route: 'log/list',
+                json: {
+                    startDate: start.toISOString(),
+                    endDate: end.toISOString()
                 }
             });
         },

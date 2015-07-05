@@ -1,7 +1,8 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var UIActions = require('app/ui-actions');
+    var UIActions = require('app/ui-actions'),
+        MessageActions = require('app/message-actions');
 
     module.exports = Reflux.createStore({
         listenables: [ UIActions ],
@@ -27,6 +28,7 @@ define(function(require, exports, module) {
             if (this.ui.channel === channel) return;
             this.ui.channel = channel;
             this.trigger(this.ui);
+            MessageActions.info(this.ui.server, this.ui.channel);
         }
     });
 });

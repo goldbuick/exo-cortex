@@ -5,7 +5,9 @@ define(function(require, exports, module) {
         'joinChannel',
         'leaveChannel',
         'topic',
-        'users'
+        'users',
+        'usersJoin',
+        'usersPart'
     ]);
 
 });

@@ -56,6 +56,40 @@ define(function(require, exports, module) {
 
             this.servers[server][channel].users = users;
             this.trigger(this.servers);
+        },
+
+        onUsersJoin: function (server, channel, users) {
+            if (this.servers[server] === undefined ||
+                this.servers[server][channel] === undefined ||
+                this.servers[server][channel].users === undefined) return;
+
+            // add users to channel
+            var group = { };
+            this.servers[server][channel].users.forEach(function (user) {
+                group[user] = true;
+            });
+            users.forEach(function (user) {
+                group[user] = true;
+            });
+            this.servers[server][channel].users = Object.keys(group);
+            this.trigger(this.servers);
+        },
+
+        onUsersPart: function (server, channel, users) {
+            if (this.servers[server] === undefined ||
+                this.servers[server][channel] === undefined ||
+                this.servers[server][channel].users === undefined) return;
+
+            // remove users from channel
+            var group = { };
+            this.servers[server][channel].users.forEach(function (user) {
+                group[user] = true;
+            });
+            users.forEach(function (user) {
+                delete group[user];
+            });
+            this.servers[server][channel].users = Object.keys(group);
+            this.trigger(this.servers);
         }
 
     });

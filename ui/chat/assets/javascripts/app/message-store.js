@@ -145,6 +145,16 @@ define(function(require, exports, module) {
                 into(result.channelUsers,
                     event.meta.server)[event.meta.channel] = Object.keys(event.meta.nicks);
                 break;
+            case 'join':
+                into(into(result.usersJoin,
+                    event.meta.server),
+                    event.meta.channel)[event.meta.nick] = true;
+                break;
+            case 'part':
+                into(into(result.usersPart,
+                    event.meta.server),
+                    event.meta.channel)[event.meta.nick] = true;
+                break;
             case 'public':
             case 'private':
                 result.messages.push({
@@ -166,6 +176,8 @@ define(function(require, exports, module) {
             joinChannel: { },
             channelTopic: { },
             channelUsers: { },
+            usersJoin: { },
+            usersPart: { },
             messages: [ ]
         };
         events.forEach(function (event) {
@@ -191,6 +203,18 @@ define(function(require, exports, module) {
         Object.keys(result.channelUsers).forEach(function (server) {
             Object.keys(result.channelUsers[server]).forEach(function (channel) {
                 ChannelActions.users(server, channel, result.channelUsers[server][channel]);
+            });
+        });
+        Object.keys(result.usersJoin).forEach(function (server) {
+            Object.keys(result.usersJoin[server]).forEach(function (channel) {
+                var meta = result.usersJoin[server][channel];
+                ChannelActions.usersJoin(server, channel, Object.keys(meta))
+            });
+        });
+        Object.keys(result.usersPart).forEach(function (server) {
+            Object.keys(result.usersPart[server]).forEach(function (channel) {
+                var meta = result.usersPart[server][channel];
+                ChannelActions.usersPart(server, channel, Object.keys(meta))
             });
         });
 

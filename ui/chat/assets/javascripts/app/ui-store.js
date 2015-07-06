@@ -28,7 +28,7 @@ define(function(require, exports, module) {
             if (this.ui.channel === channel) return;
             this.ui.channel = channel;
             this.trigger(this.ui);
-            MessageActions.info(this.ui.server, this.ui.channel);
+            if (this.ui.server) MessageActions.info(this.ui.server, this.ui.channel);
         }
     });
 });

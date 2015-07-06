@@ -30,7 +30,7 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 
 ## 0.2.0
 * ui/chat - complete, add channel topic, username lists, attempt tab-to-complete usernames
-* ui/chat, attempt tab-to-complete usernames
+* ui/chat - complete, type '@' to trigger username completion
 * stem/api-xmpp, integrate with still functioning google talk
 * stem/api-messages, integrate with apple messages
 

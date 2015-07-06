@@ -142,7 +142,7 @@ channel.message('info', function (message, finish) {
 
     // get client
     var client = gclient(message.server);
-    if (!client) return;
+    if (!client) return finish();
 
     client.send('NAMES', message.channel);
     client.send('TOPIC', message.channel);
@@ -161,7 +161,7 @@ channel.message('say', function (message, finish) {
 
     // get client
     var client = gclient(message.server);
-    if (!client) return;
+    if (!client) return finish();
 
     client.say(message.target, message.text);
     finish();

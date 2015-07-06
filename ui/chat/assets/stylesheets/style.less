@@ -242,6 +242,19 @@ header, main, footer {
   -moz-box-shadow: 0 -2px 5px 0 rgba(0, 0, 0, 0.16), 0 -2px 10px 0 rgba(0, 0, 0, 0.12);
   box-shadow: 0 -2px 5px 0 rgba(0, 0, 0, 0.16), 0 -2px 10px 0 rgba(0, 0, 0, 0.12);
 
+  .complete-list {
+    li a {
+      display: block;
+      color: @fg-color;
+      background-color: @bg-color;
+    }
+
+    li.active a {
+      color: @bg-color;
+      background-color: @fg-color;
+    }
+  }
+
   .input-field {
     margin-top: 0;
     color: @fg-color;

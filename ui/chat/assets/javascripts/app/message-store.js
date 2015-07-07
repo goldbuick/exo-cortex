@@ -94,7 +94,7 @@ define(function(require, exports, module) {
             // turn when into a date object
             message.when = new Date(message.when);
             // minutes since epoch
-            message.minutes = Math.floor(message.when.getTime() / toMinutes);
+            message.minutes = message.when.getTime() / toMinutes;
             // return that this is a unique record
             return true;
         },

@@ -31,7 +31,8 @@ function gclientclose (host) {
             server: host
         });        
     });
-    delete host[current];
+    
+    delete gclients[host];
 }
 
 function makeClient (url, nick, options) {

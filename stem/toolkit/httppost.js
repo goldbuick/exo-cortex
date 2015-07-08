@@ -1,7 +1,8 @@
 
 // standard helper code to POST json data to a given url
 
-var http = require('http');
+var http = require('http'),
+    jsesc = require('jsesc');
 
 module.exports = function(host, port, path, data, success, fail) {
     function writeError() {
@@ -11,6 +12,9 @@ module.exports = function(host, port, path, data, success, fail) {
 
     // convert to string
     var dataString = JSON.stringify(data);
+    // var dataString = jsesc(data, {
+    //     'json': true
+    // });
 
     // request headers
     var headers = {

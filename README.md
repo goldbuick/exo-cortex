@@ -32,7 +32,6 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 * ui/chat - complete, add channel topic, username lists, attempt tab-to-complete usernames
 * ui/chat - complete, type '@' to trigger username completion
 * stem/api-xmpp, integrate with still functioning google talk
-* stem/api-messages, integrate with apple messages
 
 ## 0.3.0
 * stem/api-webhook, generate events from webhooks
@@ -44,7 +43,11 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 * ui/uplink, a visual interface to terminal-sim, whereby an authenticated user can edit the sim
 
 ## 0.5.0
+* stem/app-auth, a more friendly way to auth into exo not using http basic auth
+* app/shell, an atom/electron based wrapper around ui/* web-apps
 * ??? 0.4.0 will probably take a while
 
 ## 0.8.0
+* stem/auto-messages, local app to expose messages as an api
+* stem/api-messages, integrate with apple messages auto
 * stem/api-slack, integrate with slack teams

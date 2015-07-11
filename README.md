@@ -31,6 +31,8 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 ## 0.2.0
 * ui/chat - complete, add channel topic, username lists, attempt tab-to-complete usernames
 * ui/chat - complete, type '@' to trigger username completion
+* stem/pass-chat, create an adapter to manage events from api-irc & api-xmpp
+* ui/chat - updated chat to interface with pass-chat only
 * stem/api-xmpp, integrate with still functioning google talk
 
 ## 0.3.0

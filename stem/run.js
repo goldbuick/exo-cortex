@@ -29,6 +29,7 @@ var stem = [
     [ './config-server', '--rethinkdb', '192.168.59.103:28015' ],
     node('./terminal-server'),
     node('./pass-log'),
+    node('./pass-chat'),
     node('./api-irc'),
     node('./api-ident'),
 ];

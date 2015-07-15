@@ -8,10 +8,42 @@ var io,
     groutes = { },
     server = toolkit.createServer('terminal-server');
 
+// create channel 
+var channel = server.createChannel('terminal-server');
+
+channel.message('request', function (message, finish) {
+    // discovery
+    if (!message) {
+        return finish({
+            route: 'which api to call',
+            json: 'data to send to api call'
+        });
+    }
+
+    // validate data
+    if (!message.route || !message.json) return finish();
+
+    // validate route
+    var external = groutes[message.route];
+    if (!external) return finish();
+
+    // post json to route
+    var path = (external.path || '/') + message.route;
+    server.post(external.host, external.port, path, message.json, function(json) {
+        var _message = server.createMessage('success', message.route, json);
+        finish(_message);
+
+    }, function (json) {
+        var _message = server.createMessage('fail', message.route, json);
+        finish(_message);
+
+    });
+});
+
 // listen for any message type
 server.any(function (url, json) {
     if (url !== '/upstream' || !json || !io) return;
-    io.emit('event', json);
+    io.emit(json.channel, json);
 });
 
 // listen for routing info changes
@@ -19,7 +51,6 @@ server.config('/api', function (type, value) {
     // no-op
 }, function (value) {
     groutes = value;
-    // TODO, will update this to only message authenticated clients
     if (io) io.emit('api', Object.keys(groutes));
 
     // TODO, will eventually dump this to config-server logging
@@ -35,8 +66,6 @@ server.created(function (http, port) {
 
     // listen for new clients
     io.on('connection', function(socket) {
-
-        // TODO, will require the client to authenticate before enabling these handlers
 
         // tell client list of api routes
         socket.emit('api', Object.keys(groutes));

@@ -52,23 +52,53 @@ define(function(require, exports, module) {
             this.trigger(this.messages);
         },
 
-        onInfo: function (server, channel) {
+        onSay: function (origin, server, channel, text) {
             terminal.emit('request', {
-                route: 'irc/info',
+                route: 'chat/say',
                 json: {
+                    origin: origin,
+                    server: server,
+                    channel: channel,
+                    text: text
+                }
+            });
+        },
+
+        onInfo: function (origin, server, channel) {
+            terminal.emit('request', {
+                route: 'chat/info',
+                json: {
+                    origin: origin,
                     server: server,
                     target: channel
                 }
             });
         },
 
-        onReply: function (server, channel, text) {
+        onList: function (origin, server) {
             terminal.emit('request', {
-                route: 'irc/say',
+                route: 'chat/list',
                 json: {
+                    origin: origin,
+                    server: server
+                }
+            });
+        },
+
+        onWake: function () {
+            terminal.emit('request', {
+                route: 'chat/wake',
+                json: { }
+            });
+        },
+
+        onRoster: function (origin, server, channel) {
+            terminal.emit('request', {
+                route: 'chat/roster',
+                json: {
+                    origin: origin,
                     server: server,
-                    target: channel,
-                    text: text
+                    target: channel                    
                 }
             });
         },
@@ -79,7 +109,7 @@ define(function(require, exports, module) {
             start.setDate(start.getDate() - 1);
 
             terminal.emit('request', {
-                route: 'log/list',
+                route: 'chat/history',
                 json: {
                     startDate: start.toISOString(),
                     endDate: end.toISOString()
@@ -127,56 +157,57 @@ define(function(require, exports, module) {
     }
 
     function parseEvent (result, event) {
-        if (event.channel !== 'irc') return;
+        console.log(event.type);
+        // if (event.channel !== 'irc') return;
         
-        if (event.meta.server) {
-            if (event.type !== 'disconnect') {
-                result.serverConnect[event.meta.server] = true;
+        // if (event.meta.server) {
+        //     if (event.type !== 'disconnect') {
+        //         result.serverConnect[event.meta.server] = true;
 
-            } else {
-                result.serverDisconnect[event.meta.server] = true;
-            }
+        //     } else {
+        //         result.serverDisconnect[event.meta.server] = true;
+        //     }
 
-            if (event.meta.channel) {
-                into(result.joinChannel,
-                    event.meta.server)[event.meta.channel] = true;
-            }
-        }
+        //     if (event.meta.channel) {
+        //         into(result.joinChannel,
+        //             event.meta.server)[event.meta.channel] = true;
+        //     }
+        // }
 
-        switch (event.type) {
-            case 'topic':
-                into(result.channelTopic,
-                    event.meta.server)[event.meta.channel] = {
-                    nick: event.meta.nick,
-                    topic: event.meta.topic
-                };
-                break;
-            case 'names':
-                into(result.channelUsers,
-                    event.meta.server)[event.meta.channel] = Object.keys(event.meta.nicks);
-                break;
-            case 'join':
-                into(into(result.usersJoin,
-                    event.meta.server),
-                    event.meta.channel)[event.meta.nick] = true;
-                break;
-            case 'part':
-                into(into(result.usersPart,
-                    event.meta.server),
-                    event.meta.channel)[event.meta.nick] = true;
-                break;
-            case 'public':
-            case 'private':
-                result.messages.push({
-                    id: event.id,
-                    when: event.when,
-                    server: event.meta.server,
-                    channel: event.meta.channel,
-                    user: event.meta.user,
-                    text: event.meta.text
-                });
-                break;
-        }
+        // switch (event.type) {
+        //     case 'topic':
+        //         into(result.channelTopic,
+        //             event.meta.server)[event.meta.channel] = {
+        //             nick: event.meta.nick,
+        //             topic: event.meta.topic
+        //         };
+        //         break;
+        //     case 'names':
+        //         into(result.channelUsers,
+        //             event.meta.server)[event.meta.channel] = Object.keys(event.meta.nicks);
+        //         break;
+        //     case 'join':
+        //         into(into(result.usersJoin,
+        //             event.meta.server),
+        //             event.meta.channel)[event.meta.nick] = true;
+        //         break;
+        //     case 'part':
+        //         into(into(result.usersPart,
+        //             event.meta.server),
+        //             event.meta.channel)[event.meta.nick] = true;
+        //         break;
+        //     case 'public':
+        //     case 'private':
+        //         result.messages.push({
+        //             id: event.id,
+        //             when: event.when,
+        //             server: event.meta.server,
+        //             channel: event.meta.channel,
+        //             user: event.meta.user,
+        //             text: event.meta.text
+        //         });
+        //         break;
+        // }
     }
 
     function onEvent (events) {
@@ -193,60 +224,66 @@ define(function(require, exports, module) {
         events.forEach(function (event) {
             parseEvent(result, event);
         });
-        Object.keys(result.serverConnect).forEach(function (server) {
-            ServerActions.serverConnect(server);
-        });
-        Object.keys(result.serverDisconnect).forEach(function (server) {
-            ServerActions.serverDisconnect(server);
-        });
-        Object.keys(result.joinChannel).forEach(function (server) {
-            Object.keys(result.joinChannel[server]).forEach(function (channel) {
-                ChannelActions.joinChannel(server, channel);
-            });
-        });
-        Object.keys(result.channelTopic).forEach(function (server) {
-            Object.keys(result.channelTopic[server]).forEach(function (channel) {
-                var meta = result.channelTopic[server][channel];
-                ChannelActions.topic(server, channel, meta.nick, meta.topic);
-            });
-        });
-        Object.keys(result.channelUsers).forEach(function (server) {
-            Object.keys(result.channelUsers[server]).forEach(function (channel) {
-                ChannelActions.users(server, channel, result.channelUsers[server][channel]);
-            });
-        });
-        Object.keys(result.usersJoin).forEach(function (server) {
-            Object.keys(result.usersJoin[server]).forEach(function (channel) {
-                var meta = result.usersJoin[server][channel];
-                ChannelActions.usersJoin(server, channel, Object.keys(meta))
-            });
-        });
-        Object.keys(result.usersPart).forEach(function (server) {
-            Object.keys(result.usersPart[server]).forEach(function (channel) {
-                var meta = result.usersPart[server][channel];
-                ChannelActions.usersPart(server, channel, Object.keys(meta))
-            });
-        });
+        // Object.keys(result.serverConnect).forEach(function (server) {
+        //     ServerActions.serverConnect(server);
+        // });
+        // Object.keys(result.serverDisconnect).forEach(function (server) {
+        //     ServerActions.serverDisconnect(server);
+        // });
+        // Object.keys(result.joinChannel).forEach(function (server) {
+        //     Object.keys(result.joinChannel[server]).forEach(function (channel) {
+        //         ChannelActions.joinChannel(server, channel);
+        //     });
+        // });
+        // Object.keys(result.channelTopic).forEach(function (server) {
+        //     Object.keys(result.channelTopic[server]).forEach(function (channel) {
+        //         var meta = result.channelTopic[server][channel];
+        //         ChannelActions.topic(server, channel, meta.nick, meta.topic);
+        //     });
+        // });
+        // Object.keys(result.channelUsers).forEach(function (server) {
+        //     Object.keys(result.channelUsers[server]).forEach(function (channel) {
+        //         ChannelActions.users(server, channel, result.channelUsers[server][channel]);
+        //     });
+        // });
+        // Object.keys(result.usersJoin).forEach(function (server) {
+        //     Object.keys(result.usersJoin[server]).forEach(function (channel) {
+        //         var meta = result.usersJoin[server][channel];
+        //         ChannelActions.usersJoin(server, channel, Object.keys(meta))
+        //     });
+        // });
+        // Object.keys(result.usersPart).forEach(function (server) {
+        //     Object.keys(result.usersPart[server]).forEach(function (channel) {
+        //         var meta = result.usersPart[server][channel];
+        //         ChannelActions.usersPart(server, channel, Object.keys(meta))
+        //     });
+        // });
 
-        if (result.messages.length === 1) {
-            MessageActions.message(result.messages[0]);
+        // if (result.messages.length === 1) {
+        //     MessageActions.message(result.messages[0]);
 
-        } else if (result.messages.length) {
-            MessageActions.batchMessage(result.messages);
+        // } else if (result.messages.length) {
+        //     MessageActions.batchMessage(result.messages);
 
-        }
+        // }
     }
 
     // event handlers from terminal server    
     terminal.on('api', function (api) {
-        if (api.indexOf('log/list') !== -1) MessageActions.history();
+        if (api.indexOf('chat/wake') !== -1) {
+            MessageActions.wake();
+        }
+        if (api.indexOf('chat/history') !== -1) {
+            MessageActions.history();
+        }
     });
-    terminal.on('event', function (event) {
+    terminal.on('chat', function (event) {
+        console.log('chat!', event);
         onEvent([ event ]);
     });
     terminal.on('response', function (response) {
         if (response.channel !== 'success' ||
-            response.type !== 'log/list') return;
+            response.type !== 'chat/history') return;
         onEvent(response.meta);
     });
 

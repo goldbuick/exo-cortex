@@ -5,7 +5,7 @@ WORKDIR /module
 ADD package.json package.json
 ADD toolkit toolkit
 # entry point
-ADD api-xmpp.js api-xmpp.js
+ADD pass-chat.js pass-chat.js
 
 # native support -> npm install -> drop native -> clean 
 RUN apk-install make gcc g++ python && \
@@ -14,4 +14,4 @@ RUN apk-install make gcc g++ python && \
     rm -rf /tmp/* /root/.npm /root/.node-gyp
 
 # it is expected to run in -net="container:base" mode
-CMD ["node", "api-xmpp.js", "--control", "localhost:7154"] 
+CMD ["node", "pass-chat.js", "--control", "localhost:7154"] 

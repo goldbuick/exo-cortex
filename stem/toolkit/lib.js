@@ -216,12 +216,17 @@ Server.prototype = {
 
     // send json upstream
     upstream: function (json) {
-        if (!gupstream) {
-            // console.log('emit', json);
-
-        } else {
+        if (gupstream) {
             var path = (gupstream.path || '') + '/upstream';
             httppost(gupstream.host, gupstream.port, path, json);
+        }
+    },
+
+    // node invoke a request off the terminal server
+    request: function (json, success, failure) {
+        if (gupstream) {
+            var path = (gupstream.path || '') + '/terminal-server/request';
+            httppost(gupstream.host, gupstream.port, path, json, success, failure);
         }
     },
 

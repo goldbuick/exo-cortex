@@ -38,99 +38,189 @@ function gclientclose (host) {
 function makeClient (url, nick, options) {
     var client = new irc.Client(url, nick, options);
 
+    // chatError (origin, server, text)
     client.addListener('error', function (text) {
         channel.emit('error', {
-            message: text
+            server: url,
+            text: text
         });
     });
 
-    client.addListener('registered', function () {
-        channel.emit('connect', {
-            server: url
+    // chatMessage (origin, server, _channel, user, text)
+    function handleMessage (_channel, nick, text) {
+        channel.emit('message', {
+            server: url,
+            channel: _channel,
+            user: nick,
+            text: text
         });
-    });
-
-    function handleMessage (from, to, text) {
-        if (to[0] === '#') {
-            channel.emit('public', {
-                server: url,
-                user: from,
-                channel: to,
-                text: text
-            });
-        } else {
-            channel.emit('private', {
-                server: url,
-                user: from,
-                channel: to,
-                text: text
-            });
-        }       
     }    
 
     client.addListener('selfMessage', function (to, text) {
-        handleMessage(gnick, to, text);
+        if (to[0] !== '#') handleMessage(to, gnick, text);
     });
 
     client.addListener('message', handleMessage);
 
-    client.addListener('names', function (_channel, nicks) {
-        channel.emit('names', {
-            server: url,
-            channel: _channel,
-            nicks: nicks
-        });
-    });
-
-    client.addListener('nick', function (oldnick, newnick) {
-        channel.emit('nick', {
-            server: url,
-            oldnick: oldnick,
-            newnick: newnick
-        });
-    });
-
+    // chatInfo (origin, server, _channel, info)
     client.addListener('topic', function (_channel, topic, nick) {
-        channel.emit('topic', {
+        channel.emit('info', {
             server: url,
             channel: _channel,
-            topic: topic,
-            nick: nick
+            info: {
+                topic: topic,
+                topicBy: nick
+            }
         });
     });
 
+    // chatRoster (origin, server, _channel, users)
+    client.addListener('names', function (_channel, nicks) {
+        channel.emit('roster', {
+            server: url,
+            channel: _channel,
+            users: Object.keys(nicks)
+        });
+    });
+
+    // chatState (origin, server, _channel, user, state)
     client.addListener('join', function (_channel, nick) {
-        channel.emit('join', {
+        channel.emit('state', {
             server: url,
             channel: _channel,
-            nick: nick
+            user: nick,
+            state: 'join'
         });
     });
-
     client.addListener('part', function (_channel, nick, reason) {
-        channel.emit('part', {
+        channel.emit('state', {
             server: url,
             channel: _channel,
-            nick: nick,
-            reason: reason
+            user: nick,
+            state: 'part',
+            info: reason
         });
     });
-
-    client.addListener('quit', function (nick, reason, channels) {
-        channel.emit('quit', {
+    client.addListener('kick', function (_channel, nick, by, reason) {
+        channel.emit('state', {
             server: url,
-            nick: nick,
-            reason: reason,
-            channels: channels
+            channel: _channel,
+            user: nick,
+            state: 'part',
+            info: by + ' - ' + reason
+        });
+    });
+    client.addListener('quit', function (nick, reason, channels) {
+        channels.forEach(function (_channel) {
+            channel.emit('state', {
+                server: url,
+                channel: _channel,
+                user: nick,
+                state: 'part',
+                info: reason
+            });
+        });
+    });
+    client.addListener('quit', function (nick, reason, channels) {
+        channels.forEach(function (_channel) {
+            channel.emit('state', {
+                server: url,
+                channel: _channel,
+                user: nick,
+                state: 'part',
+                info: reason
+            });
+        });
+    });
+    client.addListener('kill', function (nick, reason, channels) {
+        channels.forEach(function (_channel) {
+            channel.emit('state', {
+                server: url,
+                channel: _channel,
+                user: nick,
+                state: 'part',
+                info: reason
+            });
         });
     });
 
-    // kick - channel, nick, by, reason
-    // kill - nick, reason, channels
-    // notice - nick, to, text
+    // chatUsername (origin, server, oldUser, newUser)
+    client.addListener('nick', function (oldnick, newnick) {
+        channel.emit('username', {
+            server: url,
+            oldUser: oldnick,
+            newUser: newnick
+        });
+    });
+
+    // chatLeave (origin, server, _channel)
+    // chatList (origin, server, _channels)
 
     return client;
 }
+
+channel.message('wake', function (message, finish) {
+    // discovery
+    if (!message) {
+        return finish({});
+    }
+
+    // chatListen (origin, server, _channels)
+    gclientEach(function (host, client) {
+        channel.emit('listen', {
+            server: host,
+            channels: Object.keys(client.chans)
+        });
+    });
+
+    return finish();
+});
+
+channel.message('roster', function (message, finish) {
+    // discovery
+    if (!message) {
+        return finish({
+            server: 'which server',
+            channel: 'channel to get roster of'
+        });
+    }
+
+    // get client
+    var client = gclient(message.server);
+    if (!client) return finish();
+
+    // get channel
+    var _channel = client.chans[message.channel];
+    if (!_channel) return finish();
+
+    console.log('roster ####', JSON.stringify(_channel));
+
+    channel.emit('roster', {
+        server: message.server,
+        channel: message.channel,
+        users: Object.keys(_channel.users)
+    });
+
+    return finish();  
+});
+
+channel.message('say', function (message, finish) {
+    // discovery
+    if (!message) {
+        return finish({
+            server: 'which server',
+            channel: 'channel to message',
+            text: 'the message to send to the channel'
+        });
+    }
+
+    // get client
+    var client = gclient(message.server);
+    if (!client) return finish();
+
+    client.say(message.channel, message.text);
+    finish();
+});
 
 channel.message('info', function (message, finish) {
     // discovery
@@ -145,27 +235,31 @@ channel.message('info', function (message, finish) {
     var client = gclient(message.server);
     if (!client) return finish();
 
-    client.send('NAMES', message.channel);
-    client.send('TOPIC', message.channel);
-    finish();
+    // get channel
+    var _channel = client.chans[message.channel];
+    if (!_channel) return finish();
+
+    channel.emit('info', {
+        server: message.server,
+        channel: message.channel,
+        info: {
+            topic: _channel.topic,
+            topicBy: _channel.topicBy
+        }
+    });
+
+    return finish();
 });
 
-channel.message('say', function (message, finish) {
+channel.message('list', function (message, finish) {
     // discovery
     if (!message) {
         return finish({
-            server: 'which server',
-            target: 'user or channel to message',
-            text: 'the message to send to the target'
+            server: 'which server'
         });
     }
 
-    // get client
-    var client = gclient(message.server);
-    if (!client) return finish();
-
-    client.say(message.target, message.text);
-    finish();
+    return finish();
 });
 
 // write configuration validators
@@ -248,20 +342,39 @@ server.config('/servers/[0-9]+', function (type, value) {
         console.log('updating channels ', value.channels, before.channels);
 
         // process leaving channels
+        var leaving = [ ];
         if (before && before.channels && before.channels.length) {
             before.channels.forEach(function (chan) {
                 if (value.channels.indexOf(chan) === -1) {
                     client.part(chan);
+                    leaving.push(chan);
                 }
+            });
+        }
+        if (leaving.length) {
+            // chatLeave (origin, server, _channels)
+            channel.emit('leave', {
+                server: value.host,
+                channels: leaving
             });
         }
 
         // process joining channels
+        var joining = [ ];
         value.channels.forEach(function (chan) {
             if (!before || !before.channels || before.channels.indexOf(chan) === -1) {
                 client.join(chan);
+                joining.push(chan);
             }
         });
+        if (joining.length) {
+            // chatListen (origin, server, _channels)
+            channel.emit('listen', {
+                server: value.host,
+                channels: joining
+            });
+        }
+
     }
 });
 

@@ -156,8 +156,39 @@ define(function(require, exports, module) {
         return obj[key];
     }
 
-    function parseEvent (result, event) {
-        console.log(event.type);
+    function parseEvent (messages, event) {
+
+        switch (event.type) {
+            case 'error':
+                // chatError (origin, server, text)
+                break;
+            case 'message':
+                // chatMessage (origin, server, _channel, user, text)
+                break;
+            case 'info':
+                // chatInfo (origin, server, _channel, info) - extra meta data about a channel
+                break;
+            case 'roster':
+                // chatRoster (origin, server, _channel, users) - users in a particular channel
+                break;
+            case 'state':
+                // chatState (origin, server, _channel, user, state, [info]) - user left / join / kicked etc..
+                break;
+            case 'username':
+                // chatUsername (origin, server, oldUser, newUser) - user changed name
+                break;
+            case 'listen':
+                // chatListen (origin, server, _channels) - which channels are you in
+                break;
+            case 'leave':
+                // chatLeave (origin, server, _channels) - you have left these channels
+                break;
+            case 'list':
+                // chatList (origin, server, _channels) - potential channels to join
+                break;
+        }
+
+
         // if (event.channel !== 'irc') return;
         
         // if (event.meta.server) {
@@ -211,61 +242,18 @@ define(function(require, exports, module) {
     }
 
     function onEvent (events) {
-        var result = {
-            serverConnect: { },
-            serverDisconnect: { },
-            joinChannel: { },
-            channelTopic: { },
-            channelUsers: { },
-            usersJoin: { },
-            usersPart: { },
-            messages: [ ]
-        };
+        var messages = [ ];
+
         events.forEach(function (event) {
-            parseEvent(result, event);
+            parseEvent(messages, event);
         });
-        // Object.keys(result.serverConnect).forEach(function (server) {
-        //     ServerActions.serverConnect(server);
-        // });
-        // Object.keys(result.serverDisconnect).forEach(function (server) {
-        //     ServerActions.serverDisconnect(server);
-        // });
-        // Object.keys(result.joinChannel).forEach(function (server) {
-        //     Object.keys(result.joinChannel[server]).forEach(function (channel) {
-        //         ChannelActions.joinChannel(server, channel);
-        //     });
-        // });
-        // Object.keys(result.channelTopic).forEach(function (server) {
-        //     Object.keys(result.channelTopic[server]).forEach(function (channel) {
-        //         var meta = result.channelTopic[server][channel];
-        //         ChannelActions.topic(server, channel, meta.nick, meta.topic);
-        //     });
-        // });
-        // Object.keys(result.channelUsers).forEach(function (server) {
-        //     Object.keys(result.channelUsers[server]).forEach(function (channel) {
-        //         ChannelActions.users(server, channel, result.channelUsers[server][channel]);
-        //     });
-        // });
-        // Object.keys(result.usersJoin).forEach(function (server) {
-        //     Object.keys(result.usersJoin[server]).forEach(function (channel) {
-        //         var meta = result.usersJoin[server][channel];
-        //         ChannelActions.usersJoin(server, channel, Object.keys(meta))
-        //     });
-        // });
-        // Object.keys(result.usersPart).forEach(function (server) {
-        //     Object.keys(result.usersPart[server]).forEach(function (channel) {
-        //         var meta = result.usersPart[server][channel];
-        //         ChannelActions.usersPart(server, channel, Object.keys(meta))
-        //     });
-        // });
 
-        // if (result.messages.length === 1) {
-        //     MessageActions.message(result.messages[0]);
+        if (messages.length === 1) {
+            MessageActions.message(messages[0]);
 
-        // } else if (result.messages.length) {
-        //     MessageActions.batchMessage(result.messages);
-
-        // }
+        } else if (messages.length) {
+            MessageActions.batchMessage(messages);
+        }
     }
 
     // event handlers from terminal server    
@@ -278,7 +266,6 @@ define(function(require, exports, module) {
         }
     });
     terminal.on('chat', function (event) {
-        console.log('chat!', event);
         onEvent([ event ]);
     });
     terminal.on('response', function (response) {

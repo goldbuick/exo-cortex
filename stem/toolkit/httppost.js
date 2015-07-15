@@ -11,10 +11,13 @@ module.exports = function(host, port, path, data, success, fail) {
     }
 
     // convert to string
-    var dataString = JSON.stringify(data);
-    // var dataString = jsesc(data, {
-    //     'json': true
-    // });
+    function safeUnicode(key, value) {
+        if (typeof value === "string") {
+            return jsesc(value);
+        }
+        return value;
+    }
+    var dataString = JSON.stringify(data, safeUnicode);
 
     // request headers
     var headers = {

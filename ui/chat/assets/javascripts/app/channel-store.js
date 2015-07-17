@@ -1,97 +1,134 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var ChannelActions = require('app/channel-actions'),
-        ServerActions = require('app/server-actions');
+    var ChannelActions = require('app/channel-actions');
+
+    function getUnique() {
+        return Array.prototype.slice.call(arguments).join(':');
+    }
+
+    function Channel (origin, server, name) {
+        this.info = { };
+        this.users = { };
+        this.origin = origin;
+        this.server = server;
+        this.name = name;
+    }
+
+    Channel.prototype = {
+        constructor: Channel,
+        unique: function () {
+            return getUnique(this.origin, this.server, this.name);
+        },
+        setInfo: function (key, value) {
+            this.info[key] = value;
+        },
+        getUsers: function () {
+            return Object.keys(this.users);
+        },
+        usersJoin: function (users) {
+            var self = this;
+            users.forEach(function (user) {
+                self.users[user] = true;
+            });
+        },
+        usersLeave: function (users) {
+            var self = this;
+            users.forEach(function (user) {
+                delete self.users[user];
+            });
+        }
+    };
+
+    function ChannelSet () {
+        this.list = [ ];
+    }
+
+    ChannelSet.prototype = {
+        constructor: ChannelSet,
+        all: function () {
+            return this.list;
+        },
+        find: function (origin, server, channel) {
+            var id = getUnique(origin, server, channel);
+            return this.list.filter(function (_channel) {
+                return _channel.unique() === id;
+            })[0];
+        },
+        add: function (origin, server, channel) {
+            this.list.push(new Channel(origin, server, channel));
+            this.list.sort(function (a, b) {
+                var id1 = a.unique(),
+                    id2 = b.unique();
+
+                if (id1 < id2) {
+                    return -1;
+                }
+                if (id1 > id2) {
+                    return 1;
+                }
+                return 0;
+            });
+        },
+        remove: function (origin, server, channel) {
+            var id = getUnique(origin, server, channel);
+            this.list = this.list.filter(function (_channel) {
+                return _channel.unique() !== id;
+            });
+        }
+    };
 
     module.exports = Reflux.createStore({
 
-        listenables: [ ChannelActions, ServerActions ],
+        listenables: [ ChannelActions ],
 
         getInitialState: function () {
-            if (!this.servers) this.servers = { };
-            return this.servers;
+            if (!this.channels) this.channels = new ChannelSet();
+            return this.channels; 
         },
 
-        onServerDisconnect: function (server) {
-            if (this.servers[server] === undefined) return;
-            delete this.servers[server];
-            this.trigger(this.servers);
+        onListen: function (origin, server, channel) {
+            var _channel = this.channels.find(origin, server, channel);
+            if (_channel) return;
+            this.channels.add(origin, server, channel);
+            this.trigger(this.channels);
         },
 
-        onJoinChannel: function (server, channel) {
-            if (this.servers[server] === undefined) {
-                this.servers[server] = { };
-            }
-
-            if (this.servers[server][channel] !== undefined) return;
-            this.servers[server][channel] = {
-                users: [ ]
-            };
-            this.trigger(this.servers);
+        onLeave: function (origin, server, channel) {
+            var _channel = this.channels.find(origin, server, channel);
+            if (!_channel) return;
+            this.channels.remove(origin, server, channel);
+            this.trigger(this.channels);
         },
 
-        onLeaveChannel: function (server, channel) {
-            if (this.servers[server] === undefined ||
-                this.servers[server][channel] === undefined) return;
-
-            delete this.servers[server][channel];
-            this.trigger(this.servers);
+        onInfo: function (origin, server, channel, key, value) {
+            var _channel = this.channels.find(origin, server, channel);
+            if (!_channel) return;
+            _channel.setInfo(key, value);
+            this.trigger(this.channels);
         },
 
-        onTopic: function (server, channel, user, topic) {
-            if (this.servers[server] === undefined ||
-                this.servers[server][channel] === undefined) return;
-
-            this.servers[server][channel].topic = {
-                user: user,
-                text: topic
-            };
-            this.trigger(this.servers);
+        onUserName: function (origin, server, channel, user, name) {
+            var _channel = this.channels.find(origin, server, channel);
+            if (!_channel) return;
+            _channel.usersJoin([name]);
+            _channel.usersLeave([user]);
+            this.trigger(this.channels);
         },
 
-        onUsers: function (server, channel, users) {
-            if (this.servers[server] === undefined ||
-                this.servers[server][channel] === undefined) return;
-
-            this.servers[server][channel].users = users;
-            this.trigger(this.servers);
+        onUsersJoin: function (origin, server, channel, users) {
+            var _channel = this.channels.find(origin, server, channel);
+            if (!_channel) return;
+            _channel.usersJoin(users);
+            this.trigger(this.channels);
         },
 
-        onUsersJoin: function (server, channel, users) {
-            if (this.servers[server] === undefined ||
-                this.servers[server][channel] === undefined ||
-                this.servers[server][channel].users === undefined) return;
-
-            // add users to channel
-            var group = { };
-            this.servers[server][channel].users.forEach(function (user) {
-                group[user] = true;
-            });
-            users.forEach(function (user) {
-                group[user] = true;
-            });
-            this.servers[server][channel].users = Object.keys(group);
-            this.trigger(this.servers);
-        },
-
-        onUsersPart: function (server, channel, users) {
-            if (this.servers[server] === undefined ||
-                this.servers[server][channel] === undefined ||
-                this.servers[server][channel].users === undefined) return;
-
-            // remove users from channel
-            var group = { };
-            this.servers[server][channel].users.forEach(function (user) {
-                group[user] = true;
-            });
-            users.forEach(function (user) {
-                delete group[user];
-            });
-            this.servers[server][channel].users = Object.keys(group);
-            this.trigger(this.servers);
+        onUsersLeave: function (origin, server, channel, users) {
+            var _channel = this.channels.find(origin, server, channel);
+            if (!_channel) return;
+            _channel.usersLeave(users);
+            this.trigger(this.channels);
         }
-
     });
 
 });

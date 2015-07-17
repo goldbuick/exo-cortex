@@ -42,6 +42,16 @@ function gclientopen (options) {
     _options.credentials = true;
     var client = gclients[key] = new Client(_options);
     
+// chatError (origin, server, text)
+// chatMessage (origin, server, _channel, user, text)
+// chatInfo (origin, server, _channel, info) - extra meta data about a channel
+// chatRoster (origin, server, _channel, users) - users in a particular channel
+// chatState (origin, server, _channel, user, state, [info]) - user left / join / kicked etc..
+// chatUsername (origin, server, oldUser, newUser) - user changed name
+// chatListen (origin, server, _channels) - which channels are you in
+// chatLeave (origin, server, _channels) - you have left these channels
+// chatList (origin, server, _channels) - potential channels to join
+    
     client.on('stanza', function(stanza) {
         console.log('stanza', stanza.toString());
     });
@@ -101,6 +111,12 @@ function gclientopen (options) {
         console.log('exit');
     });
 }
+
+// wake ()
+// roster (server, _channel)
+// say (server, _channel, text)
+// info (server, _channel)
+// list (server)
 
 // write configuration validators
 server.config('', function (type, value) {

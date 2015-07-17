@@ -2,12 +2,13 @@ define(function(require, exports, module) {
     'use strict';
 
     module.exports = Reflux.createActions([
-        'joinChannel',
-        'leaveChannel',
-        'topic',
-        'users',
+        'listen',
+        'leave',
+        'info',
+        'userFav',
+        'userName',
         'usersJoin',
-        'usersPart'
+        'usersLeave'
     ]);
 
 });

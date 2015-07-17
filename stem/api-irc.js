@@ -47,7 +47,7 @@ function makeClient (url, nick, options) {
     });
 
     // chatMessage (origin, server, _channel, user, text)
-    function handleMessage (_channel, nick, text) {
+    function handleMessage (nick, _channel, text) {
         channel.emit('message', {
             server: url,
             channel: _channel,
@@ -57,7 +57,7 @@ function makeClient (url, nick, options) {
     }    
 
     client.addListener('selfMessage', function (to, text) {
-        if (to[0] !== '#') handleMessage(to, gnick, text);
+        if (to[0] !== '#') handleMessage(gnick, to, text);
     });
 
     client.addListener('message', handleMessage);
@@ -143,18 +143,14 @@ function makeClient (url, nick, options) {
             });
         });
     });
-
-    // chatUsername (origin, server, oldUser, newUser)
     client.addListener('nick', function (oldnick, newnick) {
-        channel.emit('username', {
+        channel.emit('state', {
             server: url,
-            oldUser: oldnick,
-            newUser: newnick
+            user: oldnick,
+            state: 'name',
+            info: newnick
         });
     });
-
-    // chatLeave (origin, server, _channel)
-    // chatList (origin, server, _channels)
 
     return client;
 }
@@ -192,8 +188,6 @@ channel.message('roster', function (message, finish) {
     // get channel
     var _channel = client.chans[message.channel];
     if (!_channel) return finish();
-
-    console.log('roster ####', JSON.stringify(_channel));
 
     channel.emit('roster', {
         server: message.server,

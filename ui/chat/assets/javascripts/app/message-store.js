@@ -3,7 +3,6 @@ define(function(require, exports, module) {
 
     var terminal = require('app/terminal-server'),
         UIActions = require('app/ui-actions'),
-        ServerActions = require('app/server-actions'),
         ChannelActions = require('app/channel-actions'),
         MessageActions = require('app/message-actions');
 
@@ -15,7 +14,7 @@ define(function(require, exports, module) {
 
         getInitialState: function () {
             if (!this.messages) {
-                this.ids = { };
+                this.unique = { };
                 this.db = crossfilter();
                 this.messages = {
                     reset: function () {
@@ -44,13 +43,9 @@ define(function(require, exports, module) {
             return this.messages;
         },
 
-        onActiveServer: function () {
-            this.trigger(this.messages);
-        },
-
-        onActiveChannel: function () {
-            this.trigger(this.messages);
-        },
+        // onActiveChannel: function () {
+        //     this.trigger(this.messages);
+        // },
 
         onSay: function (origin, server, channel, text) {
             terminal.emit('request', {
@@ -119,8 +114,8 @@ define(function(require, exports, module) {
 
         checkMessage: function (message) {
             // check for dupes
-            if (this.ids[message.id]) return false;
-            this.ids[message.id] = true;
+            if (this.unique[message.id]) return false;
+            this.unique[message.id] = true;
             // turn when into a date object
             message.when = new Date(message.when);
             // minutes since epoch
@@ -157,88 +152,63 @@ define(function(require, exports, module) {
     }
 
     function parseEvent (messages, event) {
-
         switch (event.type) {
             case 'error':
                 // chatError (origin, server, text)
+                console.log('error', event.meta);
                 break;
             case 'message':
                 // chatMessage (origin, server, _channel, user, text)
+                messages.push({
+                    id: event.id,
+                    when: event.when,
+                    origin: event.meta.origin,
+                    server: event.meta.server,
+                    channel: event.meta.channel,
+                    user: event.meta.user,
+                    text: event.meta.text
+                });
                 break;
             case 'info':
                 // chatInfo (origin, server, _channel, info) - extra meta data about a channel
                 break;
             case 'roster':
                 // chatRoster (origin, server, _channel, users) - users in a particular channel
+                ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channel,
+                    event.meta.users);
                 break;
+
             case 'state':
                 // chatState (origin, server, _channel, user, state, [info]) - user left / join / kicked etc..
+                switch (event.meta.state) {
+                    case 'join':
+                        ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channel,
+                            [ event.meta.user ]);
+                        break;
+                    case 'part':
+                        ChannelActions.usersLeave(event.meta.origin, event.meta.server, event.meta.channel,
+                            [ event.meta.user ]);
+                        break;
+                    case 'name':
+                        ChannelActions.userName(event.meta.origin, event.meta.server, event.meta.channel,
+                            event.meta.user, event.meta.info);
+                        break;
+                }
                 break;
-            case 'username':
-                // chatUsername (origin, server, oldUser, newUser) - user changed name
-                break;
+
             case 'listen':
                 // chatListen (origin, server, _channels) - which channels are you in
+                event.meta.channels.forEach(function (name) {
+                    ChannelActions.listen(event.meta.origin, event.meta.server, name);
+                });
                 break;
             case 'leave':
                 // chatLeave (origin, server, _channels) - you have left these channels
-                break;
-            case 'list':
-                // chatList (origin, server, _channels) - potential channels to join
+                event.meta.channels.forEach(function (name) {
+                    ChannelActions.leave(event.meta.origin, event.meta.server, name);
+                });
                 break;
         }
-
-
-        // if (event.channel !== 'irc') return;
-        
-        // if (event.meta.server) {
-        //     if (event.type !== 'disconnect') {
-        //         result.serverConnect[event.meta.server] = true;
-
-        //     } else {
-        //         result.serverDisconnect[event.meta.server] = true;
-        //     }
-
-        //     if (event.meta.channel) {
-        //         into(result.joinChannel,
-        //             event.meta.server)[event.meta.channel] = true;
-        //     }
-        // }
-
-        // switch (event.type) {
-        //     case 'topic':
-        //         into(result.channelTopic,
-        //             event.meta.server)[event.meta.channel] = {
-        //             nick: event.meta.nick,
-        //             topic: event.meta.topic
-        //         };
-        //         break;
-        //     case 'names':
-        //         into(result.channelUsers,
-        //             event.meta.server)[event.meta.channel] = Object.keys(event.meta.nicks);
-        //         break;
-        //     case 'join':
-        //         into(into(result.usersJoin,
-        //             event.meta.server),
-        //             event.meta.channel)[event.meta.nick] = true;
-        //         break;
-        //     case 'part':
-        //         into(into(result.usersPart,
-        //             event.meta.server),
-        //             event.meta.channel)[event.meta.nick] = true;
-        //         break;
-        //     case 'public':
-        //     case 'private':
-        //         result.messages.push({
-        //             id: event.id,
-        //             when: event.when,
-        //             server: event.meta.server,
-        //             channel: event.meta.channel,
-        //             user: event.meta.user,
-        //             text: event.meta.text
-        //         });
-        //         break;
-        // }
     }
 
     function onEvent (events) {

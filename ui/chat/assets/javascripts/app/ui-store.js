@@ -10,6 +10,7 @@ define(function(require, exports, module) {
         getInitialState: function() {
             if (!this.ui) {
                 this.ui = {
+                    origin: '',
                     server: '',
                     channel: ''
                 };
@@ -17,18 +18,14 @@ define(function(require, exports, module) {
             return this.ui;
         },
 
-        onActiveServer: function (server) {
-            if (this.ui.server === server) return;
+        onActiveChannel: function (origin, server, channel) {
+            if (this.ui.origin === origin &&
+                this.ui.server === server &&
+                this.ui.channel === channel) return;
+            this.ui.origin = origin;
             this.ui.server = server;
-            this.ui.channel = '';
-            this.trigger(this.ui);
-        },
-
-        onActiveChannel: function (channel) {
-            if (this.ui.channel === channel) return;
             this.ui.channel = channel;
             this.trigger(this.ui);
-            if (this.ui.server) MessageActions.info(this.ui.server, this.ui.channel);
         }
     });
 });

@@ -3,6 +3,22 @@ define(function (require, exports, module) {
 
     var MessageStore = require('app/message-store');
 
+    function getStyleRuleValue(selector, style) {
+        var sheets = document.styleSheets;
+        for (var i = 0, l = sheets.length; i < l; i++) {
+            var sheet = sheets[i];
+            if (!sheet.cssRules) continue;
+
+            for (var j = 0, k = sheet.cssRules.length; j < k; j++) {
+                var rule = sheet.cssRules[j];
+                if (rule.selectorText && rule.selectorText.split(',').indexOf(selector) !== -1) {
+                    return rule.style[style];
+                }
+            }
+        }
+        return null;
+    }
+
     var MessageSparkline = React.createClass({
         mixins: [
             Reflux.connectFilter(MessageStore, 'messages', function (messages) {
@@ -43,7 +59,9 @@ define(function (require, exports, module) {
         },
 
         sparkline: function (dom) {
-            var model = this.volumeData();
+            var model = this.volumeData(),
+                rule = getStyleRuleValue('.fg-color', 'color');
+
             if (!this.chart) {
                 this.chart = c3.generate({
                     bindto: dom,
@@ -53,7 +71,7 @@ define(function (require, exports, module) {
                     },
                     data: {
                         columns: [ model ],
-                        colors: { data1: '#fff' },
+                        colors: { data1: rule || '#000' },
                         types: { data1: 'area' }
                     },
                     axis: {
@@ -85,6 +103,14 @@ define(function (require, exports, module) {
             this.trigger = setTimeout(function() {
                 this.sparkline(this.chartDOM());
             }.bind(this), 500);
+        },
+
+        componentWillUnmount: function () {
+            clearTimeout(this.trigger);
+            if (this.chart) {
+                this.chart.destroy();
+                this.chart = undefined;
+            }
         },
 
         render: function () {

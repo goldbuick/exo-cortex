@@ -2,7 +2,6 @@ define(function(require, exports, module) {
     'use strict';
 
     var terminal = require('app/terminal-server'),
-        UIActions = require('app/ui-actions'),
         ChannelActions = require('app/channel-actions'),
         MessageActions = require('app/message-actions');
 
@@ -10,7 +9,7 @@ define(function(require, exports, module) {
         toMinutes = 60000;
 
     module.exports = Reflux.createStore({
-        listenables: [ MessageActions, UIActions ],
+        listenables: [ MessageActions ],
 
         getInitialState: function () {
             if (!this.messages) {
@@ -47,12 +46,7 @@ define(function(require, exports, module) {
             return this.messages;
         },
 
-        // onActiveChannel: function () {
-        //     this.trigger(this.messages);
-        // },
-
         onSay: function (origin, server, channel, text) {
-            console.log('say', arguments);
             terminal.emit('request', {
                 route: 'chat/say',
                 json: {

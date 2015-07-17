@@ -66,9 +66,10 @@ define(function (require, exports, module) {
 
         render: function () {
             var lastGap = 0,
-                lastUser = '';
+                lastUser = '',
+                userList = { };
 
-            return <table className="message-list">
+            var result = <table className="message-list">
                 <tbody>
                 {this.messages().map((message) => {
                     var first = false,
@@ -83,9 +84,8 @@ define(function (require, exports, module) {
                         lastGap = message.gap;
                     }
 
-                    IdentActions.request(message.user);
+                    userList[message.user] = true;
 
-                    var elements = [ ];
                     if (first) {
                         return <tr key={message.id}>
                             <td className="avi first"
@@ -114,6 +114,12 @@ define(function (require, exports, module) {
                 </tr>
                 </tbody>
             </table>;
+
+            Object.keys(userList).forEach(function (user){
+                IdentActions.request(user);
+            });
+
+            return result;
         }
     });
 

@@ -1,8 +1,7 @@
 
 // standard helper code to POST json data to a given url
 
-var http = require('http'),
-    jsesc = require('jsesc');
+var http = require('http');
 
 module.exports = function(host, port, path, data, success, fail) {
     function writeError() {
@@ -10,10 +9,10 @@ module.exports = function(host, port, path, data, success, fail) {
         console.log('toolkit/httppost', error);
     }
 
-    // convert to string
+    // convert to utf-8 string
     function safeUnicode(key, value) {
         if (typeof value === "string") {
-            return jsesc(value);
+            return unescape(encodeURIComponent(value));
         }
         return value;
     }

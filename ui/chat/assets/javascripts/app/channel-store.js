@@ -50,7 +50,7 @@ define(function(require, exports, module) {
             return this.list;
         },
         find: function (origin, server, channel) {
-            var id = getUnique(origin, server, channel);
+            var id = getUnique(origin || '', server || '', channel || '');
             return this.list.filter(function (_channel) {
                 return _channel.unique() === id;
             })[0];

@@ -31,7 +31,7 @@ define(function(require, exports, module) {
                 terminal.emit('request', {
                     route: 'ident/gen',
                     json: {
-                        size: 48,
+                        size: 32,
                         curve: 2,
                         stroke: 1,
                         padding: 1,

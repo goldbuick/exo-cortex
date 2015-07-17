@@ -18,11 +18,15 @@ define(function(require, exports, module) {
                 this.db = crossfilter();
                 this.messages = {
                     reset: function () {
+                        this.origin.filterAll();
                         this.server.filterAll();
                         this.channel.filterAll();
                         this.minutes.filterAll();
                         this.user.filterAll();
                     },
+                    origin: this.db.dimension(function (d) {
+                        return d.origin;
+                    }),
                     server: this.db.dimension(function (d) {
                         return d.server;
                     }),
@@ -48,6 +52,7 @@ define(function(require, exports, module) {
         // },
 
         onSay: function (origin, server, channel, text) {
+            console.log('say', arguments);
             terminal.emit('request', {
                 route: 'chat/say',
                 json: {

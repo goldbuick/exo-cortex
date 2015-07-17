@@ -6,22 +6,30 @@ define(function (require, exports, module) {
         
     var MessageReply = React.createClass({
         mixins: [
-            Reflux.connect(ChannelStore, 'channel')
+            Reflux.connect(ChannelStore, 'channels')
         ],
 
-        userList: function () {
-            if (this.props.server &&
-                this.props.channel &&
-                this.state.channel[this.props.server][this.props.channel] &&
-                this.state.channel[this.props.server][this.props.channel].users) {
+        currentChannel: function () {
+            if (!this.state.channels ||
+                !this.state.channels.all().length) return;
+            var _channel = this.state.channels.find(
+                this.props.origin, this.props.server, this.props.channel);
+            return _channel;
+        },
 
-                return this.state.channel[this.props.server][this.props.channel].users;
-            }
+        userList: function () {
+            var current = this.currentChannel();
+            if (current) return current.getUsers();
             return [ ];
         },
         
         stateKey: function (op) {
-            return this.props.server + ':' + this.props.channel + ':' + op;
+            return [
+                op,
+                this.props.origin,
+                this.props.server,
+                this.props.channel
+            ].join(':');
         },
 
         stateValue: function (op, value) {
@@ -119,7 +127,8 @@ define(function (require, exports, module) {
                         delete this.state[wordsKey];
                         this.setState(this.state);
                     } else {
-                        MessageActions.reply(this.props.server, this.props.channel, input);
+                        MessageActions.say(
+                            this.props.origin, this.props.server, this.props.channel, input);
                         this.state[inputKey] = '';
                         this.setState(this.state);
                     }

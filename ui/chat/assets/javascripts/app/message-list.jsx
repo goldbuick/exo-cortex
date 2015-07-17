@@ -85,12 +85,11 @@ define(function (require, exports, module) {
 
                     IdentActions.request(message.user);
 
+                    var elements = [ ];
                     if (first) {
                         return <tr key={message.id}>
-                            <td className="avi first">
-                                <div className="avi-wrapper"
-                                    dangerouslySetInnerHTML={{__html: message.avi}}></div>
-                            </td>
+                            <td className="avi first"
+                                dangerouslySetInnerHTML={{__html: message.avi}}></td>
                             <td className="content first">
                                 <div className="details">
                                     <a className="name" href="#!"
@@ -98,15 +97,13 @@ define(function (require, exports, module) {
                                     <span className="when">{message.when}</span>
                                     <span className="ago">{message.ago}</span>
                                 </div>
-                                <p className="text">{message.text}</p>
+                                <p className="text">{decodeURIComponent(message.text)}</p>
                             </td>
                         </tr>;
                     }
 
                     return <tr key={message.id}>
-                        <td className="avi">
-                            <div className="avi-wrapper">&nbsp;</div>
-                        </td>
+                        <td className="avi"></td>
                         <td className="content">
                             <p className="text">{message.text}</p>
                         </td>

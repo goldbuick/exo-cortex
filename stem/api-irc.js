@@ -57,7 +57,7 @@ function makeClient (url, nick, options) {
     }    
 
     client.addListener('selfMessage', function (to, text) {
-        if (to[0] !== '#') handleMessage(gnick, to, text);
+        if (to[0] === '#') handleMessage(gnick, to, text);
     });
 
     client.addListener('message', handleMessage);

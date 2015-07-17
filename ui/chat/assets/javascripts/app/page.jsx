@@ -36,28 +36,33 @@ define(function (require, exports, module) {
                 .style('fill', t.url());
         },
 
-        onShowChannelInfo: function (e) {
+        onShowInfo: function (e) {
             e.preventDefault();
             UIActions.showChannelInfo();
         },
 
         currentChannel: function () {
-            if (this.state.ui.channel) return this.state.ui.channel;
+            if (!this.state.channels ||
+                !this.state.channels.all().length) return {
+                origin: '',
+                server: '',
+                name: ''
+            };
 
-            if (this.state.channels && this.state.channels.all().length) {
-                return this.state.channels.all()[0].name;
-            }
+            var _channel = this.state.channels.find(
+                this.state.ui.origin, this.state.ui.server, this.state.ui.channel);
+            if (_channel) return _channel;
 
-            return '';
+            return this.state.channels.all()[0];
         },
 
         render: function () {
-            var currentChannel = this.currentChannel(),
-                channelInfo = '';
+            var currentInfo = '',
+                current = this.currentChannel();
 
-            if (currentChannel) {
-                channelInfo = <a href="#!">
-                    <i onClick={this.onShowChannelInfo}
+            if (current) {
+                currentInfo = <a href="#!">
+                    <i onClick={this.onShowInfo}
                         className="material-icons">info_outline</i></a>;
             }
 
@@ -70,32 +75,35 @@ define(function (require, exports, module) {
                                     <a href="#" data-activates="chat-nav" className="button-collapse">
                                         <i className="mdi-navigation-menu"></i>
                                     </a>
-                                    <h5 className="valign">&nbsp;{currentChannel}&nbsp;</h5>
-                                    {channelInfo}
+                                    <h5 className="valign">&nbsp;{current.name}&nbsp;</h5>
+                                    {currentInfo}
                                 </div>
                             </nav>
                         </div>
                         <div id="chat-nav" className="side-nav fixed">
                             <div className="bkg"></div>
                             <div className="overview"><MessageSparkline width="280" /></div>
-                            <ChannelList channel={currentChannel} />
+                            <ChannelList channel={current.name} />
                         </div>
                     </header>
                     <main>
+                        <MessageList
+                            origin={current.origin}
+                            server={current.server}
+                            channel={current.name} />
+                        <MessageReply
+                            origin={current.origin}
+                            server={current.server}
+                            channel={current.name} />
                     </main>
                 </div>
             );
         }
     });
-                        // <MessageList
-                        //     server={currentServer}
-                        //     channel={currentChannel} />
-                        // <MessageReply
-                        //     server={currentServer}
-                        //     channel={currentChannel} />
                         // <ChannelInfo
-                        //     server={currentServer}
-                        //     channel={currentChannel} />
+                        //     origin={current.origin}
+                        //     server={current.server}
+                        //     channel={current.name} />
 
     return Page;
 });

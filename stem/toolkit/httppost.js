@@ -9,19 +9,12 @@ module.exports = function(host, port, path, data, success, fail) {
         console.log('toolkit/httppost', error);
     }
 
-    // convert to utf-8 string
-    function safeUnicode(key, value) {
-        if (typeof value === "string") {
-            return unescape(encodeURIComponent(value));
-        }
-        return value;
-    }
-    var dataString = JSON.stringify(data, safeUnicode);
+    var dataString = JSON.stringify(data);
 
     // request headers
     var headers = {
-        'Content-Type': 'application/json',
-        'Content-Length': dataString.length
+        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Length': Buffer.byteLength(dataString)
     };
 
     // request config
@@ -68,6 +61,5 @@ module.exports = function(host, port, path, data, success, fail) {
     });
 
     // emit request
-    req.write(dataString);
-    req.end();
+    req.end(dataString);
 };

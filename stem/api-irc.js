@@ -35,13 +35,13 @@ function gclientclose (host) {
     delete gclients[host];
 }
 
-function makeClient (url, nick, options) {
-    var client = new irc.Client(url, nick, options);
+function makeClient (host, nick, options) {
+    var client = new irc.Client(host, nick, options);
 
     // chatError (origin, server, text)
     client.addListener('error', function (text) {
         channel.emit('error', {
-            server: url,
+            server: host,
             text: text
         });
     });
@@ -49,7 +49,7 @@ function makeClient (url, nick, options) {
     // chatMessage (origin, server, _channel, user, text)
     function handleMessage (nick, _channel, text) {
         channel.emit('message', {
-            server: url,
+            server: host,
             channel: _channel,
             user: nick,
             text: text
@@ -65,7 +65,7 @@ function makeClient (url, nick, options) {
     // chatInfo (origin, server, _channel, info)
     client.addListener('topic', function (_channel, topic, nick) {
         channel.emit('info', {
-            server: url,
+            server: host,
             channel: _channel,
             info: {
                 topic: topic,
@@ -77,7 +77,7 @@ function makeClient (url, nick, options) {
     // chatRoster (origin, server, _channel, users)
     client.addListener('names', function (_channel, nicks) {
         channel.emit('roster', {
-            server: url,
+            server: host,
             channel: _channel,
             users: Object.keys(nicks)
         });
@@ -86,7 +86,7 @@ function makeClient (url, nick, options) {
     // chatState (origin, server, _channel, user, state)
     client.addListener('join', function (_channel, nick) {
         channel.emit('state', {
-            server: url,
+            server: host,
             channel: _channel,
             user: nick,
             state: 'join'
@@ -94,7 +94,7 @@ function makeClient (url, nick, options) {
     });
     client.addListener('part', function (_channel, nick, reason) {
         channel.emit('state', {
-            server: url,
+            server: host,
             channel: _channel,
             user: nick,
             state: 'part',
@@ -103,7 +103,7 @@ function makeClient (url, nick, options) {
     });
     client.addListener('kick', function (_channel, nick, by, reason) {
         channel.emit('state', {
-            server: url,
+            server: host,
             channel: _channel,
             user: nick,
             state: 'part',
@@ -113,7 +113,7 @@ function makeClient (url, nick, options) {
     client.addListener('quit', function (nick, reason, channels) {
         channels.forEach(function (_channel) {
             channel.emit('state', {
-                server: url,
+                server: host,
                 channel: _channel,
                 user: nick,
                 state: 'part',
@@ -124,7 +124,7 @@ function makeClient (url, nick, options) {
     client.addListener('quit', function (nick, reason, channels) {
         channels.forEach(function (_channel) {
             channel.emit('state', {
-                server: url,
+                server: host,
                 channel: _channel,
                 user: nick,
                 state: 'part',
@@ -135,7 +135,7 @@ function makeClient (url, nick, options) {
     client.addListener('kill', function (nick, reason, channels) {
         channels.forEach(function (_channel) {
             channel.emit('state', {
-                server: url,
+                server: host,
                 channel: _channel,
                 user: nick,
                 state: 'part',
@@ -145,7 +145,7 @@ function makeClient (url, nick, options) {
     });
     client.addListener('nick', function (oldnick, newnick) {
         channel.emit('state', {
-            server: url,
+            server: host,
             user: oldnick,
             state: 'name',
             info: newnick
@@ -245,17 +245,6 @@ channel.message('info', function (message, finish) {
     return finish();
 });
 
-channel.message('list', function (message, finish) {
-    // discovery
-    if (!message) {
-        return finish({
-            server: 'which server'
-        });
-    }
-
-    return finish();
-});
-
 // write configuration validators
 server.config('', function (type, value) {
     if (value.nick === undefined) {
@@ -316,7 +305,9 @@ server.config('/servers/[0-9]+', function (type, value) {
 
         if (value.channels.length) {
             gclients[value.host] = makeClient(value.host, gnick, {
+                realName: gnick,
                 port: value.port,
+                encoding: 'UTF-8',
                 channels: value.channels
             });
         }

@@ -19,12 +19,11 @@ var channel = server.createChannel('chat');
 // chatListen (origin, server, _channels) - which channels are you in
 // chatLeave (origin, server, _channels) - you have left these channels
 
+// history (startDate, endDate)
 // wake ()
 // roster (server, _channel)
 // say (server, _channel, text)
 // info (server, _channel)
-// list (server)
-// history (startDate, endDate)
 
 // generic chat api 
 
@@ -41,6 +40,37 @@ channel.message('wake', function (message, finish) {
         server.request({ route: api + '/wake', json: { }});
     });
     return finish();
+});
+
+channel.message('history', function (message, finish) {
+    // discovery
+    if (!message) {
+        return finish({
+            startDate: 'when to start the list',
+            endDate: 'when to end the list'
+        });
+    }
+
+    // need to figure out how best to translate ?
+    server.request({
+        route: 'log/list',
+        json: {
+            startDate: message.startDate,
+            endDate: message.endDate
+        }
+    }, function (response) {
+        finish(response.meta.map(function (json) {
+            json.meta.origin = json.channel;
+            json.channel = 'chat';
+            return json;
+        }));
+        finish();
+
+    }, function (response) {
+        console.log(response);
+        finish();
+
+    });
 });
 
 function genRoute (origin, type) {
@@ -76,7 +106,7 @@ channel.message('say', function (message, finish) {
             text: 'the message to send to the channel'
         });
     }
-    
+
     server.request({
         route: genRoute(message.origin, 'say'),
         json: message
@@ -102,55 +132,6 @@ channel.message('info', function (message, finish) {
     }, finish, function (response) {
         console.log(response);
         finish();
-    });
-});
-
-channel.message('list', function (message, finish) {
-    // discovery
-    if (!message) {
-        return finish({
-            origin: 'which api',
-            server: 'which server'
-        });
-    }
-
-    server.request({
-        route: genRoute(message.origin, 'list'),
-        json: message
-    }, finish, function (response) {
-        console.log(response);
-        finish();
-    });
-});
-
-channel.message('history', function (message, finish) {
-    // discovery
-    if (!message) {
-        return finish({
-            startDate: 'when to start the list',
-            endDate: 'when to end the list'
-        });
-    }
-
-    // need to figure out how best to translate ?
-    server.request({
-        route: 'log/list',
-        json: {
-            startDate: message.startDate,
-            endDate: message.endDate
-        }
-    }, function (response) {
-        finish(response.meta.map(function (json) {
-            json.meta.origin = json.channel;
-            json.channel = 'chat';
-            return json;
-        }));
-        finish();
-
-    }, function (response) {
-        console.log(response);
-        finish();
-
     });
 });
 

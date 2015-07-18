@@ -8,7 +8,7 @@ module.exports = function(fn) {
     function writeError(res, code, error) {
         console.log('toolkit/httpjson', error);
         res.writeHead(code, error, {
-            'Content-Type': 'text/html',
+            'Content-Type': 'text/html; charset=utf-8',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': 'true',
             'Access-Control-Allow-Methods': 'GET, POST'
@@ -24,7 +24,7 @@ module.exports = function(fn) {
             }
 
             res.writeHead(200, {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json; charset=utf-8',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': 'true',
                 'Access-Control-Allow-Methods': 'GET, POST'
@@ -57,7 +57,7 @@ module.exports = function(fn) {
                 }
 
             } catch (e) {
-                writeError(res, 400, 'Expected Valid JSON:\n' + requestBody);
+                writeError(res, 400, [ 'JSON error', e.message, e.fileName, e.lineNumber, requestBody ].join('\n'));
             }
         });
     }

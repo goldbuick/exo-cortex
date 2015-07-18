@@ -1,10 +1,10 @@
 
 @import "flexbox.less";
 
-@fg-color: #fff;
-@bg-color: darken(@fg-color, 92%);
-@alt-color: darken(@fg-color, 50%);
-@soft-color: darken(@fg-color, 87%);
+@fg-color: #f50;
+@bg-color: darken(@fg-color, 48%);
+@alt-color: darken(@fg-color, 30%);
+@soft-color: darken(@fg-color, 44%);
 
 @font-light: 100;
 @font-normal: 500;
@@ -194,6 +194,9 @@ header, main, footer {
       height: 32px;
       width: 32px;
       position: absolute;
+      * {
+        stroke: @fg-color;
+      }
     }
   }
 

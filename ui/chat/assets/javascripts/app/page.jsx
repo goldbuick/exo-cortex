@@ -46,7 +46,8 @@ define(function (require, exports, module) {
                 !this.state.channels.all().length) return {
                 origin: '',
                 server: '',
-                name: ''
+                name: '',
+                info: { }
             };
 
             var _channel = this.state.channels.find(
@@ -57,10 +58,12 @@ define(function (require, exports, module) {
         },
 
         render: function () {
-            var currentInfo = '',
+            var currentName = '',
+                currentInfo = '',
                 current = this.currentChannel();
 
             if (current) {
+                currentName = current.info.name ? current.info.name : current.name;
                 currentInfo = <a href="#!">
                     <i onClick={this.onShowInfo}
                         className="material-icons">info_outline</i></a>;
@@ -75,7 +78,7 @@ define(function (require, exports, module) {
                                     <a href="#" data-activates="chat-nav" className="button-collapse">
                                         <i className="mdi-navigation-menu"></i>
                                     </a>
-                                    <h5 className="valign">&nbsp;{current.name}&nbsp;</h5>
+                                    <h5 className="valign">&nbsp;{currentName}&nbsp;</h5>
                                     {currentInfo}
                                 </div>
                             </nav>

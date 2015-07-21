@@ -31,7 +31,7 @@ var stem = [
     node('./pass-log'),
     node('./pass-chat'),
     node('./api-irc'),
-    // node('./api-xmpp'),
+    node('./api-xmpp'),
     node('./api-ident'),
 ];
 

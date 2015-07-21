@@ -41,6 +41,7 @@ define(function (require, exports, module) {
                                 <li key={'server-gap' + channel.server} className="gap"></li>
                             );
                         }
+
                         elements.push(
                             <li key={'server-' + channel.server} className="server">
                                 <div className="ident" dangerouslySetInnerHTML={{
@@ -54,15 +55,17 @@ define(function (require, exports, module) {
                         first = false;
                     }
 
-                    var active = (channel.name === this.props.channel),
+                    var name = channel.info.name ? channel.info.name : channel.name,
+                        active = (channel.name === this.props.channel),
                         liTagClass = active ? 'active' : '';
+
                     elements.push(
                         <li key={'channel-' + channel.name} className={liTagClass}>
                             <div className="selected"></div>
                             <MessageSparkline width="280"
                                 server={channel.server} channel={channel.name} />
                             <a href="#!"
-                                onClick={this.viewChannel.bind(this, channel)}>{channel.name}</a>
+                                onClick={this.viewChannel.bind(this, channel)}>{name}</a>
                         </li>                        
                     );
 

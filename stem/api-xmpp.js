@@ -7,8 +7,11 @@ var ltx = require('ltx'),
 
 // create server 
 var server = toolkit.createServer('api-xmpp'),
+    gusers = {},
     gclients = {},
-    gconnect = {};
+    gconnect = {},
+    glisten = [ ],
+    glistenTimer;
 
 // create channel
 var channel = server.createChannel('xmpp');
@@ -88,32 +91,73 @@ function gclientopen (options) {
             console.log('message', stanza.toString());
 
         } else if (stanza.is('presence')) {
-            // chatInfo (origin, server, _channel, info) - extra meta data about a channel
-            // chatState (origin, server, _channel, user, state, [info]) - user left / join / kicked etc..
-            console.log('presence', stanza.toString());
-            // var from = gjid(stanza.attrs.from);
-            // console.log(from, stanza.getChildText('show'), stanza.toString());
+            var user = gjid(stanza.attrs.from);
+            if (stanza.getChildText('show')) {
+                switch (stanza.attrs.type) {
+                    default:
+                        glisten.push({ user: user, listen: true });
+                        break;
+                    case 'unavailable':
+                        glisten.push({ user: user, leave: true });
+                        break;
+                }
+
+                clearTimeout(glistenTimer);
+                glistenTimer = setTimeout(function () {
+                    var listen = [ ],
+                        leave = [ ];
+
+                    glisten.forEach(function (item) {
+                        if (item.listen) listen.push(item.user);
+                        if (item.leave) leave.push(item.user);                        
+                    });
+                    glisten = [ ];
+
+                    // chatListen (origin, server, _channels)
+                    channel.emit('listen', {
+                        server: host,
+                        channels: listen
+                    });
+                    // chatLeave (origin, server, _channels)                
+                    channel.emit('leave', {
+                        server: host,
+                        channels: leave
+                    });
+
+                }, 1000);
+            }
+            if (stanza.getChildText('status')) {
+                channel.emit('info', {
+                    server: host,
+                    channel: user,
+                    info: { status: stanza.getChildText('status') }
+                });
+            }
 
         } else if (stanza.is('iq')) {
-            // chatRoster (origin, server, _channel, users) - users in a particular channel
-            // chatListen (origin, server, _channels) - which channels are you in
-            var _channels = { };
+            // create lookup table for jid -> nice name
             stanza.getChild('query').getChildren('item').forEach(function (user) {
-                _channels[user.attrs.name || user.attrs.jid] = true;
+                gusers[user.attrs.jid] = user.attrs.name || user.attrs.jid;
             });
-            _channels = Object.keys(_channels);
+            var _channels = Object.keys(gusers);
 
-            channel.emit('listen', {
-                server: host,
-                channels: _channels
-            });
-
-            _channels.forEach(function (_channel) {
-                channel.emit('roster', {
+            // chatInfo (origin, server, _channel, info) - extra meta data about a channel
+            _channels.forEach(function (user) {
+                channel.emit('info', {
                     server: host,
-                    channel: _channel,
-                    users: [ _channel, nick ]
+                    channel: user,
+                    info: { name: gusers[user] }
                 });
+            });
+
+            // chatRoster (origin, server, _channel, users) - users in a particular channel
+            var _rosters = { };
+            _channels.forEach(function (_channel) {
+                _rosters[_channel] = [ _channel, nick ];
+            });
+            channel.emit('rosters', {
+                server: host,
+                channels: _rosters
             });
         }
     });

@@ -74,15 +74,6 @@ function makeClient (host, nick, options) {
         });
     });
 
-    // chatRoster (origin, server, _channel, users)
-    client.addListener('names', function (_channel, nicks) {
-        channel.emit('roster', {
-            server: host,
-            channel: _channel,
-            users: Object.keys(nicks)
-        });
-    });
-
     // chatState (origin, server, _channel, user, state)
     client.addListener('join', function (_channel, nick) {
         channel.emit('state', {
@@ -152,6 +143,16 @@ function makeClient (host, nick, options) {
         });
     });
 
+    // chatRosters (origin, server, _channels)
+    client.addListener('names', function (_channel, nicks) {
+        var _channels = { };
+        _channels[_channel] = Object.keys(nicks);
+        channel.emit('rosters', {
+            server: host,
+            channels: _channels
+        });
+    });
+
     return client;
 }
 
@@ -189,10 +190,11 @@ channel.message('roster', function (message, finish) {
     var _channel = client.chans[message.channel];
     if (!_channel) return finish();
 
-    channel.emit('roster', {
-        server: message.server,
-        channel: message.channel,
-        users: Object.keys(_channel.users)
+    var _channels = { };
+    _channels[_channel] = Object.keys(_channel.users);
+    channel.emit('rosters', {
+        server: host,
+        channels: _channels
     });
 
     return finish();  

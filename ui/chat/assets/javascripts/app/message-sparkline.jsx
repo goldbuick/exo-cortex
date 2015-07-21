@@ -94,15 +94,19 @@ define(function (require, exports, module) {
             return $(this.getDOMNode()).find('.chart')[0];
         },
 
-        componentDidMount: function () {
-            this.sparkline(this.chartDOM());
-        },
-
-        componentDidUpdate: function (update) {
+        _sparkline: function () {
             clearTimeout(this.trigger);
             this.trigger = setTimeout(function() {
                 this.sparkline(this.chartDOM());
-            }.bind(this), 500);
+            }.bind(this), 1000);
+        },
+
+        componentDidMount: function () {
+            this._sparkline();
+        },
+
+        componentDidUpdate: function (update) {
+            this._sparkline();
         },
 
         componentWillUnmount: function () {

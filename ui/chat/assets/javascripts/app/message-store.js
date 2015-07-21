@@ -170,11 +170,17 @@ define(function(require, exports, module) {
                 break;
             case 'info':
                 // chatInfo (origin, server, _channel, info) - extra meta data about a channel
+                Object.keys(event.meta.info).forEach(function (key) {
+                    ChannelActions.info(
+                        event.meta.origin,
+                        event.meta.server,
+                        event.meta.channel, key, event.meta.info[key]);
+                });
                 break;
-            case 'roster':
+            case 'rosters':
                 // chatRoster (origin, server, _channel, users) - users in a particular channel
-                ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channel,
-                    event.meta.users);
+                // ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channel,
+                //     event.meta.users);
                 break;
 
             case 'state':

@@ -7,7 +7,8 @@ define(function(require, exports, module) {
         return Array.prototype.slice.call(arguments).join(':');
     }
 
-    function Channel (origin, server, name) {
+    function Channel (active, origin, server, name) {
+        this.active = active;
         this.info = { };
         this.users = { };
         this.origin = origin;
@@ -47,7 +48,9 @@ define(function(require, exports, module) {
     ChannelSet.prototype = {
         constructor: ChannelSet,
         all: function () {
-            return this.list;
+            return this.list.filter(function (channel) {
+                return channel.active;
+            });
         },
         find: function (origin, server, channel) {
             var id = getUnique(origin || '', server || '', channel || '');
@@ -55,11 +58,12 @@ define(function(require, exports, module) {
                 return _channel.unique() === id;
             })[0];
         },
-        add: function (origin, server, channel) {
-            this.list.push(new Channel(origin, server, channel));
+        add: function (active, origin, server, channel) {
+            var _channel = new Channel(active, origin, server, channel);
+            this.list.push(_channel);
             this.list.sort(function (a, b) {
-                var id1 = a.unique(),
-                    id2 = b.unique();
+                var id1 = a.unique().toLowerCase(),
+                    id2 = b.unique().toLowerCase();
 
                 if (id1 < id2) {
                     return -1;
@@ -69,6 +73,7 @@ define(function(require, exports, module) {
                 }
                 return 0;
             });
+            return _channel;
         },
         remove: function (origin, server, channel) {
             var id = getUnique(origin, server, channel);
@@ -89,28 +94,33 @@ define(function(require, exports, module) {
 
         onListen: function (origin, server, channel) {
             var _channel = this.channels.find(origin, server, channel);
-            if (_channel) return;
-            this.channels.add(origin, server, channel);
+            if (!_channel) {
+                _channel = this.channels.add(true, origin, server, channel);
+            }
+            if (_channel.active) {
+                return;
+            }
+            _channel.active = true;
             this.trigger(this.channels);
         },
 
         onLeave: function (origin, server, channel) {
             var _channel = this.channels.find(origin, server, channel);
-            if (!_channel) return;
-            this.channels.remove(origin, server, channel);
+            if (!_channel || !_channel.active) return;
+            _channel.active = false;
             this.trigger(this.channels);
         },
 
         onInfo: function (origin, server, channel, key, value) {
             var _channel = this.channels.find(origin, server, channel);
-            if (!_channel) return;
+            if (!_channel) _channel = this.channels.add(false, origin, server, channel);
             _channel.setInfo(key, value);
             this.trigger(this.channels);
         },
 
         onUserName: function (origin, server, channel, user, name) {
             var _channel = this.channels.find(origin, server, channel);
-            if (!_channel) return;
+            if (!_channel) _channel = this.channels.add(false, origin, server, channel);
             _channel.usersJoin([name]);
             _channel.usersLeave([user]);
             this.trigger(this.channels);
@@ -118,14 +128,14 @@ define(function(require, exports, module) {
 
         onUsersJoin: function (origin, server, channel, users) {
             var _channel = this.channels.find(origin, server, channel);
-            if (!_channel) return;
+            if (!_channel) _channel = this.channels.add(false, origin, server, channel);
             _channel.usersJoin(users);
             this.trigger(this.channels);
         },
 
         onUsersLeave: function (origin, server, channel, users) {
             var _channel = this.channels.find(origin, server, channel);
-            if (!_channel) return;
+            if (!_channel) _channel = this.channels.add(false, origin, server, channel);
             _channel.usersLeave(users);
             this.trigger(this.channels);
         }

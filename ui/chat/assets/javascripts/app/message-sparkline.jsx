@@ -3,6 +3,52 @@ define(function (require, exports, module) {
 
     var MessageStore = require('app/message-store');
 
+    // we build an update queue system to roll out sparkline updates
+    // since it's a heavy operation
+
+    var Spark = {
+        sparkid: 1,
+        queue: [ ],
+        pending: { },
+
+        start: function (spark) {
+            spark.sparkid = ++this.sparkid;
+        },
+
+        update: function (spark) {
+            // already pending
+            if (this.pending[spark.sparkid]) return;
+            // not pending
+            this.queue.push(spark);
+            this.pending[spark.sparkid] = true;
+            // trigger processing
+            this.next();
+        },
+
+        stop: function (spark) {
+            // not pending
+            if (!this.pending[spark.sparkid]) return;
+            // filter queue
+            this.queue = this.queue.filter(function (_spark) {
+                return _spark.sparkid !== spark.sparkid;
+            });
+            // no longer pending
+            delete this.pending[spark.sparkid];
+        },
+
+        next: function () {
+            // timeout pending, no work to do
+            if (this.timer || this.queue.length === 0) return;
+            // process next spark
+            this.timer = setTimeout(function () {
+                delete this.timer;
+                var spark = this.queue.shift();
+                spark.sparkline();
+                this.next();
+            }.bind(this), 100);
+        },
+    };
+
     function getStyleRuleValue(selector, style) {
         var sheets = document.styleSheets;
         for (var i = 0, l = sheets.length; i < l; i++) {
@@ -38,6 +84,10 @@ define(function (require, exports, module) {
             })
         ],
 
+        chartDOM: function () {
+            return $(this.getDOMNode()).find('.chart')[0];
+        },
+
         volumeData: function () {
             var ago = { },
                 sinceEpoch = Math.floor(new Date().getTime() / MessageStore.toMinutes),
@@ -58,8 +108,9 @@ define(function (require, exports, module) {
             return model;
         },
 
-        sparkline: function (dom) {
-            var model = this.volumeData(),
+        sparkline: function (empty) {
+            var dom = this.chartDOM(),
+                model = empty ? [ 'data1', 0, 0 ] : this.volumeData(),
                 rule = getStyleRuleValue('.fg-color', 'color');
 
             if (!this.chart) {
@@ -90,27 +141,21 @@ define(function (require, exports, module) {
             }
         },
 
-        chartDOM: function () {
-            return $(this.getDOMNode()).find('.chart')[0];
-        },
-
-        _sparkline: function () {
-            clearTimeout(this.trigger);
-            this.trigger = setTimeout(function() {
-                this.sparkline(this.chartDOM());
-            }.bind(this), 1000);
-        },
-
         componentDidMount: function () {
-            this._sparkline();
+            this.sparkline(true);
+            // prep for updates
+            Spark.start(this);
         },
 
-        componentDidUpdate: function (update) {
-            this._sparkline();
+        componentDidUpdate: function () {
+            // add to update queue
+            Spark.update(this);
         },
 
         componentWillUnmount: function () {
-            clearTimeout(this.trigger);
+            // make to clear if pending update
+            Spark.stop(this);
+            // remove chart class & dom
             if (this.chart) {
                 this.chart.destroy();
                 this.chart = undefined;

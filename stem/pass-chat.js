@@ -13,8 +13,8 @@ var channel = server.createChannel('chat');
 
 // chatError (origin, server, text)
 // chatMessage (origin, server, _channel, user, text)
-// chatInfo (origin, server, _channel, info) - extra meta data about a channel
-// chatState (origin, server, _channel, user, state, [info]) - user left / join / kicked etc..
+// chatInfo (origin, server, _channels) - key => info - extra meta data about a channel
+// chatState (origin, server, _channels) - key => [user, state, [info]] - user left / join / kicked etc..
 // chatRosters (origin, server, _channels) - which users are in these channels
 // chatListen (origin, server, _channels) - which channels are you in
 // chatLeave (origin, server, _channels) - you have left these channels

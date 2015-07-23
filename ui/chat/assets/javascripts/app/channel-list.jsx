@@ -24,6 +24,21 @@ define(function (require, exports, module) {
             return this.state.ident[name];
         },
 
+        componentDidMount: function () {
+            var bkg = d3.select($(this.getDOMNode()).find('.bkg')[0])
+                .append('svg');
+
+            var t = textures.lines()
+                .orientation('vertical', 'horizontal')
+                .size(6)
+                .strokeWidth(1)
+                .shapeRendering('crispEdges');
+
+            bkg.call(t);
+            bkg.append('rect')
+                .style('fill', t.url());
+        },
+
         render: function () {
             var first = true,
                 lastServer = '';

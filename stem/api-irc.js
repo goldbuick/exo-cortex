@@ -27,12 +27,18 @@ function gclientclose (host) {
     if (!gclients[host]) return;
 
     gclients[host].disconnect('leaving', function() {
-        channel.emit('disconnect', {
-            server: host
-        });        
+        // channel.emit('disconnect', {
+        //     server: host
+        // });        
     });
     
     delete gclients[host];
+}
+
+function makeChannels (_channel, data) {
+    var _channels = { };
+    _channels[_channel] = data;
+    return _channels;
 }
 
 function makeClient (host, nick, options) {
@@ -62,15 +68,14 @@ function makeClient (host, nick, options) {
 
     client.addListener('message', handleMessage);
 
-    // chatInfo (origin, server, _channel, info)
+    // chatInfo (origin, server, _channels)
     client.addListener('topic', function (_channel, topic, nick) {
         channel.emit('info', {
             server: host,
-            channel: _channel,
-            info: {
+            channels: makeChannels(_channel, {
                 topic: topic,
                 topicBy: nick
-            }
+            })
         });
     });
 
@@ -78,78 +83,80 @@ function makeClient (host, nick, options) {
     client.addListener('join', function (_channel, nick) {
         channel.emit('state', {
             server: host,
-            channel: _channel,
-            user: nick,
-            state: 'join'
+            channels: makeChannels(_channel, [{
+                user: nick,
+                state: 'join'
+            }])
         });
     });
     client.addListener('part', function (_channel, nick, reason) {
         channel.emit('state', {
             server: host,
-            channel: _channel,
-            user: nick,
-            state: 'part',
-            info: reason
+            channels: makeChannels(_channel, [{
+                user: nick,
+                state: 'part',
+                info: reason
+            }])
         });
     });
     client.addListener('kick', function (_channel, nick, by, reason) {
         channel.emit('state', {
             server: host,
-            channel: _channel,
-            user: nick,
-            state: 'part',
-            info: by + ' - ' + reason
+            channels: makeChannels(_channel, [{
+                user: nick,
+                state: 'part',
+                info: by + ' - ' + reason
+            }])
         });
     });
     client.addListener('quit', function (nick, reason, channels) {
+        var _channels = { };
         channels.forEach(function (_channel) {
-            channel.emit('state', {
-                server: host,
-                channel: _channel,
+            _channels[_channel] = [{
                 user: nick,
                 state: 'part',
                 info: reason
-            });
+            }];
         });
-    });
-    client.addListener('quit', function (nick, reason, channels) {
-        channels.forEach(function (_channel) {
-            channel.emit('state', {
-                server: host,
-                channel: _channel,
-                user: nick,
-                state: 'part',
-                info: reason
-            });
+        channel.emit('state', {
+            server: host,
+            channels: _channels
         });
     });
     client.addListener('kill', function (nick, reason, channels) {
+        var _channels = { };
         channels.forEach(function (_channel) {
-            channel.emit('state', {
-                server: host,
-                channel: _channel,
+            _channels[_channel] = [{
                 user: nick,
                 state: 'part',
                 info: reason
-            });
+            }];
         });
-    });
-    client.addListener('nick', function (oldnick, newnick) {
         channel.emit('state', {
             server: host,
-            user: oldnick,
-            state: 'name',
-            info: newnick
+            channels: _channels
+        });
+    });
+    client.addListener('nick', function (oldnick, newnick, channels) {
+        var _channels = { };
+        channels.forEach(function (_channel) {
+            _channels[_channel] = [{
+                user: oldnick,
+                state: 'name',
+                info: newnick
+            }];
+        });
+        channel.emit('state', {
+            server: host,
+            channels: _channels
         });
     });
 
     // chatRosters (origin, server, _channels)
     client.addListener('names', function (_channel, nicks) {
-        var _channels = { };
-        _channels[_channel] = Object.keys(nicks);
         channel.emit('rosters', {
             server: host,
-            channels: _channels
+            channels: makeChannels(_channel, Object.keys(nicks))
         });
     });
 
@@ -190,11 +197,9 @@ channel.message('roster', function (message, finish) {
     var _channel = client.chans[message.channel];
     if (!_channel) return finish();
 
-    var _channels = { };
-    _channels[_channel] = Object.keys(_channel.users);
     channel.emit('rosters', {
         server: host,
-        channels: _channels
+        channels: makeChannels(message.channel, Object.keys(_channel.users))
     });
 
     return finish();  
@@ -237,11 +242,10 @@ channel.message('info', function (message, finish) {
 
     channel.emit('info', {
         server: message.server,
-        channel: message.channel,
-        info: {
+        channels: makeChannels(message.channel, {
             topic: _channel.topic,
             topicBy: _channel.topicBy
-        }
+        })
     });
 
     return finish();

@@ -93,6 +93,7 @@ define(function(require, exports, module) {
         },
 
         onListen: function (origin, server, channels) {
+            var delta = false;
             channels.forEach(function (channel) {
                 var _channel = this.channels.find(origin, server, channel);
                 if (!_channel) {
@@ -103,28 +104,33 @@ define(function(require, exports, module) {
                 }
 
                 _channel.active = true;
-                this.trigger(this.channels);
+                delta = true;
             }.bind(this));
+            if (delta) this.trigger(this.channels);
         },
 
         onLeave: function (origin, server, channels) {
+            var delta = false;
             channels.forEach(function (channel) {
                 var _channel = this.channels.find(origin, server, channel);
                 if (!_channel || !_channel.active) return;
                 _channel.active = false;
-                this.trigger(this.channels);
+                delta = true;
             }.bind(this));
+            if (delta) this.trigger(this.channels);
         },
 
         onInfo: function (origin, server, channels) {
+            var delta = false;
             Object.keys(channels).forEach(function (channel) {
                 var _channel = this.channels.find(origin, server, channel);
                 if (!_channel) _channel = this.channels.add(false, origin, server, channel);
                 Object.keys(channels[channel]).forEach(function (key) {
                     _channel.setInfo(key, channels[channel][key]);
                 });
-                this.trigger(this.channels);
+                delta = true;
             }.bind(this));
+            if (delta) this.trigger(this.channels);
         },
 
         onUserName: function (origin, server, channels) {
@@ -137,21 +143,25 @@ define(function(require, exports, module) {
         },
 
         onUsersJoin: function (origin, server, channels) {
+            var delta = false;
             Object.keys(channels).forEach(function (channel) {
                 var _channel = this.channels.find(origin, server, channel);
                 if (!_channel) _channel = this.channels.add(false, origin, server, channel);
                 _channel.usersJoin(channels[channel]);
-                this.trigger(this.channels);
+                delta = true;
             }.bind(this));
+            if (delta) this.trigger(this.channels);
         },
 
         onUsersLeave: function (origin, server, channels) {
+            var delta = false;
             Object.keys(channels).forEach(function (channel) {
                 var _channel = this.channels.find(origin, server, channel);
                 if (!_channel) _channel = this.channels.add(false, origin, server, channel);
                 _channel.usersLeave(channels[channel]);
-                this.trigger(this.channels);
+                delta = true;
             }.bind(this));
+            if (delta) this.trigger(this.channels);
         }
     });
 

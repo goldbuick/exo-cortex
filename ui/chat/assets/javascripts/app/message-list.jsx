@@ -96,7 +96,7 @@ define(function (require, exports, module) {
                                     <span className="when">{message.when}</span>
                                     <span className="ago">{message.ago}</span>
                                 </div>
-                                <p className="text">{decodeURIComponent(message.text)}</p>
+                                <p className="text">{message.text}</p>
                             </td>
                         </tr>;
                     }

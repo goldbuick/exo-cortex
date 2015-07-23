@@ -47,7 +47,7 @@ define(function (require, exports, module) {
                 delete this.timer;
                 delete this.pending[spark.sparkid];
                 // generate graph
-                spark.sparkline();
+                spark.sparkline(!spark.chart);
                 // process next graph
                 this.next();
             }.bind(this), 100);
@@ -147,9 +147,10 @@ define(function (require, exports, module) {
         },
 
         componentDidMount: function () {
-            this.sparkline(true);
             // prep for updates
             Spark.start(this);
+            // add to update queue
+            Spark.update(this);
         },
 
         componentDidUpdate: function () {

@@ -86,6 +86,8 @@ function gclientopen (options) {
     });
     
     client.on('stanza', function(stanza) {
+        var _channels;
+
         if (stanza.is('message')) {
             // chatMessage (origin, server, _channel, user, text)
             console.log('message', stanza.toString());
@@ -127,10 +129,13 @@ function gclientopen (options) {
                 }, 1000);
             }
             if (stanza.getChildText('status')) {
+                _channels = { };
+                _channels[user] = {
+                    status: stanza.getChildText('status')
+                };
                 channel.emit('info', {
                     server: host,
-                    channel: user,
-                    info: { status: stanza.getChildText('status') }
+                    channels: _channels
                 });
             }
 
@@ -139,26 +144,25 @@ function gclientopen (options) {
             stanza.getChild('query').getChildren('item').forEach(function (user) {
                 gusers[user.attrs.jid] = user.attrs.name || user.attrs.jid;
             });
-            var _channels = Object.keys(gusers);
+            _channels = Object.keys(gusers);
 
-            // chatInfo (origin, server, _channel, info) - extra meta data about a channel
+            var _infos = { },
+                _rosters = { };
+
             _channels.forEach(function (user) {
-                channel.emit('info', {
-                    server: host,
-                    channel: user,
-                    info: { name: gusers[user] }
-                });
+                _infos[user] = { name: gusers[user] };
+                _rosters[user] = [ user, nick ];
             });
 
-            // chatRoster (origin, server, _channel, users) - users in a particular channel
-            var _rosters = { };
-            _channels.forEach(function (_channel) {
-                _rosters[_channel] = [ _channel, nick ];
+            channel.emit('info', {
+                server: host,
+                channels: _infos
             });
             channel.emit('rosters', {
                 server: host,
                 channels: _rosters
             });
+
         }
     });
 
@@ -179,13 +183,13 @@ channel.message('wake', function (message, finish) {
         return finish({});
     }
 
-    // chatListen (origin, server, _channels)
-    // gclientEach(function (host, client) {
-    //     channel.emit('listen', {
-    //         server: host,
-    //         channels: Object.keys(client.chans)
-    //     });
-    // });
+    chatListen (origin, server, _channels)
+    gclientEach(function (host, client) {
+        channel.emit('listen', {
+            server: host,
+            channels: Object.keys(client.chans)
+        });
+    });
 
     return finish();
 });

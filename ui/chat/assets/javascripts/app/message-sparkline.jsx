@@ -41,9 +41,14 @@ define(function (require, exports, module) {
             if (this.timer || this.queue.length === 0) return;
             // process next spark
             this.timer = setTimeout(function () {
-                delete this.timer;
+                // get target
                 var spark = this.queue.shift();
+                // longer pending
+                delete this.timer;
+                delete this.pending[spark.sparkid];
+                // generate graph
                 spark.sparkline();
+                // process next graph
                 this.next();
             }.bind(this), 100);
         },

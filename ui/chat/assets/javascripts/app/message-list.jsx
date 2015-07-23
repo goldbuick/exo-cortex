@@ -66,8 +66,7 @@ define(function (require, exports, module) {
 
         render: function () {
             var lastGap = 0,
-                lastUser = '',
-                userList = { };
+                lastUser = '';
 
             var result = <table className="message-list">
                 <tbody>
@@ -84,7 +83,7 @@ define(function (require, exports, module) {
                         lastGap = message.gap;
                     }
 
-                    userList[message.user] = true;
+                    IdentActions.request(message.user);
 
                     if (first) {
                         return <tr key={message.id}>
@@ -114,10 +113,6 @@ define(function (require, exports, module) {
                 </tr>
                 </tbody>
             </table>;
-
-            Object.keys(userList).forEach(function (user){
-                IdentActions.request(user);
-            });
 
             return result;
         }

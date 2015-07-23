@@ -43,10 +43,12 @@ define(function(require, exports, module) {
             }
         },
 
-        onRequest: function (source) {
-            if (this.idents[source] !== undefined) return;
-            this.idents[source] = '';
-            this.queue.push(source);
+        onBatchRequest: function (sources) {
+            sources.forEach(function (source) {
+                if (this.idents[source] !== undefined) return;
+                this.idents[source] = '';
+                this.queue.push(source);
+            }.bind(this));
         },
 
         onResponse: function (source, svg) {

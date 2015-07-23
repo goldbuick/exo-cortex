@@ -123,7 +123,7 @@ define(function(require, exports, module) {
             return true;
         },
 
-        onBatchMessage: function (messages) {
+        onMessages: function (messages) {
             var added = messages.filter(function (message) {
                 return this.checkMessage(message);
             }.bind(this));
@@ -132,103 +132,66 @@ define(function(require, exports, module) {
                 this.db.add(added);
                 this.trigger(this.messages);
             }
-        },
-
-        onMessage: function (message) {
-            if (this.checkMessage(message)) {
-                this.db.add([message]);
-                this.trigger(this.messages);
-            }
         }
     });
 
     // parse events from terminal server
-    function into (obj, key) {
-        if (obj[key] === undefined) {
-            obj[key] = { };
-        }
-        return obj[key];
-    }
+    function onEvent (event) {
+        switch (event.type) {
+            default:
+                console.log(event.type, event.meta);
+                break;
 
-    function parseEvent (messages, event) {
-        console.log(event.type, event.meta);
-        // switch (event.type) {
-        //     case 'error':
-        //         // chatError (origin, server, text)
-        //         console.log('error', event.meta);
-        //         break;
-        //     case 'message':
-        //         // chatMessage (origin, server, _channel, user, text)
-        //         messages.push({
-        //             id: event.id,
-        //             when: event.when,
-        //             origin: event.meta.origin,
-        //             server: event.meta.server,
-        //             channel: event.meta.channel,
-        //             user: event.meta.user,
-        //             text: event.meta.text
-        //         });
-        //         break;
-        //     case 'info':
-        //         // chatInfo (origin, server, _channel, info) - extra meta data about a channel
-        //         Object.keys(event.meta.info).forEach(function (key) {
-        //             ChannelActions.info(
-        //                 event.meta.origin,
-        //                 event.meta.server,
-        //                 event.meta.channel, key, event.meta.info[key]);
-        //         });
-        //         break;
-        //     case 'rosters':
-        //         // chatRoster (origin, server, _channel, users) - users in a particular channel
-        //         // ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channel,
-        //         //     event.meta.users);
-        //         break;
+            case 'error':
+                // chatError (origin, server, text)
+                console.log('error', event.meta);
+                break;
 
-        //     case 'state':
-        //         // chatState (origin, server, _channel, user, state, [info]) - user left / join / kicked etc..
-        //         switch (event.meta.state) {
-        //             case 'join':
-        //                 ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channel,
-        //                     [ event.meta.user ]);
-        //                 break;
-        //             case 'part':
-        //                 ChannelActions.usersLeave(event.meta.origin, event.meta.server, event.meta.channel,
-        //                     [ event.meta.user ]);
-        //                 break;
-        //             case 'name':
-        //                 ChannelActions.userName(event.meta.origin, event.meta.server, event.meta.channel,
-        //                     event.meta.user, event.meta.info);
-        //                 break;
-        //         }
-        //         break;
+            case 'listen':
+                ChannelActions.listen(event.meta.origin, event.meta.server, event.meta.channels);
+                break;
+            case 'leave':
+                ChannelActions.leave(event.meta.origin, event.meta.server, event.meta.channels);
+                break;
 
-        //     case 'listen':
-        //         // chatListen (origin, server, _channels) - which channels are you in
-        //         event.meta.channels.forEach(function (name) {
-        //             ChannelActions.listen(event.meta.origin, event.meta.server, name);
-        //         });
-        //         break;
-        //     case 'leave':
-        //         // chatLeave (origin, server, _channels) - you have left these channels
-        //         event.meta.channels.forEach(function (name) {
-        //             ChannelActions.leave(event.meta.origin, event.meta.server, name);
-        //         });
-        //         break;
-        // }
-    }
+            case 'info':
+                ChannelActions.info(event.meta.origin, event.meta.server, event.meta.channels);
+                break;
 
-    function onEvent (events) {
-        var messages = [ ];
+            case 'rosters':
+                ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channels);
+                break;
 
-        events.forEach(function (event) {
-            parseEvent(messages, event);
-        });
+            case 'state':
+                console.log('state', event.meta);
+                // chatState (origin, server, _channel, user, state, [info]) - user left / join / kicked etc..
+                // switch (event.meta.state) {
+                //     case 'join':
+                //         ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channel,
+                //             [ event.meta.user ]);
+                //         break;
+                //     case 'part':
+                //         ChannelActions.usersLeave(event.meta.origin, event.meta.server, event.meta.channel,
+                //             [ event.meta.user ]);
+                //         break;
+                //     case 'name':
+                //         ChannelActions.userName(event.meta.origin, event.meta.server, event.meta.channel,
+                //             event.meta.user, event.meta.info);
+                //         break;
+                // }
+                break;
 
-        if (messages.length === 1) {
-            MessageActions.message(messages[0]);
-
-        } else if (messages.length) {
-            MessageActions.batchMessage(messages);
+            case 'message':
+                MessageActions.message({
+                    id: event.id,
+                    when: event.when,
+                    origin: event.meta.origin,
+                    server: event.meta.server,
+                    channel: event.meta.channel,
+                    user: event.meta.user,
+                    text: event.meta.text
+                });
+                break;
         }
     }
 
@@ -242,12 +205,12 @@ define(function(require, exports, module) {
         }
     });
     terminal.on('chat', function (event) {
-        onEvent([ event ]);
+        onEvent(event);
     });
     terminal.on('response', function (response) {
         if (response.channel !== 'success' ||
             response.type !== 'chat/history') return;
-        onEvent(response.meta);
+        response.meta.forEach(onEvent);
     });
 
     module.exports.groupScale = groupScale;

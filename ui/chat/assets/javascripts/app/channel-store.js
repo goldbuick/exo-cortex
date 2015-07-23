@@ -92,52 +92,66 @@ define(function(require, exports, module) {
             return this.channels; 
         },
 
-        onListen: function (origin, server, channel) {
-            var _channel = this.channels.find(origin, server, channel);
-            if (!_channel) {
-                _channel = this.channels.add(true, origin, server, channel);
-            }
-            if (_channel.active) {
-                return;
-            }
-            _channel.active = true;
-            this.trigger(this.channels);
+        onListen: function (origin, server, channels) {
+            channels.forEach(function (channel) {
+                var _channel = this.channels.find(origin, server, channel);
+                if (!_channel) {
+                    _channel = this.channels.add(true, origin, server, channel);
+
+                } else if (_channel.active) {
+                    return;
+                }
+
+                _channel.active = true;
+                this.trigger(this.channels);
+            }.bind(this));
         },
 
-        onLeave: function (origin, server, channel) {
-            var _channel = this.channels.find(origin, server, channel);
-            if (!_channel || !_channel.active) return;
-            _channel.active = false;
-            this.trigger(this.channels);
+        onLeave: function (origin, server, channels) {
+            channels.forEach(function (channel) {
+                var _channel = this.channels.find(origin, server, channel);
+                if (!_channel || !_channel.active) return;
+                _channel.active = false;
+                this.trigger(this.channels);
+            }.bind(this));
         },
 
-        onInfo: function (origin, server, channel, key, value) {
-            var _channel = this.channels.find(origin, server, channel);
-            if (!_channel) _channel = this.channels.add(false, origin, server, channel);
-            _channel.setInfo(key, value);
-            this.trigger(this.channels);
+        onInfo: function (origin, server, channels) {
+            Object.keys(channels).forEach(function (channel) {
+                var _channel = this.channels.find(origin, server, channel);
+                if (!_channel) _channel = this.channels.add(false, origin, server, channel);
+                Object.keys(channels[channel]).forEach(function (key) {
+                    _channel.setInfo(key, channels[channel][key]);
+                });
+                this.trigger(this.channels);
+            }.bind(this));
         },
 
-        onUserName: function (origin, server, channel, user, name) {
-            var _channel = this.channels.find(origin, server, channel);
-            if (!_channel) _channel = this.channels.add(false, origin, server, channel);
-            _channel.usersJoin([name]);
-            _channel.usersLeave([user]);
-            this.trigger(this.channels);
+        onUserName: function (origin, server, channels) {
+            console.log('onUserName', channels);
+            // var _channel = this.channels.find(origin, server, channel);
+            // if (!_channel) _channel = this.channels.add(false, origin, server, channel);
+            // _channel.usersJoin([name]);
+            // _channel.usersLeave([user]);
+            // this.trigger(this.channels);
         },
 
-        onUsersJoin: function (origin, server, channel, users) {
-            var _channel = this.channels.find(origin, server, channel);
-            if (!_channel) _channel = this.channels.add(false, origin, server, channel);
-            _channel.usersJoin(users);
-            this.trigger(this.channels);
+        onUsersJoin: function (origin, server, channels) {
+            Object.keys(channels).forEach(function (channel) {
+                var _channel = this.channels.find(origin, server, channel);
+                if (!_channel) _channel = this.channels.add(false, origin, server, channel);
+                _channel.usersJoin(channels[channel]);
+                this.trigger(this.channels);
+            }.bind(this));
         },
 
-        onUsersLeave: function (origin, server, channel, users) {
-            var _channel = this.channels.find(origin, server, channel);
-            if (!_channel) _channel = this.channels.add(false, origin, server, channel);
-            _channel.usersLeave(users);
-            this.trigger(this.channels);
+        onUsersLeave: function (origin, server, channels) {
+            Object.keys(channels).forEach(function (channel) {
+                var _channel = this.channels.find(origin, server, channel);
+                if (!_channel) _channel = this.channels.add(false, origin, server, channel);
+                _channel.usersLeave(channels[channel]);
+                this.trigger(this.channels);
+            }.bind(this));
         }
     });
 

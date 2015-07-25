@@ -8,6 +8,7 @@ var ltx = require('ltx'),
 // create server 
 var server = toolkit.createServer('api-xmpp'),
     gusers = {},
+    gnames = {},
     gclients = {},
     gconnect = {},
     glisten = [ ],
@@ -86,6 +87,8 @@ function gclientopen (options) {
 
     // track it
     gclients[host] = client;
+    gnames[host] = { };
+    gusers[host] = { };
 
     // chatError (origin, server, text)
     client.on('error', function(e) {
@@ -106,15 +109,16 @@ function gclientopen (options) {
                 channel.emit('message', {
                     server: host,
                     channel: user,
-                    user: user,
+                    user: gnames[host][user] ? gnames[host][user] : user,
                     text: stanza.getChildText('body')
                 });
             }
 
         } else if (stanza.is('presence')) {
+            // console.log(stanza.toString());
             var user = gjid(stanza.attrs.from);
-            if (!gusers[user]) gusers[user] = [ ];
-            gusers[user].push(stanza.attrs.from);
+            if (!gusers[host][user]) gusers[host][user] = { };
+            gusers[host][user][stanza.attrs.from] = true;
             if (stanza.getChildText('show')) {
                 switch (stanza.attrs.type) {
                     default:
@@ -170,10 +174,10 @@ function gclientopen (options) {
 
             var _infos = { },
                 _rosters = { };
-
             _channels.forEach(function (user) {
+                gnames[host][user] = _names[user];
                 _infos[user] = { name: _names[user] };
-                _rosters[user] = [ user, nick ];
+                _rosters[user] = [ _names[user], nick ];
             });
 
             channel.emit('info', {
@@ -256,18 +260,32 @@ channel.message('say', function (message, finish) {
     var client = gclient(message.server);
     if (!client) return finish();
 
-    var users = gusers[message.channel];
+    // get user collection for server
+    var users = gusers[message.server];
     if (!users) return finish();
 
-    users.forEach(function (user) {
-        var reply = new ltx.Element('message', {
-            to: user,
-            type: 'chat'
-        });
-        reply.c('body').t(message.text);
-        client.send(reply);
-        console.log(reply.toString());
+    // get potential resources
+    users = users[message.channel];
+    if (!users) return finish();
+    users = Object.keys(users);
+
+    // pick resource
+    var user = users.filter(function (_user) {
+        return _user.indexOf('/Messaging') === -1 && _user.indexOf('/messaging') === -1;
     });
+
+    if (user.length) {
+        user = user[0];
+    } else {
+        user = users.pop();
+    }
+
+    var reply = new ltx.Element('message', {
+        to: user,
+        type: 'chat'
+    });
+    reply.c('body').t(message.text);
+    client.send(reply);
 
     channel.emit('message', {
         server: message.server,

@@ -1,7 +1,8 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var MessageStore = require('app/message-store');
+    var MessageStore = require('app/message-store'),
+        Sparkline = require('app/lib/sparkline');
 
     // we build an update queue system to roll out sparkline updates
     // since it's a heavy operation
@@ -36,39 +37,30 @@ define(function (require, exports, module) {
             delete this.pending[spark.sparkid];
         },
 
+        process: function () {
+            // get target
+            var spark = this.queue.shift();
+            // longer pending
+            delete this.timer;
+            delete this.pending[spark.sparkid];
+            // generate graph
+            spark.sparkline();
+            // process next graph
+            this.next();
+        },
+
+        delay: function () {
+            // pause between processing 
+            this.timer = setTimeout(this.process.bind(this), 100);
+        },
+
         next: function () {
             // timeout pending, no work to do
             if (this.timer || this.queue.length === 0) return;
-            // process next spark
-            this.timer = setTimeout(function () {
-                // get target
-                var spark = this.queue.shift();
-                // longer pending
-                delete this.timer;
-                delete this.pending[spark.sparkid];
-                // generate graph
-                spark.sparkline(!spark.chart);
-                // process next graph
-                this.next();
-            }.bind(this), 100);
+            // process next spark only when tab is in focus
+            this.timer = window.requestAnimationFrame(this.delay.bind(this));
         },
     };
-
-    function getStyleRuleValue(selector, style) {
-        var sheets = document.styleSheets;
-        for (var i = 0, l = sheets.length; i < l; i++) {
-            var sheet = sheets[i];
-            if (!sheet.cssRules) continue;
-
-            for (var j = 0, k = sheet.cssRules.length; j < k; j++) {
-                var rule = sheet.cssRules[j];
-                if (rule.selectorText && rule.selectorText.split(',').indexOf(selector) !== -1) {
-                    return rule.style[style];
-                }
-            }
-        }
-        return null;
-    }
 
     var MessageSparkline = React.createClass({
         mixins: [
@@ -90,7 +82,7 @@ define(function (require, exports, module) {
         ],
 
         chartDOM: function () {
-            return $(this.getDOMNode()).find('.chart')[0];
+            return $(this.getDOMNode());
         },
 
         volumeData: function () {
@@ -104,7 +96,7 @@ define(function (require, exports, module) {
                 ago[delta] = d.value;
             });
 
-            var model = [ 'data1' ];
+            var model = [ ];
             while (start >= 0) {
                 model.push(ago[start] || 0);
                 --start;
@@ -113,37 +105,11 @@ define(function (require, exports, module) {
             return model;
         },
 
-        sparkline: function (empty) {
+        sparkline: function () {
             var dom = this.chartDOM(),
-                model = empty ? [ 'data1', 0, 0 ] : this.volumeData(),
-                rule = getStyleRuleValue('.fg-color', 'color');
-
-            if (!this.chart) {
-                this.chart = c3.generate({
-                    bindto: dom,
-                    size: {
-                        width: this.props.width,
-                        height: 20
-                    },
-                    data: {
-                        columns: [ model ],
-                        colors: { data1: rule || '#000' },
-                        types: { data1: 'area' }
-                    },
-                    axis: {
-                        x: { show: false },
-                        y: { show: false }
-                    },
-                    point: { show: false },
-                    tooltip: { show: false },
-                    legend: { show: false }
-                });
-
-            } else {
-                this.chart.load({
-                    columns: [ model ]
-                });
-            }
+                model = this.volumeData();
+            dom.html(Sparkline(this.props.width, this.props.height, 4, model, !this.drawn));
+            this.drawn = true;
         },
 
         componentDidMount: function () {
@@ -161,15 +127,10 @@ define(function (require, exports, module) {
         componentWillUnmount: function () {
             // make to clear if pending update
             Spark.stop(this);
-            // remove chart class & dom
-            if (this.chart) {
-                this.chart.destroy();
-                this.chart = undefined;
-            }
         },
 
         render: function () {
-            return <div className="sparkline"><div className="chart"></div></div>;
+            return <div className="sparkline"></div>;
         }
     });
 

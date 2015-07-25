@@ -2,8 +2,8 @@ define(function (require, exports, module) {
     'use strict';
 
     var UIActions = require('app/ui-actions'),
-        IdentStore = require('app/ident-store'),
-        IdentActions = require('app/ident-actions'),
+        IdentStore = require('app/lib/ident-store'),
+        IdentActions = require('app/lib/ident-actions'),
         MessageStore = require('app/message-store'),
         ChannelActions = require('app/channel-actions'),
         ChannelStore = require('app/channel-store');

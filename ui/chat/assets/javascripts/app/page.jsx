@@ -21,19 +21,6 @@ define(function (require, exports, module) {
                 edge: 'left',
                 menuWidth: 310
             });
-
-            var bkg = d3.select($(this.getDOMNode()).find('.bkg')[0])
-                .append('svg');
-
-            var t = textures.lines()
-                .orientation('vertical', 'horizontal')
-                .size(6)
-                .strokeWidth(1)
-                .shapeRendering('crispEdges');
-
-            bkg.call(t);
-            bkg.append('rect')
-                .style('fill', t.url());
         },
 
         onShowInfo: function (e) {
@@ -84,8 +71,8 @@ define(function (require, exports, module) {
                             </nav>
                         </div>
                         <div id="chat-nav" className="side-nav fixed">
-                            <div className="bkg"></div>
-                            <div className="overview"><MessageSparkline width="280" /></div>
+                            <div className="overview">
+                                <MessageSparkline width="280" height="16" /></div>
                             <ChannelList channel={current.name} />
                         </div>
                     </header>

@@ -1,7 +1,7 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var collect = require('app/collected-actions');
+    var collect = require('app/lib/collected-actions');
 
     module.exports = Reflux.createActions([
         'listen',

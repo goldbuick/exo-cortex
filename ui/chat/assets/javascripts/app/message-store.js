@@ -1,7 +1,7 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var terminal = require('app/terminal-server'),
+    var terminal = require('app/lib/terminal-server'),
         ChannelActions = require('app/channel-actions'),
         MessageActions = require('app/message-actions');
 
@@ -163,7 +163,7 @@ define(function(require, exports, module) {
                 break;
 
             case 'state':
-                console.log('state', event.meta);
+                // console.log('state', event.meta);
                 // chatState (origin, server, _channel, user, state, [info]) - user left / join / kicked etc..
                 // switch (event.meta.state) {
                 //     case 'join':

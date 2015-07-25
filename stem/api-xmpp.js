@@ -69,12 +69,23 @@ function gclientroster (host) {
 
 function gclientopen (options) {
     var host = options.host,
-        nick = gjid(options.jid);
+        nick = options.jid;
+
+    // close existing client
     gclientclose(host);
 
+    // setup options
     var _options = JSON.parse(JSON.stringify(options));
     _options.credentials = true;
-    var client = gclients[host] = new Client(_options);
+
+    // create client
+    var client = new Client(_options);
+
+    // track from nick
+    client.nick = gjid(nick);
+
+    // track it
+    gclients[host] = client;
 
     // chatError (origin, server, text)
     client.on('error', function(e) {
@@ -90,10 +101,20 @@ function gclientopen (options) {
 
         if (stanza.is('message')) {
             // chatMessage (origin, server, _channel, user, text)
-            console.log('message', stanza.toString());
+            if (stanza.getChildText('body')) {
+                var user = gjid(stanza.attrs.from);
+                channel.emit('message', {
+                    server: host,
+                    channel: user,
+                    user: user,
+                    text: stanza.getChildText('body')
+                });
+            }
 
         } else if (stanza.is('presence')) {
             var user = gjid(stanza.attrs.from);
+            if (!gusers[user]) gusers[user] = [ ];
+            gusers[user].push(stanza.attrs.from);
             if (stanza.getChildText('show')) {
                 switch (stanza.attrs.type) {
                     default:
@@ -141,16 +162,17 @@ function gclientopen (options) {
 
         } else if (stanza.is('iq')) {
             // create lookup table for jid -> nice name
+            var _names = { };
             stanza.getChild('query').getChildren('item').forEach(function (user) {
-                gusers[user.attrs.jid] = user.attrs.name || user.attrs.jid;
+                _names[user.attrs.jid] = user.attrs.name || user.attrs.jid;
             });
-            _channels = Object.keys(gusers);
+            _channels = Object.keys(_names);
 
             var _infos = { },
                 _rosters = { };
 
             _channels.forEach(function (user) {
-                _infos[user] = { name: gusers[user] };
+                _infos[user] = { name: _names[user] };
                 _rosters[user] = [ user, nick ];
             });
 
@@ -183,7 +205,7 @@ channel.message('wake', function (message, finish) {
         return finish({});
     }
 
-    chatListen (origin, server, _channels)
+    // chatListen (origin, server, _channels)
     gclientEach(function (host, client) {
         channel.emit('listen', {
             server: host,
@@ -234,7 +256,26 @@ channel.message('say', function (message, finish) {
     var client = gclient(message.server);
     if (!client) return finish();
 
-    // client.say(message.channel, message.text);
+    var users = gusers[message.channel];
+    if (!users) return finish();
+
+    users.forEach(function (user) {
+        var reply = new ltx.Element('message', {
+            to: user,
+            type: 'chat'
+        });
+        reply.c('body').t(message.text);
+        client.send(reply);
+        console.log(reply.toString());
+    });
+
+    channel.emit('message', {
+        server: message.server,
+        channel: message.channel,
+        user: client.nick,
+        text: message.text
+    });
+
     finish();
 });
 

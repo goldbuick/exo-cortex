@@ -2,8 +2,8 @@ define(function (require, exports, module) {
     'use strict';
 
     var UIActions = require('app/ui-actions'),
-        IdentActions = require('app/ident-actions'),
-        IdentStore = require('app/ident-store'),
+        IdentActions = require('app/lib/ident-actions'),
+        IdentStore = require('app/lib/ident-store'),
         ChannelStore = require('app/channel-store'),
         MessageSparkline = require('app/message-sparkline');
 
@@ -44,6 +44,7 @@ define(function (require, exports, module) {
                 lastServer = '';
 
             return <ul className="channel-nav">
+                <div className="bkg"></div>
                 <li className="logo valign-wrapper">
                     <h5 className="valign">exo-cortex</h5>
                 </li>
@@ -62,7 +63,7 @@ define(function (require, exports, module) {
                                 <div className="ident" dangerouslySetInnerHTML={{
                                     __html: this.serverIdent(channel.origin, channel.server)
                                 }}></div>
-                                <MessageSparkline width="280"
+                                <MessageSparkline width="280" height="16"
                                     server={channel.server}/>
                                 <div className="name">{channel.server}</div>
                             </li>
@@ -77,7 +78,7 @@ define(function (require, exports, module) {
                     elements.push(
                         <li key={'channel-' + channel.name} className={liTagClass}>
                             <div className="selected"></div>
-                            <MessageSparkline width="280"
+                            <MessageSparkline width="280" height="16"
                                 server={channel.server} channel={channel.name} />
                             <a href="#!"
                                 onClick={this.viewChannel.bind(this, channel)}>{name}</a>

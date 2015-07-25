@@ -2,9 +2,9 @@
 @import "flexbox.less";
 
 @fg-color: #f50;
-@bg-color: darken(@fg-color, 48%);
-@alt-color: darken(@fg-color, 30%);
-@soft-color: darken(@fg-color, 44%);
+@bg-color: darken(@fg-color, 45%);
+@alt-color: darken(@fg-color, 10%);
+@soft-color: darken(@fg-color, 40%);
 
 @font-light: 100;
 @font-normal: 500;
@@ -129,8 +129,8 @@ header, main, footer {
   .bkg {
     top: 0;
     left: 0;
-    width: 100%;
-    height: 8000px;
+    right: 0;
+    bottom: 0;
     position: absolute;
     svg, rect {
       width: 100%;
@@ -156,8 +156,10 @@ header, main, footer {
   }
 
   div.sparkline {
-    height: 20px;
-    position: absolute;
+    position: absolute;                
+    svg * {
+      stroke: @fg-color;
+    }
   }  
 }
 

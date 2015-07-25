@@ -1,8 +1,8 @@
 define(function(require, exports, module) {
     'use strict';
 
-    var terminal = require('app/terminal-server'),
-        IdentActions = require('app/ident-actions');
+    var terminal = require('app/lib/terminal-server'),
+        IdentActions = require('app/lib/ident-actions');
 
     var trigger;
     function triggerNext () {

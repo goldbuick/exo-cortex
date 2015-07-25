@@ -18,6 +18,9 @@ define(function(require, exports, module) {
 
     Channel.prototype = {
         constructor: Channel,
+        group: function () {
+            return getUnique(this.origin, this.server).toLowerCase();
+        },
         unique: function () {
             return getUnique(this.origin, this.server, this.name);
         },
@@ -62,15 +65,19 @@ define(function(require, exports, module) {
             var _channel = new Channel(active, origin, server, channel);
             this.list.push(_channel);
             this.list.sort(function (a, b) {
-                var id1 = a.unique().toLowerCase(),
-                    id2 = b.unique().toLowerCase();
+                var id1group = a.group(),
+                    id2group = b.group(),
+                    id1name = a.info.name ? a.info.name : a.name,
+                    id2name = b.info.name ? b.info.name : b.name;
 
-                if (id1 < id2) {
-                    return -1;
+                if (id1group === id2group) {
+                    if (id1name < id2name) return -1;
+                    if (id1name > id2name) return 1;
+                    return 0;
                 }
-                if (id1 > id2) {
-                    return 1;
-                }
+
+                if (id1group < id2group) return -1;
+                if (id1group > id2group) return 1;
                 return 0;
             });
             return _channel;

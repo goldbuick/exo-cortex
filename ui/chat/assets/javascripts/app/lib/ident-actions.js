@@ -9,6 +9,6 @@ define(function(require, exports, module) {
         'next'
     ]);
 
-    collect(module.exports, 'request', 'batchRequest', 256);
+    collect(module.exports, 'request', 'batchRequest', 1000);
 
 });

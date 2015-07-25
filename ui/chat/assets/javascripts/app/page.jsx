@@ -16,11 +16,47 @@ define(function (require, exports, module) {
             Reflux.connect(ChannelStore, 'channels')
         ],
 
+        updateBkg: function () {
+            clearTimeout(this.bkgTimer);
+            this.bkgTimer = setTimeout(function () {
+                var list = $(this.getDOMNode()).find('.channel-nav'),
+                    listHeight = list.height() + 'px',
+                    listWidth = '310px';
+
+                var bkg = $(this.getDOMNode()).find('.bkg');
+
+                bkg.html('');
+                bkg = d3.select(bkg[0])
+                    .append('svg')
+                    .attr('width', listWidth)
+                    .attr('height', listHeight);
+
+                var t = textures.lines()
+                    .orientation('vertical', 'horizontal')
+                    .size(4)
+                    .strokeWidth(1)
+                    .shapeRendering('crispEdges');
+
+                bkg.call(t);
+                bkg.append('rect')
+                    .attr('width', listWidth)
+                    .attr('height', listHeight)
+                    .style('fill', t.url());
+
+                console.log('list', listWidth, listHeight);
+            }.bind(this), 256);
+        },
+
         componentDidMount: function () {
             $(this.getDOMNode()).find('.button-collapse').sideNav({
                 edge: 'left',
                 menuWidth: 310
             });
+            this.updateBkg();
+        },
+
+        componentDidUpdate: function () {
+            this.updateBkg();
         },
 
         onShowInfo: function (e) {
@@ -71,6 +107,7 @@ define(function (require, exports, module) {
                             </nav>
                         </div>
                         <div id="chat-nav" className="side-nav fixed">
+                            <div className="bkg"></div>
                             <div className="overview">
                                 <MessageSparkline width="280" height="16" /></div>
                             <ChannelList channel={current.name} />

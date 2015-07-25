@@ -60,7 +60,7 @@ define(function (require, exports, module) {
             svg.circle(lx, ly, 1, attr),
             svg.circle(hx, hy, 1, attr)
         ), {
-            'class': animated ? 'animated fadeIn' : ''
+            'class': animated ? 'animated zoomInUp' : ''
         });
     };
 

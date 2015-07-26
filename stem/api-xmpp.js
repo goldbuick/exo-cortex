@@ -368,11 +368,11 @@ server.config('/accounts/[0-9]+', function (type, value) {
     }, 1000);
 });
 
-server.config('/accounts/[0-9]+/jid', function (type, value) {
-    if (type === 'value') return [
-        value.split('/')[0], 'exo'
-    ].join('/');
-});
+// server.config('/accounts/[0-9]+/jid', function (type, value) {
+//     if (type === 'value') return [
+//         value.split('/')[0], 'exo'
+//     ].join('/');
+// });
 
 // handle server start
 server.created(function (http, port) {

@@ -213,7 +213,7 @@ channel.message('wake', function (message, finish) {
     gclientEach(function (host, client) {
         channel.emit('listen', {
             server: host,
-            channels: Object.keys(client.chans)
+            channels: Object.keys(gusers[host])
         });
     });
 
@@ -233,15 +233,13 @@ channel.message('roster', function (message, finish) {
     var client = gclient(message.server);
     if (!client) return finish();
 
-    // // get channel
-    // var _channel = client.chans[message.channel];
-    // if (!_channel) return finish();
-
-    // channel.emit('roster', {
-    //     server: message.server,
-    //     channel: message.channel,
-    //     users: Object.keys(_channel.users)
-    // });
+    // emit roster info
+    var _channels = { };
+    _channels[message.channel] = [ gnames[message.channel], client.nick ];
+    channel.emit('rosters', {
+        server: host,
+        channels: _channels
+    });
 
     return finish();  
 });
@@ -310,18 +308,13 @@ channel.message('info', function (message, finish) {
     var client = gclient(message.server);
     if (!client) return finish();
 
-    // // get channel
-    // var _channel = client.chans[message.channel];
-    // if (!_channel) return finish();
-
-    // channel.emit('info', {
-    //     server: message.server,
-    //     channel: message.channel,
-    //     info: {
-    //         topic: _channel.topic,
-    //         topicBy: _channel.topicBy
-    //     }
-    // });
+    // emit roster info
+    var _channels = { };
+    _channels[message.channel] = { name: gnames[message.channel] };
+    channel.emit('info', {
+        server: host,
+        channels: _channels
+    });
 
     return finish();
 });

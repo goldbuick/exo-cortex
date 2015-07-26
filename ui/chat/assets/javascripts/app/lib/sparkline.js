@@ -57,8 +57,10 @@ define(function (require, exports, module) {
         height += padding * 2;
         return svg(width, height, svg._(
             svg.path(points, attr),
-            svg.circle(lx, ly, 1, attr),
-            svg.circle(hx, hy, 1, attr)
+            svg.line(lx, ly, lx, height, attr),
+            svg.line(hx, 0, hx, hy, attr),
+            svg.circle(lx, height - 2, 1, attr),
+            svg.circle(hx, 2, 1, attr)
         ), {
             'class': animated ? 'animated zoomInUp' : ''
         });

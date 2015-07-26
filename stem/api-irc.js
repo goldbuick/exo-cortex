@@ -172,6 +172,7 @@ channel.message('wake', function (message, finish) {
     // chatListen (origin, server, _channels)
     gclientEach(function (host, client) {
         channel.emit('listen', {
+            nolog: true,
             server: host,
             channels: Object.keys(client.chans)
         });
@@ -198,6 +199,7 @@ channel.message('roster', function (message, finish) {
     if (!_channel) return finish();
 
     channel.emit('rosters', {
+        nolog: true,
         server: host,
         channels: makeChannels(message.channel, Object.keys(_channel.users))
     });
@@ -241,6 +243,7 @@ channel.message('info', function (message, finish) {
     if (!_channel) return finish();
 
     channel.emit('info', {
+        nolog: true,
         server: message.server,
         channels: makeChannels(message.channel, {
             topic: _channel.topic,

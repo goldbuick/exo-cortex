@@ -212,6 +212,7 @@ channel.message('wake', function (message, finish) {
     // chatListen (origin, server, _channels)
     gclientEach(function (host, client) {
         channel.emit('listen', {
+            nolog: true,
             server: host,
             channels: Object.keys(gusers[host])
         });
@@ -237,6 +238,7 @@ channel.message('roster', function (message, finish) {
     var _channels = { };
     _channels[message.channel] = [ gnames[message.channel], client.nick ];
     channel.emit('rosters', {
+        nolog: true,
         server: host,
         channels: _channels
     });
@@ -312,6 +314,7 @@ channel.message('info', function (message, finish) {
     var _channels = { };
     _channels[message.channel] = { name: gnames[message.channel] };
     channel.emit('info', {
+        nolog: true,
         server: host,
         channels: _channels
     });

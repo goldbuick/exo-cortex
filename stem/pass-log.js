@@ -49,7 +49,10 @@ channel.message('list', function (message, finish) {
 server.any(function (url, json) {
     if (url !== '/upstream' || !json || !db.conn) return;
 
-    // log all events
+    // ignore repeat messages
+    if (json.meta && json.meta.nolog === true) return;
+
+    // log all non-repeat events
     db.run(db.q().insert(json), function (err) {
         db.check(err);
     });

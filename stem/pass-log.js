@@ -49,8 +49,8 @@ channel.message('list', function (message, finish) {
 server.any(function (url, json) {
     if (url !== '/upstream' || !json || !db.conn) return;
 
-    // ignore repeat messages
-    if (json.meta && json.meta.nolog === true) return;
+    // only log qualified events
+    if (json.meta && json.meta.keeplog !== true) return;
 
     // log all non-repeat events
     db.run(db.q().insert(json), function (err) {

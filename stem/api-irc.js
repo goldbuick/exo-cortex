@@ -71,6 +71,7 @@ function makeClient (host, nick, options) {
     // chatInfo (origin, server, _channels)
     client.addListener('topic', function (_channel, topic, nick) {
         channel.emit('info', {
+            nolog: true,
             server: host,
             channels: makeChannels(_channel, {
                 topic: topic,
@@ -82,6 +83,7 @@ function makeClient (host, nick, options) {
     // chatState (origin, server, _channel, user, state)
     client.addListener('join', function (_channel, nick) {
         channel.emit('state', {
+            nolog: true,
             server: host,
             channels: makeChannels(_channel, [{
                 user: nick,
@@ -91,6 +93,7 @@ function makeClient (host, nick, options) {
     });
     client.addListener('part', function (_channel, nick, reason) {
         channel.emit('state', {
+            nolog: true,
             server: host,
             channels: makeChannels(_channel, [{
                 user: nick,
@@ -101,6 +104,7 @@ function makeClient (host, nick, options) {
     });
     client.addListener('kick', function (_channel, nick, by, reason) {
         channel.emit('state', {
+            nolog: true,
             server: host,
             channels: makeChannels(_channel, [{
                 user: nick,
@@ -119,6 +123,7 @@ function makeClient (host, nick, options) {
             }];
         });
         channel.emit('state', {
+            nolog: true,
             server: host,
             channels: _channels
         });
@@ -133,6 +138,7 @@ function makeClient (host, nick, options) {
             }];
         });
         channel.emit('state', {
+            nolog: true,
             server: host,
             channels: _channels
         });
@@ -147,6 +153,7 @@ function makeClient (host, nick, options) {
             }];
         });
         channel.emit('state', {
+            nolog: true,
             server: host,
             channels: _channels
         });
@@ -348,6 +355,7 @@ server.config('/servers/[0-9]+', function (type, value) {
         if (leaving.length) {
             // chatLeave (origin, server, _channels)
             channel.emit('leave', {
+                nolog: true,
                 server: value.host,
                 channels: leaving
             });
@@ -364,6 +372,7 @@ server.config('/servers/[0-9]+', function (type, value) {
         if (joining.length) {
             // chatListen (origin, server, _channels)
             channel.emit('listen', {
+                nolog: true,
                 server: value.host,
                 channels: joining
             });

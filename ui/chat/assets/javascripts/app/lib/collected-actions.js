@@ -2,7 +2,7 @@ define(function(require, exports, module) {
     'use strict';
 
     var unique = 1;
-    module.exports = function (obj, name, target, delay) {        
+    module.exports = function (obj, name, target, delay, cap) {        
         ++unique;
         var timerName = 'collected-' + unique,
             queueName = 'collected-data-' + unique;
@@ -14,12 +14,20 @@ define(function(require, exports, module) {
             // add data to queue, only support a single arg
             obj[queueName].push(arguments[0]);
 
-            // kick off completion timer
-            clearTimeout(obj[timerName]);
-            obj[timerName] = setTimeout(function() {
+            // do we have a cap ?
+            if (cap && obj[queueName].length >= cap) {
+                // send action now
                 obj[target].call(obj, obj[queueName]);
                 obj[queueName] = [ ];
-            }, delay);
+
+            } else {
+                // kick off completion timer
+                clearTimeout(obj[timerName]);
+                obj[timerName] = setTimeout(function() {
+                    obj[target].call(obj, obj[queueName]);
+                    obj[queueName] = [ ];
+                }, delay);
+            }
         };
     };
 

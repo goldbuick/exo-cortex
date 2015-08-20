@@ -1,100 +1,93 @@
 
 // CHAT SPEC
 
-var toolkit = require('./toolkit/lib');
-
-function inject (collection, server, room, data) {
-    if (collection[server] === undefined) {
-        collection[server] = { };
-    }
-    if (collection[server][room] === undefined) {
-        collection[server][room] = [ ];
-    }
-    collection[server][room].push(data);
-}
+var toolkit = require('./toolkit/lib'),
+    collected = require('./toolkit/collected');
 
 function ChatSpec (name) {
     this.server = toolkit.createServer('api-' + name);
-    this.channel = server.createChannel(name);
-    this.channel.message('wake', this.onWake.bind(this));
-    this.channel.message('say', this.onSay.bind(this));
+    this.channel = this.server.createChannel(name);
+
+    this.channel.message('info', function (message, finish) {
+        if (this._info) return this._info.call(this, message, finish);
+        return finish();
+    }.bind(this));
+
+    this.channel.message('say', function (message, finish) {
+        if (this._say) return this._say.call(this, message, finish);
+        return finish();
+    }.bind(this));
+
+    function debug (msg, data) {
+        console.log(msg, JSON.stringify(data, null, 2));
+    }
+    
+    this.dataError = collected.create();
+    this.dataError.on(function (data) {
+        debug('error', data);
+        this.channel.emit('error', {
+            servers: data
+        });
+    }.bind(this));
+    
+    this.dataInfo = collected.create();
+    this.dataInfo.on(function (data) {
+        debug('info', data);
+        this.channel.emit('info', {
+            servers: data
+        });
+    }.bind(this));
+
+    this.dataMessage = collected.create();
+    this.dataMessage.on(function (data) {
+        debug('message', data);
+        this.channel.emit('message', {
+            keeplog: true,
+            servers: data
+        });
+    }.bind(this));
 }
 
 ChatSpec.prototype = {
     constructor: ChatSpec,
 
-    emitError: function (connection, error) {
-        this.channel.emit('error', {
-            connection: connection,
-            error: error
+    // EVENTS
+
+    error: function (server, text) {
+        this.dataError.push(server, {
+            text: text
         });
     },
 
-    user: function (collection, server, room, user, info) {
-        inject(collection, server, room, {
+    user: function (server, user, info) {
+        this.dataInfo.push(server, {
             user: user,
             info: info
         });
     },
 
-    room: function (collection, server, room, info) {
-        inject(collection, server, room, {
+    room: function (server, room, info) {
+        this.dataInfo.push(server, room, {
+            room: room,
             info: info
         });
     },
 
-    emitInfo: function (collection) {
-        this.channel.emit('info', {
-            list: collection
-        });
-    },
-
-    message: function (collection, server, room, user, text) {
-        inject(collection, server, room, {
-            type: 'message',
+    message: function (server, room, user, text) {
+        this.dataMessage.push(server, room, {
             user: user,
             text: text
         });
     },
 
-    join: function (collection, server, room, user) {
-        inject(collection, server, room, {
-            type: 'join',
-            user: user
-        });
+    // MESSAGES
+
+    info: function (fn) {
+        this._info = fn;
     },
 
-    leave: function (collection, server, room, user, text) {
-        inject(collection, server, room, {
-            type: 'leave',
-            user: user,
-            text: text || ''
-        });
-    },
-
-    emitEvent: function (collection) {
-        this.channel.emit('event', {
-            keeplog: true,
-            list: collection
-        });
-    },
-
-    wake: function (handler) {
-        this._wake = handler;
-    },
-
-    say: function (handler) {
-        this._say = handler;
-    },
-
-    onWake: function (message, finish) {
-        if (this._wake) return this._wake.call(this, message, finish);
-        return finish();
-    },
-
-    onSay: function (message, finish) {
-        if (this._say) return this._say.call(this, message, finish);
-        return finish();
+    say: function (fn) {
+        this._say = fn;
     }
 
 };

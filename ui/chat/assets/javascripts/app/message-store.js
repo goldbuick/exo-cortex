@@ -59,43 +59,43 @@ define(function(require, exports, module) {
         },
 
         onInfo: function (origin, server, channel) {
-            terminal.emit('request', {
-                route: 'chat/info',
-                json: {
-                    origin: origin,
-                    server: server,
-                    target: channel
-                }
-            });
+            // terminal.emit('request', {
+            //     route: 'chat/info',
+            //     json: {
+            //         origin: origin,
+            //         server: server,
+            //         target: channel
+            //     }
+            // });
         },
 
-        onList: function (origin, server) {
-            terminal.emit('request', {
-                route: 'chat/list',
-                json: {
-                    origin: origin,
-                    server: server
-                }
-            });
-        },
+        // onList: function (origin, server) {
+        //     terminal.emit('request', {
+        //         route: 'chat/list',
+        //         json: {
+        //             origin: origin,
+        //             server: server
+        //         }
+        //     });
+        // },
 
-        onWake: function () {
-            terminal.emit('request', {
-                route: 'chat/wake',
-                json: { }
-            });
-        },
+        // onWake: function () {
+        //     terminal.emit('request', {
+        //         route: 'chat/wake',
+        //         json: { }
+        //     });
+        // },
 
-        onRoster: function (origin, server, channel) {
-            terminal.emit('request', {
-                route: 'chat/roster',
-                json: {
-                    origin: origin,
-                    server: server,
-                    target: channel                    
-                }
-            });
-        },
+        // onRoster: function (origin, server, channel) {
+        //     terminal.emit('request', {
+        //         route: 'chat/roster',
+        //         json: {
+        //             origin: origin,
+        //             server: server,
+        //             target: channel                    
+        //         }
+        //     });
+        // },
 
         onHistory: function () {
             var end = new Date(),
@@ -147,50 +147,32 @@ define(function(require, exports, module) {
                 console.log('error', event.meta);
                 break;
 
-            case 'listen':
-                ChannelActions.listen(event.meta.origin, event.meta.server, event.meta.channels);
-                break;
-            case 'leave':
-                ChannelActions.leave(event.meta.origin, event.meta.server, event.meta.channels);
-                break;
+            // case 'listen':
+            //     ChannelActions.listen(event.meta.origin, event.meta.server, event.meta.channels);
+            //     break;
+            // case 'leave':
+            //     ChannelActions.leave(event.meta.origin, event.meta.server, event.meta.channels);
+            //     break;
 
-            case 'info':
-                ChannelActions.info(event.meta.origin, event.meta.server, event.meta.channels);
-                break;
+            // case 'info':
+            //     ChannelActions.info(event.meta.origin, event.meta.server, event.meta.channels);
+            //     break;
 
-            case 'rosters':
-                ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channels);
-                break;
-
-            case 'state':
-                // console.log('state', event.meta);
-                // chatState (origin, server, _channel, user, state, [info]) - user left / join / kicked etc..
-                // switch (event.meta.state) {
-                //     case 'join':
-                //         ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channel,
-                //             [ event.meta.user ]);
-                //         break;
-                //     case 'part':
-                //         ChannelActions.usersLeave(event.meta.origin, event.meta.server, event.meta.channel,
-                //             [ event.meta.user ]);
-                //         break;
-                //     case 'name':
-                //         ChannelActions.userName(event.meta.origin, event.meta.server, event.meta.channel,
-                //             event.meta.user, event.meta.info);
-                //         break;
-                // }
-                break;
+            // case 'rosters':
+            //     ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channels);
+            //     break;
 
             case 'message':
-                MessageActions.message({
-                    id: event.id,
-                    when: event.when,
-                    origin: event.meta.origin,
-                    server: event.meta.server,
-                    channel: event.meta.channel,
-                    user: event.meta.user,
-                    text: event.meta.text
-                });
+                console.log('message', event);
+                // MessageActions.message({
+                //     id: event.id,
+                //     when: event.when,
+                //     origin: event.meta.origin,
+                //     server: event.meta.server,
+                //     channel: event.meta.channel,
+                //     user: event.meta.user,
+                //     text: event.meta.text
+                // });
                 break;
         }
     }

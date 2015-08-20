@@ -9,38 +9,8 @@ var server = toolkit.createServer('pass-chat');
 // create channel
 var channel = server.createChannel('chat');
 
-// chat spec
-
-// chatError (origin, server, text)
-// chatMessage (origin, server, _channel, user, text)
-// chatInfo (origin, server, _channels) - key => info - extra meta data about a channel
-// chatState (origin, server, _channels) - key => [user, state, [info]] - user left / join / kicked etc..
-// chatRosters (origin, server, _channels) - which users are in these channels
-// chatListen (origin, server, _channels) - which channels are you in
-// chatLeave (origin, server, _channels) - you have left these channels
-
-// history (startDate, endDate)
-// wake ()
-// roster (server, _channel)
-// say (server, _channel, text)
-// info (server, _channel)
-
-// generic chat api 
-
+// globals
 var gapis = [ ];
-
-channel.message('wake', function (message, finish) {
-    // discovery
-    if (!message) {
-        return finish({});
-    }
-
-    // signal that a ui client has connected
-    gapis.forEach(function (api) {
-        server.request({ route: api + '/wake', json: { }});
-    });
-    return finish();
-});
 
 channel.message('history', function (message, finish) {
     // discovery
@@ -77,18 +47,19 @@ function genRoute (origin, type) {
     return (origin || 'invalid') + '/' + type;
 }
 
-channel.message('roster', function (message, finish) {
+channel.message('info', function (message, finish) {
     // discovery
     if (!message) {
         return finish({
             origin: 'which api',
             server: 'which server',
-            channel: 'channel to get roster of'
+            rooms: 'list of which rooms (optional)',
+            users: 'list of which users (optional)'
         });
     }
 
     server.request({
-        route: genRoute(message.origin, 'roster'),
+        route: genRoute(message.origin, 'info'),
         json: message
     }, finish, function (response) {
         console.log(response);
@@ -102,32 +73,13 @@ channel.message('say', function (message, finish) {
         return finish({
             origin: 'which api',
             server: 'which server',
-            channel: 'channel to message',
-            text: 'the message to send to the channel'
+            room: 'room to message',
+            text: 'the message to send to the room'
         });
     }
 
     server.request({
         route: genRoute(message.origin, 'say'),
-        json: message
-    }, finish, function (response) {
-        console.log(response);
-        finish();
-    });
-});
-
-channel.message('info', function (message, finish) {
-    // discovery
-    if (!message) {
-        return finish({
-            origin: 'which api',
-            server: 'which server',
-            channel: 'channel to get info on'
-        });
-    }
-
-    server.request({
-        route: genRoute(message.origin, 'info'),
         json: message
     }, finish, function (response) {
         console.log(response);

@@ -3,48 +3,61 @@
 
 var ltx = require('ltx'),
     Client = require('node-xmpp-client'),
-    toolkit = require('./toolkit/lib');
+    spec = require('./spec-chat');
 
-// create server 
-var server = toolkit.createServer('api-xmpp'),
-    gusers = {},
-    gnames = {},
-    gclients = {},
-    gconnect = {},
-    glisten = [ ],
-    glistenTimer;
+// user tracking class
+function Users (self, coms) {
+    this.self = self;
+    this.coms = coms;
+    this.names = { };
+    this.resources = { };
+}
 
-// create channel
-var channel = server.createChannel('xmpp');
+Users.prototype = {
+    constructor: Users,
 
-// helper functions for xmpp clients
-function gjid (full) {
+    user: function (id) {
+        return {
+            name: this.names[id] || '',
+            resource: this.resources[id] || ''
+        };
+    },
+
+    name: function (id, name) {
+        this.names[id] = name;
+    },
+
+    resource: function (id, resource) {
+        function pick (str) {
+            return str.indexOf('/Messaging') !== -1 || str.indexOf('/messaging') !== -1;
+        }
+        var old = this.resources[id] || '',
+            oldvalid = pick(old),
+            newvalid = pick(resource);
+
+        // ignore if existing is valid, and new is not
+        if (oldvalid && !newvalid) {
+            return;
+        }
+
+        this.resources[id] = resource;
+    }
+};
+
+// create server
+var chat = spec.createServer('xmpp');
+
+// globals
+var gclients = { },
+    gconnect = { };
+
+// xmpp helpers
+function gclientid (full) {
     return full.split('/')[0];
 }
 
-function gclient (host) {
-    return gclients[host];
-}
-
-function gclientEach (fn) {
-    Object.keys(gclients).forEach(function (host) {
-        fn(host, gclients[host]);
-    });
-}
-
-function gclientclose (host) {
-    if (!gclients[host]) return;
-
-    gclients[host].end();
-    channel.emit('disconnect', {
-        client: host
-    });
-
-    delete gclients[host];
-}
-
 function gclientroster (host) {
-    var client = gclient(host);
+    var client = gclients[host];
     if (!client) return;
 
     // request roster
@@ -65,271 +78,138 @@ function gclientroster (host) {
         }).c('query', 'jabber:iq:roster').up();
 
     }
-    client.send(roster);
+
+    client.coms.send(roster);
+}
+
+function gclientclose (host) {
+    if (!gclients[host]) return;
+
+    gclients[host].coms.end();
+    delete gclients[host];        
 }
 
 function gclientopen (options) {
-    var host = options.host,
-        nick = options.jid;
+    options = JSON.parse(JSON.stringify(options));
+    if (gclients[options.host]) return;
 
-    // close existing client
-    gclientclose(host);
+    // proper gtalk support
+    options.credentials = true;
+    console.log('gclientopen', options);
 
-    // setup options
-    var _options = JSON.parse(JSON.stringify(options));
-    _options.credentials = true;
+    var client = new Users(gclientid(options.jid), new Client(options));
+    gclients[options.host] = client;
 
-    // create client
-    var client = new Client(_options);
+    // EVENTS
 
-    // track from nick
-    client.nick = gjid(nick);
-
-    // track it
-    gclients[host] = client;
-    gnames[host] = { };
-    gusers[host] = { };
-
-    // chatError (origin, server, text)
-    client.on('error', function(e) {
-        console.log('error', e);
-        channel.emit('error', {
-            server: host,
-            text: JSON.stringify(e)
-        });
+    client.coms.on('online', function () {
+        // signal ready
+        client.coms.send(new ltx.Element('presence'));
+        // ask for roster
+        gclientroster(options.host);
+        // keep alive
+        client.coms.connection.socket.setTimeout(0);
+        client.coms.connection.socket.setKeepAlive(true, 10000);
     });
-    
-    client.on('stanza', function(stanza) {
-        var _channels;
 
+    client.coms.on('error', function(e) {
+        chat.error(options.host, JSON.stringify(e));
+    });
+
+    client.coms.on('stanza', function(stanza) {
         if (stanza.is('message')) {
-            // chatMessage (origin, server, _channel, user, text)
             if (stanza.getChildText('body')) {
-                var user = gjid(stanza.attrs.from);
-                channel.emit('message', {
-                    server: host,
-                    channel: user,
-                    user: gnames[host][user] ? gnames[host][user] : user,
-                    text: stanza.getChildText('body')
-                });
+                var user = gclientid(stanza.attrs.from);
+                chat.message(options.host, user, user, stanza.getChildText('body'));
             }
 
         } else if (stanza.is('presence')) {
-            // console.log(stanza.toString());
-            var user = gjid(stanza.attrs.from);
-            if (!gusers[host][user]) gusers[host][user] = { };
-            gusers[host][user][stanza.attrs.from] = true;
-            if (stanza.getChildText('show')) {
-                switch (stanza.attrs.type) {
-                    default:
-                        glisten.push({ user: user, listen: true });
-                        break;
-                    case 'unavailable':
-                        glisten.push({ user: user, leave: true });
-                        break;
-                }
-
-                clearTimeout(glistenTimer);
-                glistenTimer = setTimeout(function () {
-                    var listen = [ ],
-                        leave = [ ];
-
-                    glisten.forEach(function (item) {
-                        if (item.listen) listen.push(item.user);
-                        if (item.leave) leave.push(item.user);                        
-                    });
-                    glisten = [ ];
-
-                    // chatListen (origin, server, _channels)
-                    channel.emit('listen', {
-                        server: host,
-                        channels: listen
-                    });
-                    // chatLeave (origin, server, _channels)                
-                    channel.emit('leave', {
-                        server: host,
-                        channels: leave
-                    });
-
-                }, 1000);
-            }
-            if (stanza.getChildText('status')) {
-                _channels = { };
-                _channels[user] = {
-                    status: stanza.getChildText('status')
-                };
-                channel.emit('info', {
-                    server: host,
-                    channels: _channels
-                });
-            }
+            var user = gclientid(stanza.attrs.from);
+            client.resource(user, stanza.attrs.from);
 
         } else if (stanza.is('iq')) {
-            // create lookup table for jid -> nice name
-            var _names = { };
             stanza.getChild('query').getChildren('item').forEach(function (user) {
-                _names[user.attrs.jid] = user.attrs.name || user.attrs.jid;
+                client.name(user.attrs.jid, user.attrs.name || user.attrs.jid);
             });
-            _channels = Object.keys(_names);
-
-            var _infos = { },
-                _rosters = { };
-            _channels.forEach(function (user) {
-                gnames[host][user] = _names[user];
-                _infos[user] = { name: _names[user] };
-                _rosters[user] = [ _names[user], nick ];
-            });
-
-            channel.emit('info', {
-                server: host,
-                channels: _infos
-            });
-            channel.emit('rosters', {
-                server: host,
-                channels: _rosters
-            });
-
         }
-    });
-
-    client.on('online', function() {
-        // signal ready
-        client.send(new ltx.Element('presence'));
-        // ask for roster
-        gclientroster(host);
-        // keep alive
-        client.connection.socket.setTimeout(0);
-        client.connection.socket.setKeepAlive(true, 10000);
     });
 }
 
-channel.message('wake', function (message, finish) {
+// MESSAGES
+
+chat.info(function (message, finish) {
     // discovery
     if (!message) {
-        return finish({});
+        return finish({
+            server: 'which server',
+            rooms: 'list of which rooms (optional)',
+            users: 'list of which users (optional)'
+        });
     }
 
-    // chatListen (origin, server, _channels)
-    gclientEach(function (host, client) {
-        channel.emit('listen', {
-            nolog: true,
-            server: host,
-            channels: Object.keys(gusers[host])
-        });
-    });
+    // get client
+    var client = gclients[message.server];
+    if (!client) return finish();
 
+    if (message.users !== undefined && message.users.forEach) {
+        message.users.forEach(function (user) {
+            var info = client.user(user);
+            chat.user(message.server, user, {
+                name: info.name
+            });
+        });
+    }
+
+    if (message.rooms !== undefined && message.rooms.forEach) {
+        message.rooms.forEach(function (room) {
+            var info = client.user(room);
+            chat.room(message.server, room, {
+                name: info.name
+            });
+        });
+    }
     return finish();
 });
 
-channel.message('roster', function (message, finish) {
+chat.say(function (message, finish) {
     // discovery
     if (!message) {
         return finish({
             server: 'which server',
-            channel: 'channel to get roster of'
+            room: 'room to message',
+            text: 'the message to send to the room'
         });
     }
 
     // get client
-    var client = gclient(message.server);
+    var client = gclients[message.server];
     if (!client) return finish();
 
-    // emit roster info
-    var _channels = { };
-    _channels[message.channel] = [ gnames[message.channel], client.nick ];
-    channel.emit('rosters', {
-        nolog: true,
-        server: host,
-        channels: _channels
-    });
-
-    return finish();  
-});
-
-channel.message('say', function (message, finish) {
-    // discovery
-    if (!message) {
-        return finish({
-            server: 'which server',
-            channel: 'channel to message',
-            text: 'the message to send to the channel'
+    // send reply
+    var info = client.user(message.room);
+    if (info) {
+        var reply = new ltx.Element('message', {
+            to: info.resource,
+            type: 'chat'
         });
+        reply.c('body').t(message.text);
+        client.coms.send(reply);
+
+        // self message
+        chat.message(message.server, message.room, client.self, message.text);
     }
-
-    // get client
-    var client = gclient(message.server);
-    if (!client) return finish();
-
-    // get user collection for server
-    var users = gusers[message.server];
-    if (!users) return finish();
-
-    // get potential resources
-    users = users[message.channel];
-    if (!users) return finish();
-    users = Object.keys(users);
-
-    // pick resource
-    var user = users.filter(function (_user) {
-        return _user.indexOf('/Messaging') === -1 && _user.indexOf('/messaging') === -1;
-    });
-
-    if (user.length) {
-        user = user[0];
-    } else {
-        user = users.pop();
-    }
-
-    var reply = new ltx.Element('message', {
-        to: user,
-        type: 'chat'
-    });
-    reply.c('body').t(message.text);
-    client.send(reply);
-
-    channel.emit('message', {
-        server: message.server,
-        channel: message.channel,
-        user: client.nick,
-        text: message.text
-    });
-
-    finish();
-});
-
-channel.message('info', function (message, finish) {
-    // discovery
-    if (!message) {
-        return finish({
-            server: 'which server',
-            channel: 'channel to get info on'
-        });
-    }
-
-    // get client
-    var client = gclient(message.server);
-    if (!client) return finish();
-
-    // emit roster info
-    var _channels = { };
-    _channels[message.channel] = { name: gnames[message.channel] };
-    channel.emit('info', {
-        nolog: true,
-        server: host,
-        channels: _channels
-    });
-
     return finish();
 });
 
-// write configuration validators
-server.config('', function (type, value) {
+// CONFIG
+
+chat.server.config('', function (type, value) {
     if (value.accounts === undefined) {
         value.accounts = [ ];
     }
 });
 
-server.config('/accounts', function (type, value) {
+chat.server.config('/accounts', function (type, value) {
     // no-op    
 }, function (value) {
     if (!value || !value.length) return;
@@ -341,14 +221,14 @@ server.config('/accounts', function (type, value) {
     var cclients = Object.keys(gclients);
 
     // disconnect clients we no longer care about
-    cclients.forEach(function (key) {
-        if (clients.indexOf(key) == -1) {
-            gclientclose(key);
+    cclients.forEach(function (host) {
+        if (clients.indexOf(host) == -1) {
+            gclientclose(host);
         }
     });
 });
 
-server.config('/accounts/[0-9]+', function (type, value) {
+chat.server.config('/accounts/[0-9]+', function (type, value) {
     if (type !== 'object') {
         return {
             host: '',
@@ -368,16 +248,22 @@ server.config('/accounts/[0-9]+', function (type, value) {
     }, 1000);
 });
 
-// server.config('/accounts/[0-9]+/jid', function (type, value) {
-//     if (type === 'value') return [
-//         value.split('/')[0], 'exo'
-//     ].join('/');
-// });
+chat.server.config('/accounts/[0-9]+/jid', function (type, value) {
+    // return 'whitlark@gmail.com/exo';
+    if (type === 'value') {
+        var parts = value.split('/');
+        if (parts[1] !== 'exo') {
+            return parts[0] + '/exo';
+        }
+    } else {
+        return 'username@domain.com/exo';
+    }
+});
 
-// handle server start
-server.created(function (http, port) {
+// START
+
+chat.server.created(function (http, port) {
     console.log('server started on', port);
 });
 
-// start server
-server.start();
+chat.server.start();

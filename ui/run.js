@@ -25,7 +25,7 @@ function exec (cwd) {
 var ui = [
     '/config',
     '/chat',
-    '/uplink'
+    '/paracord'
 ];
 
 function next() {

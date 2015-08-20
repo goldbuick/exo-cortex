@@ -37,20 +37,11 @@ exports.config = {
           "dist/css/materialize.css",
           "dist/js/materialize.js",
           { "dist/font": "./font" }
+        ],
+        "crossfilter": [
+          "crossfilter.js"
         ]
       }
     }
-  },
-  "copy": {
-    "extensions": [
-        "js",  "css",  "png",  "jpg",
-      "jpeg",  "gif", "html",  "php",
-       "eot",  "svg",  "ttf", "woff",
-       "otf", "yaml","  kml",  "ico",
-       "htc",  "htm", "json",  "txt",
-       "xml",  "xsd",  "map",   "md",
-       "mp4",  "dae"
-    ],
-    "exclude": [ ]
   }
 }

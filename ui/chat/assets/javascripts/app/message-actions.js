@@ -6,9 +6,9 @@ define(function(require, exports, module) {
     module.exports = Reflux.createActions([
         'say',
         'info',
-        'list',
-        'wake',
-        'roster',
+        // 'list',
+        // 'wake',
+        // 'roster',
         'history',
         'messages'
     ]);

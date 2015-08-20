@@ -2,287 +2,112 @@
 // IRC API
 
 var irc = require('irc'),
-    toolkit = require('./toolkit/lib');
+    spec = require('./spec-chat');
 
-// create server 
-var server = toolkit.createServer('api-irc'),
-    gnick = 'exo__',
-    gclients = {};
+// create server
+var chat = spec.createServer('irc');
 
-// create channel
-var channel = server.createChannel('irc');
+// globals
+var gclients = { };
 
-// irc client helpers functions
-function gclient (host) {
-    return gclients[host];
-}
-
-function gclientEach (fn) {
-    Object.keys(gclients).forEach(function (host) {
-        fn(host, gclients[host]);
-    });
-}
-
+// irc helpers
 function gclientclose (host) {
     if (!gclients[host]) return;
 
-    gclients[host].disconnect('leaving', function() {
-        // channel.emit('disconnect', {
-        //     server: host
-        // });        
+    gclients[host].disconnect('exo-cortex recycle', function() {
+        delete gclients[host];        
     });
-    
-    delete gclients[host];
 }
 
-function makeChannels (_channel, data) {
-    var _channels = { };
-    _channels[_channel] = data;
-    return _channels;
-}
+function gclientopen (host, port, nick, channels) {
+    if (gclients[host]) return;
 
-function makeClient (host, nick, options) {
-    var client = new irc.Client(host, nick, options);
+    var client = new irc.Client(host, nick, {
+        port: port,
+        userName: nick,
+        realName: nick,
+        encoding: 'UTF-8',
+        channels: channels
+    });
+    gclients[host] = client;
 
-    // chatError (origin, server, text)
+    // EVENTS
+
     client.addListener('error', function (text) {
-        channel.emit('error', {
-            server: host,
-            text: text
-        });
+        chat.error(host, text);
     });
 
-    // chatMessage (origin, server, _channel, user, text)
     function handleMessage (nick, _channel, text) {
-        channel.emit('message', {
-            server: host,
-            channel: _channel,
-            user: nick,
-            text: text
-        });
+        chat.message(host, _channel, nick, text);
     }    
 
     client.addListener('selfMessage', function (to, text) {
         if (to[0] === '#') handleMessage(gnick, to, text);
     });
 
-    client.addListener('message', handleMessage);
-
-    // chatInfo (origin, server, _channels)
-    client.addListener('topic', function (_channel, topic, nick) {
-        channel.emit('info', {
-            nolog: true,
-            server: host,
-            channels: makeChannels(_channel, {
-                topic: topic,
-                topicBy: nick
-            })
-        });
-    });
-
-    // chatState (origin, server, _channel, user, state)
-    client.addListener('join', function (_channel, nick) {
-        channel.emit('state', {
-            nolog: true,
-            server: host,
-            channels: makeChannels(_channel, [{
-                user: nick,
-                state: 'join'
-            }])
-        });
-    });
-    client.addListener('part', function (_channel, nick, reason) {
-        channel.emit('state', {
-            nolog: true,
-            server: host,
-            channels: makeChannels(_channel, [{
-                user: nick,
-                state: 'part',
-                info: reason
-            }])
-        });
-    });
-    client.addListener('kick', function (_channel, nick, by, reason) {
-        channel.emit('state', {
-            nolog: true,
-            server: host,
-            channels: makeChannels(_channel, [{
-                user: nick,
-                state: 'part',
-                info: by + ' - ' + reason
-            }])
-        });
-    });
-    client.addListener('quit', function (nick, reason, channels) {
-        var _channels = { };
-        channels.forEach(function (_channel) {
-            _channels[_channel] = [{
-                user: nick,
-                state: 'part',
-                info: reason
-            }];
-        });
-        channel.emit('state', {
-            nolog: true,
-            server: host,
-            channels: _channels
-        });
-    });
-    client.addListener('kill', function (nick, reason, channels) {
-        var _channels = { };
-        channels.forEach(function (_channel) {
-            _channels[_channel] = [{
-                user: nick,
-                state: 'part',
-                info: reason
-            }];
-        });
-        channel.emit('state', {
-            nolog: true,
-            server: host,
-            channels: _channels
-        });
-    });
-    client.addListener('nick', function (oldnick, newnick, channels) {
-        var _channels = { };
-        channels.forEach(function (_channel) {
-            _channels[_channel] = [{
-                user: oldnick,
-                state: 'name',
-                info: newnick
-            }];
-        });
-        channel.emit('state', {
-            nolog: true,
-            server: host,
-            channels: _channels
-        });
-    });
-
-    // chatRosters (origin, server, _channels)
-    client.addListener('names', function (_channel, nicks) {
-        channel.emit('rosters', {
-            server: host,
-            channels: makeChannels(_channel, Object.keys(nicks))
-        });
-    });
-
-    return client;
+    client.addListener('message', handleMessage);    
 }
 
-channel.message('wake', function (message, finish) {
+// MESSAGES
+
+chat.info(function (message, finish) {
     // discovery
     if (!message) {
-        return finish({});
+        return finish({
+            server: 'which server',
+            rooms: 'list of which rooms (optional)',
+            users: 'list of which users (optional)'
+        });
     }
 
-    // chatListen (origin, server, _channels)
-    gclientEach(function (host, client) {
-        channel.emit('listen', {
-            nolog: true,
-            server: host,
-            channels: Object.keys(client.chans)
+    // get client
+    var client = gclients[message.server];
+    if (!client) return finish();
+
+    if (message.users !== undefined && message.users.forEach) {
+        message.users.forEach(function (user) {
+            chat.user(message.server, user, {
+                name: user
+            });
         });
-    });
+    }
+
+    if (message.rooms !== undefined && message.rooms.forEach) {
+        message.rooms.forEach(function (room) {
+            chat.user(message.server, room, {
+                name: room
+            });
+        });
+    }
 
     return finish();
 });
 
-channel.message('roster', function (message, finish) {
+chat.say(function (message, finish) {
     // discovery
     if (!message) {
         return finish({
             server: 'which server',
-            channel: 'channel to get roster of'
+            room: 'room to message',
+            text: 'the message to send to the room'
         });
     }
 
     // get client
-    var client = gclient(message.server);
+    var client = gclients[message.server];
     if (!client) return finish();
 
-    // get channel
-    var _channel = client.chans[message.channel];
-    if (!_channel) return finish();
-
-    channel.emit('rosters', {
-        nolog: true,
-        server: host,
-        channels: makeChannels(message.channel, Object.keys(_channel.users))
-    });
-
-    return finish();  
-});
-
-channel.message('say', function (message, finish) {
-    // discovery
-    if (!message) {
-        return finish({
-            server: 'which server',
-            channel: 'channel to message',
-            text: 'the message to send to the channel'
-        });
-    }
-
-    // get client
-    var client = gclient(message.server);
-    if (!client) return finish();
-
-    client.say(message.channel, message.text);
-    finish();
-});
-
-channel.message('info', function (message, finish) {
-    // discovery
-    if (!message) {
-        return finish({
-            server: 'which server',
-            channel: 'channel to get info on'
-        });
-    }
-
-    // get client
-    var client = gclient(message.server);
-    if (!client) return finish();
-
-    // get channel
-    var _channel = client.chans[message.channel];
-    if (!_channel) return finish();
-
-    channel.emit('info', {
-        nolog: true,
-        server: message.server,
-        channels: makeChannels(message.channel, {
-            topic: _channel.topic,
-            topicBy: _channel.topicBy
-        })
-    });
-
+    client.say(message.room, message.text);
     return finish();
 });
 
-// write configuration validators
-server.config('', function (type, value) {
-    if (value.nick === undefined) {
-        value.nick = gnick;
-    } else {
-        gnick = value.nick;
-    }
+// CONFIG
+
+chat.server.config('', function (type, value) {
     if (value.servers === undefined) value.servers = [ ];
 });
 
-server.config('/nick', function (type, value) {
-    if (type !== 'value' || value.length === 0)
-        return gnick;
-
-}, function (value) {
-    gnick = value;
-    gclientEach(function (host, client) {
-        client.send('NICK', nick);
-    });
-});
-
-server.config('/servers', function (type, value) {
+chat.server.config('/servers', function (type, value) {
     // no-op    
 }, function (value) {
     if (!value || !value.length) return;
@@ -301,9 +126,10 @@ server.config('/servers', function (type, value) {
     });
 });
 
-server.config('/servers/[0-9]+', function (type, value) {
+chat.server.config('/servers/[0-9]+', function (type, value) {
     if (type !== 'object') {
         return {
+            nick: '',
             host: '',
             port: '',
             channels: ''
@@ -311,107 +137,90 @@ server.config('/servers/[0-9]+', function (type, value) {
     }
 
 }, function (value, before) {
-    if (!value.host) return;
+    if (!value || !value.host) return;
 
     // get client
-    var client = gclient(value.host);
+    var client = gclients[value.host];
 
     if (client === undefined) {
-        console.log('starting ', value.host, value.port);
+        console.log('starting', value.nick, value.host, value.port);
 
         if (value.channels.length) {
-            gclients[value.host] = makeClient(value.host, gnick, {
-                realName: gnick,
-                port: value.port,
-                encoding: 'UTF-8',
-                channels: value.channels
-            });
+            gclientopen(value.host, value.port, value.nick, value.channels);
         }
 
     } else if (value.port !== before.port) {
-        console.log('changing port ', value.host, value.port);
+        console.log('changing port', value.host, value.port);
         
         gclientclose(value.host);
         if (value.channels.length) {
-            gclients[value.host] = makeClient(value.host, gnick, {
-                port: value.port,
-                channels: value.channels
-            });
+            gclientopen(value.host, value.port, value.nick, value.channels);
         }
 
-    } else if (value.channels && value.channels.length) {
-        console.log('updating channels ', value.channels, before.channels);
+    } else {
+        if (value.nick !== before.nick) {
+            console.log('changing nick', value.host, value.port);            
+            client.send('NICK', value.nick);
+        }
 
-        // process leaving channels
-        var leaving = [ ];
-        if (before && before.channels && before.channels.length) {
-            before.channels.forEach(function (chan) {
-                if (value.channels.indexOf(chan) === -1) {
-                    client.part(chan);
-                    leaving.push(chan);
+        if (value.channels && value.channels.length) {
+            console.log('updating channels', value.channels, before.channels);
+
+            // process leaving channels
+            if (before && before.channels && before.channels.length) {
+                before.channels.forEach(function (chan) {
+                    if (value.channels.indexOf(chan) === -1) {
+                        client.part(chan);
+                    }
+                });
+            }
+
+            // process joining channels
+            value.channels.forEach(function (chan) {
+                if (!before || !before.channels || before.channels.indexOf(chan) === -1) {
+                    client.join(chan);
                 }
             });
         }
-        if (leaving.length) {
-            // chatLeave (origin, server, _channels)
-            channel.emit('leave', {
-                nolog: true,
-                server: value.host,
-                channels: leaving
-            });
-        }
-
-        // process joining channels
-        var joining = [ ];
-        value.channels.forEach(function (chan) {
-            if (!before || !before.channels || before.channels.indexOf(chan) === -1) {
-                client.join(chan);
-                joining.push(chan);
-            }
-        });
-        if (joining.length) {
-            // chatListen (origin, server, _channels)
-            channel.emit('listen', {
-                nolog: true,
-                server: value.host,
-                channels: joining
-            });
-        }
-
     }
 });
 
-server.config('/servers/[0-9]+/host', function (type, value) {
+chat.server.config('/servers/[0-9]+/nick', function (type, value) {
+    if (type !== 'value' || value.length === 0)
+        return 'exo__';
+});
+
+chat.server.config('/servers/[0-9]+/host', function (type, value) {
     if (type !== 'value')
         return '';
 
     // get client
     var name = 'irc.freenode.net',
-        client = gclient(name);
+        client = gclients[name];
 
     if (!client && value.length === 0)
         return 'irc.freenode.net';
 });
 
-server.config('/servers/[0-9]+/port', function (type, value) {
+chat.server.config('/servers/[0-9]+/port', function (type, value) {
     if (type !== 'value' || value.length === 0)
         return 6667;
 });
 
-server.config('/servers/[0-9]+/channels', function (type, value) {
+chat.server.config('/servers/[0-9]+/channels', function (type, value) {
     if (type !== 'array') return [ ];
 });
 
-server.config('/servers/[0-9]+/channels/[0-9]+', function (type, value) {
+chat.server.config('/servers/[0-9]+/channels/[0-9]+', function (type, value) {
     console.log('validate channel name', type, value);
     if (type === 'value' && value[0] !== '#')
         return '#' + value;
 });
 
-// handle server start
-server.created(function (http, port) {
+// START
+
+chat.server.created(function (http, port) {
     console.log('server started on', port);
 });
 
-// start server
-server.start();
+chat.server.start();

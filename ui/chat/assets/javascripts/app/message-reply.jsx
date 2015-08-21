@@ -1,12 +1,12 @@
 define(function (require, exports, module) {
     'use strict';
 
-    var ChannelStore = require('app/channel-store'),
+    var RoomStore = require('app/room-store'),
         MessageActions = require('app/message-actions');
         
     var MessageReply = React.createClass({
         mixins: [
-            Reflux.connect(ChannelStore, 'channels')
+            Reflux.connect(RoomStore, 'rooms')
         ],
 
         currentChannel: function () {

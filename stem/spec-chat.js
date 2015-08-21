@@ -67,7 +67,7 @@ ChatSpec.prototype = {
     },
 
     room: function (server, room, info) {
-        this.dataInfo.push(server, room, {
+        this.dataInfo.push(server, {
             room: room,
             info: info
         });

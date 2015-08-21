@@ -3,9 +3,9 @@ define(function (require, exports, module) {
 
     var UIStore = require('app/ui-store'),
         UIActions = require('app/ui-actions'),
-        ChannelStore = require('app/channel-store'),
-        ChannelList = require('app/channel-list'),
-        ChannelInfo = require('app/channel-info'),
+        RoomStore = require('app/room-store'),
+        RoomList = require('app/room-list'),
+        RoomInfo = require('app/room-info'),
         MessageList = require('app/message-list'),
         MessageReply = require('app/message-reply'),
         MessageSparkline = require('app/message-sparkline');
@@ -13,13 +13,13 @@ define(function (require, exports, module) {
     var Page = React.createClass({
         mixins: [
             Reflux.connect(UIStore, 'ui'),
-            Reflux.connect(ChannelStore, 'channels')
+            Reflux.connect(RoomStore, 'rooms')
         ],
 
         updateBkg: function () {
             clearTimeout(this.bkgTimer);
             this.bkgTimer = setTimeout(function () {
-                var list = $(this.getDOMNode()).find('.channel-nav'),
+                var list = $(this.getDOMNode()).find('.room-nav'),
                     listHeight = list.height() + 'px',
                     listWidth = '310px';
 
@@ -61,29 +61,29 @@ define(function (require, exports, module) {
 
         onShowInfo: function (e) {
             e.preventDefault();
-            UIActions.showChannelInfo();
+            UIActions.showRoomInfo();
         },
 
-        currentChannel: function () {
-            if (!this.state.channels ||
-                !this.state.channels.all().length) return {
+        currentRoom: function () {
+            if (!this.state.rooms ||
+                !this.state.rooms.all().length) return {
                 origin: '',
                 server: '',
                 name: '',
                 info: { }
             };
 
-            var _channel = this.state.channels.find(
-                this.state.ui.origin, this.state.ui.server, this.state.ui.channel);
-            if (_channel) return _channel;
+            var _room = this.state.rooms.find(
+                this.state.ui.origin, this.state.ui.server, this.state.ui.room);
+            if (_room) return _room;
 
-            return this.state.channels.all()[0];
+            return this.state.rooms.all()[0];
         },
 
         render: function () {
             var currentName = '',
                 currentInfo = '',
-                current = this.currentChannel();
+                current = this.currentRoom();
 
             if (current) {
                 currentName = current.info.name ? current.info.name : current.name;
@@ -110,27 +110,27 @@ define(function (require, exports, module) {
                             <div className="bkg"></div>
                             <div className="overview">
                                 <MessageSparkline width="280" height="16" /></div>
-                            <ChannelList channel={current.name} />
+                            <RoomList room={current.name} />
                         </div>
                     </header>
                     <main>
                         <MessageList
                             origin={current.origin}
                             server={current.server}
-                            channel={current.name} />
+                            room={current.name} />
                         <MessageReply
                             origin={current.origin}
                             server={current.server}
-                            channel={current.name} />
+                            room={current.name} />
                     </main>
                 </div>
             );
         }
     });
-                        // <ChannelInfo
+                        // <RoomInfo
                         //     origin={current.origin}
                         //     server={current.server}
-                        //     channel={current.name} />
+                        //     room={current.name} />
 
     return Page;
 });

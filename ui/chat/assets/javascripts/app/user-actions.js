@@ -4,13 +4,11 @@ define(function(require, exports, module) {
     var collect = require('app/lib/collected-actions');
 
     module.exports = Reflux.createActions([
-        'say',
-        'lookups',
-        'history',
-        'messages'
+        'infos',
+        'lookups'
     ]);
 
+    collect(module.exports, 'info', 'infos', 100);
     collect(module.exports, 'lookup', 'lookups', 100);
-    collect(module.exports, 'message', 'messages', 100);
 
 });

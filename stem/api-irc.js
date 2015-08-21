@@ -64,18 +64,18 @@ chat.info(function (message, finish) {
     var client = gclients[message.server];
     if (!client) return finish();
 
-    if (message.users !== undefined && message.users.forEach) {
-        message.users.forEach(function (user) {
-            chat.user(message.server, user, {
-                name: user
+    if (message.rooms !== undefined && message.rooms.forEach) {
+        message.rooms.forEach(function (room) {
+            chat.room(message.server, room, {
+                name: room
             });
         });
     }
 
-    if (message.rooms !== undefined && message.rooms.forEach) {
-        message.rooms.forEach(function (room) {
-            chat.user(message.server, room, {
-                name: room
+    if (message.users !== undefined && message.users.forEach) {
+        message.users.forEach(function (user) {
+            chat.user(message.server, user, {
+                name: user
             });
         });
     }

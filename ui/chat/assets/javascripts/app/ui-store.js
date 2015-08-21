@@ -12,19 +12,19 @@ define(function(require, exports, module) {
                 this.ui = {
                     origin: '',
                     server: '',
-                    channel: ''
+                    room: ''
                 };
             }
             return this.ui;
         },
 
-        onActiveChannel: function (origin, server, channel) {
+        onActiveRoom: function (origin, server, room) {
             if (this.ui.origin === origin &&
                 this.ui.server === server &&
-                this.ui.channel === channel) return;
+                this.ui.room === room) return;
             this.ui.origin = origin;
             this.ui.server = server;
-            this.ui.channel = channel;
+            this.ui.room = room;
             this.trigger(this.ui);
         }
     });

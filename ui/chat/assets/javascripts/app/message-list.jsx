@@ -5,13 +5,15 @@ define(function (require, exports, module) {
         IdentStore = require('app/lib/ident-store'),
         IdentActions = require('app/lib/ident-actions'),
         MessageStore = require('app/message-store'),
-        ChannelActions = require('app/channel-actions'),
-        ChannelStore = require('app/channel-store');
+        RoomActions = require('app/room-actions'),
+        RoomStore = require('app/room-store'),
+        UserStore = require('app/user-store');
 
     var MessageList = React.createClass({
         mixins: [
+            Reflux.connect(UserStore, 'users'),
+            Reflux.connect(RoomStore, 'rooms'),
             Reflux.connect(IdentStore, 'ident'),
-            Reflux.connect(ChannelStore, 'channels'),
             Reflux.connect(MessageStore, 'messages')
         ],
 
@@ -26,9 +28,9 @@ define(function (require, exports, module) {
             var node = document.body;
             if (this.shouldScrollBottom ||
                 this.lastServer !== this.props.server ||
-                this.lastChannel !== this.props.channel) {
+                this.lastRoom !== this.props.room) {
                 this.lastServer = this.props.server;
-                this.lastChannel = this.props.channel;
+                this.lastRoom = this.props.room;
                 node.scrollTop = node.scrollHeight;
             }
         },
@@ -39,7 +41,7 @@ define(function (require, exports, module) {
 
             list.reset();
             list.server.filterExact(this.props.server);
-            list.channel.filterExact(this.props.channel);
+            list.room.filterExact(this.props.room);
             return list.minutes.top(256).sort(function (a, b) {
                 return a.minutes - b.minutes;
 
@@ -58,10 +60,11 @@ define(function (require, exports, module) {
             }.bind(this));
         },
 
-        onUserDM: function (user, e) {
+        onUserDM: function (message, e) {
             e.preventDefault();
-            ChannelActions.joinChannel(this.props.server, user);
-            UIActions.activeChannel(user);
+            console.log(message);
+            // RoomActions.joinChannel(this.props.server, user);
+            // UIActions.activeRoom(user);
         },
 
         render: function () {
@@ -83,7 +86,7 @@ define(function (require, exports, module) {
                         lastGap = message.gap;
                     }
 
-                    IdentActions.request(message.user);
+                    IdentActions.request(message.user, message.user);
 
                     if (first) {
                         return <tr key={message.id}>
@@ -92,7 +95,7 @@ define(function (require, exports, module) {
                             <td className="content first">
                                 <div className="details">
                                     <a className="name" href="#!"
-                                        onClick={this.onUserDM.bind(this, message.user)}>{message.user}</a>
+                                        onClick={this.onUserDM.bind(this, message)}>{message.user}</a>
                                     <span className="when">{message.when}</span>
                                     <span className="ago">{message.ago}</span>
                                 </div>

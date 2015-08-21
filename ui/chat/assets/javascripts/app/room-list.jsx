@@ -4,23 +4,23 @@ define(function (require, exports, module) {
     var UIActions = require('app/ui-actions'),
         IdentActions = require('app/lib/ident-actions'),
         IdentStore = require('app/lib/ident-store'),
-        ChannelStore = require('app/channel-store'),
+        RoomStore = require('app/room-store'),
         MessageSparkline = require('app/message-sparkline');
 
     var ServerList = React.createClass({
         mixins: [
             Reflux.connect(IdentStore, 'ident'),
-            Reflux.connect(ChannelStore, 'channels')
+            Reflux.connect(RoomStore, 'rooms')
         ],
 
-        viewChannel: function (channel, e) {
+        viewRoom: function (room, e) {
             e.preventDefault();
-            UIActions.activeChannel(channel.origin, channel.server, channel.name);
+            UIActions.activeRoom(room.origin, room.server, room.name);
         },
 
         serverIdent: function (origin, server) {
             var name = [origin, server].join(':');
-            IdentActions.request(name);
+            IdentActions.request(name, name);
             return this.state.ident[name];
         },
 
@@ -28,44 +28,44 @@ define(function (require, exports, module) {
             var first = true,
                 lastServer = '';
 
-            return <ul className="channel-nav">
+            return <ul className="room-nav">
                 <li className="logo valign-wrapper">
                     <h5 className="valign">exo-cortex</h5>
                 </li>
-                {this.state.channels.all().map((channel) => {
+                {this.state.rooms.all().map((room) => {
                     var elements = [ ];
-                    if (channel.server !== lastServer) {
-                        lastServer = channel.server;
+                    if (room.server !== lastServer) {
+                        lastServer = room.server;
                         if (!first) {
                             elements.push(
-                                <li key={'server-gap' + channel.server} className="gap"></li>
+                                <li key={'server-gap' + room.server} className="gap"></li>
                             );
                         }
 
                         elements.push(
-                            <li key={'server-' + channel.server} className="server">
+                            <li key={'server-' + room.server} className="server">
                                 <div className="ident" dangerouslySetInnerHTML={{
-                                    __html: this.serverIdent(channel.origin, channel.server)
+                                    __html: this.serverIdent(room.origin, room.server)
                                 }}></div>
                                 <MessageSparkline width="280" height="16"
-                                    server={channel.server}/>
-                                <div className="name">{channel.server}</div>
+                                    server={room.server}/>
+                                <div className="name">{room.server}</div>
                             </li>
                         );
                         first = false;
                     }
 
-                    var name = channel.info.name ? channel.info.name : channel.name,
-                        active = (channel.name === this.props.channel),
+                    var name = room.info.name ? room.info.name : room.name,
+                        active = (room.name === this.props.room),
                         liTagClass = active ? 'active' : '';
 
                     elements.push(
-                        <li key={'channel-' + channel.name} className={liTagClass}>
+                        <li key={'room-' + room.name} className={liTagClass}>
                             <div className="selected"></div>
                             <MessageSparkline width="280" height="16"
-                                server={channel.server} channel={channel.name} />
+                                server={room.server} room={room.name} />
                             <a href="#!"
-                                onClick={this.viewChannel.bind(this, channel)}>{name}</a>
+                                onClick={this.viewRoom.bind(this, room)}>{name}</a>
                         </li>                        
                     );
 

@@ -151,6 +151,16 @@ chat.info(function (message, finish) {
     var client = gclients[message.server];
     if (!client) return finish();
 
+    if (message.rooms !== undefined && message.rooms.forEach) {
+        message.rooms.forEach(function (room) {
+            var info = client.user(room);
+            console.log('lookup', room, info);
+            chat.room(message.server, room, {
+                name: info.name
+            });
+        });
+    }
+
     if (message.users !== undefined && message.users.forEach) {
         message.users.forEach(function (user) {
             var info = client.user(user);
@@ -160,14 +170,6 @@ chat.info(function (message, finish) {
         });
     }
 
-    if (message.rooms !== undefined && message.rooms.forEach) {
-        message.rooms.forEach(function (room) {
-            var info = client.user(room);
-            chat.room(message.server, room, {
-                name: info.name
-            });
-        });
-    }
     return finish();
 });
 

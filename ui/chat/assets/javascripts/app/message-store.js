@@ -2,7 +2,8 @@ define(function(require, exports, module) {
     'use strict';
 
     var terminal = require('app/lib/terminal-server'),
-        ChannelActions = require('app/channel-actions'),
+        UserActions = require('app/user-actions'),
+        RoomActions = require('app/room-actions'),
         MessageActions = require('app/message-actions');
 
     var groupScale = 20,
@@ -19,7 +20,7 @@ define(function(require, exports, module) {
                     reset: function () {
                         this.origin.filterAll();
                         this.server.filterAll();
-                        this.channel.filterAll();
+                        this.room.filterAll();
                         this.minutes.filterAll();
                         this.user.filterAll();
                     },
@@ -29,8 +30,8 @@ define(function(require, exports, module) {
                     server: this.db.dimension(function (d) {
                         return d.server;
                     }),
-                    channel: this.db.dimension(function (d) {
-                        return d.channel;
+                    room: this.db.dimension(function (d) {
+                        return d.room;
                     }),
                     minutes: this.db.dimension(function (d) {
                         return d.minutes;
@@ -46,56 +47,50 @@ define(function(require, exports, module) {
             return this.messages;
         },
 
-        onSay: function (origin, server, channel, text) {
+        onLookups: function (lookups) {
+            var batch = { };
+            lookups.forEach(function (lookup) {
+                if (batch[lookup.origin] === undefined) {
+                    batch[lookup.origin] = { };
+                }
+                if (batch[lookup.origin][lookup.server] === undefined) {
+                    batch[lookup.origin][lookup.server] = {
+                        rooms: [ ],
+                        users: [ ]
+                    };
+                }
+                if (lookup.room) batch[lookup.origin][lookup.server].rooms.push(lookup.room);
+                if (lookup.user) batch[lookup.origin][lookup.server].users.push(lookup.user);
+            });
+
+            Object.keys(batch).forEach(function (origin) {
+                Object.keys(batch[origin]).forEach(function (server) {
+                    var lookup = batch[origin][server];
+                    console.log('request', origin, server, lookup);
+                    terminal.emit('request', {
+                        route: 'chat/info',
+                        json: {
+                            origin: origin,
+                            server: server,
+                            rooms: lookup.rooms,
+                            users: lookup.users
+                        }
+                    });
+                });
+            });
+        },
+
+        onSay: function (origin, server, room, text) {
             terminal.emit('request', {
                 route: 'chat/say',
                 json: {
                     origin: origin,
                     server: server,
-                    channel: channel,
+                    room: room,
                     text: text
                 }
             });
         },
-
-        onInfo: function (origin, server, channel) {
-            // terminal.emit('request', {
-            //     route: 'chat/info',
-            //     json: {
-            //         origin: origin,
-            //         server: server,
-            //         target: channel
-            //     }
-            // });
-        },
-
-        // onList: function (origin, server) {
-        //     terminal.emit('request', {
-        //         route: 'chat/list',
-        //         json: {
-        //             origin: origin,
-        //             server: server
-        //         }
-        //     });
-        // },
-
-        // onWake: function () {
-        //     terminal.emit('request', {
-        //         route: 'chat/wake',
-        //         json: { }
-        //     });
-        // },
-
-        // onRoster: function (origin, server, channel) {
-        //     terminal.emit('request', {
-        //         route: 'chat/roster',
-        //         json: {
-        //             origin: origin,
-        //             server: server,
-        //             target: channel                    
-        //         }
-        //     });
-        // },
 
         onHistory: function () {
             var end = new Date(),
@@ -147,41 +142,63 @@ define(function(require, exports, module) {
                 console.log('error', event.meta);
                 break;
 
-            // case 'listen':
-            //     ChannelActions.listen(event.meta.origin, event.meta.server, event.meta.channels);
-            //     break;
-            // case 'leave':
-            //     ChannelActions.leave(event.meta.origin, event.meta.server, event.meta.channels);
-            //     break;
-
-            // case 'info':
-            //     ChannelActions.info(event.meta.origin, event.meta.server, event.meta.channels);
-            //     break;
-
-            // case 'rosters':
-            //     ChannelActions.usersJoin(event.meta.origin, event.meta.server, event.meta.channels);
-            //     break;
+            case 'info':
+                Object.keys(event.meta.servers).forEach(function (server) {
+                    event.meta.servers[server].forEach(function (info) {
+                        var prefix = event.meta.origin + ':' + server + ':';
+                        if (info.room) {
+                            RoomActions.info(prefix + info.room, {
+                                origin: event.meta.origin,
+                                server: server,
+                                room: info.room,
+                                info: info.info
+                            });
+                        }
+                        if (info.user) {
+                            UserActions.info(prefix + info.user, {
+                                origin: event.meta.origin,
+                                server: server,
+                                user: info.user,
+                                info: info.info
+                            });
+                        }
+                    });
+                });
+                break;
 
             case 'message':
-                console.log('message', event);
-                // MessageActions.message({
-                //     id: event.id,
-                //     when: event.when,
-                //     origin: event.meta.origin,
-                //     server: event.meta.server,
-                //     channel: event.meta.channel,
-                //     user: event.meta.user,
-                //     text: event.meta.text
-                // });
+                Object.keys(event.meta.servers).forEach(function (server) {
+                    Object.keys(event.meta.servers[server]).forEach(function (room) {
+                        event.meta.servers[server][room].forEach(function (message) {
+                            var prefix = event.meta.origin + ':' + server + ':';
+                            MessageActions.message({
+                                id: event.id,
+                                when: event.when,
+                                origin: event.meta.origin,
+                                server: server,
+                                room: room,
+                                user: message.user,
+                                text: message.text
+                            });
+                            RoomActions.join(prefix + room, {
+                                origin: event.meta.origin,
+                                server: server,
+                                room: room
+                            });
+                            UserActions.lookup(prefix + message.user, {
+                                origin: event.meta.origin,
+                                server: server,
+                                user: message.user
+                            });
+                        });
+                    });
+                });
                 break;
         }
     }
 
     // event handlers from terminal server    
     terminal.on('api', function (api) {
-        if (api.indexOf('chat/wake') !== -1) {
-            MessageActions.wake();
-        }
         if (api.indexOf('chat/history') !== -1) {
             MessageActions.history();
         }

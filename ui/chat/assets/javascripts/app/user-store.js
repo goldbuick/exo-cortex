@@ -85,7 +85,7 @@ define(function(require, exports, module) {
                     _user.info[prop] = info.info[prop];
                 });
             }.bind(this));
-            this.trigger(this.rooms);
+            this.trigger(this.users);
         },
 
         onLookups: function (lookups) {
@@ -96,7 +96,8 @@ define(function(require, exports, module) {
                 this.users.add(lookup.origin, lookup.server, lookup.user);
                 delta = true;
             }.bind(this));
-            if (delta) this.trigger(this.rooms);
+            if (delta) this.trigger(this.users);
         }
     });
+
 });

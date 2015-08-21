@@ -42,8 +42,6 @@ define(function (require, exports, module) {
                     .attr('width', listWidth)
                     .attr('height', listHeight)
                     .style('fill', t.url());
-
-                console.log('list', listWidth, listHeight);
             }.bind(this), 256);
         },
 

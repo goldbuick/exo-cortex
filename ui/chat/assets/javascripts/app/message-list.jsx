@@ -46,11 +46,16 @@ define(function (require, exports, module) {
                 return a.minutes - b.minutes;
 
             }).map(function (message) {
-                var when = moment(message.when);
+                var when = moment(message.when),
+                    user = this.state.users.find(message.origin, message.server, message.user);
+
                 return {
+                    origin: message.origin,
+                    server: message.server,
                     id: message.id,
                     avi: this.state.ident[message.user],
                     user: message.user,
+                    name: (user && user.info.name) ? user.info.name : message.user,
                     text: message.text,
                     ago: when.fromNow(),
                     when: when.format('hh:mm A'),
@@ -86,7 +91,8 @@ define(function (require, exports, module) {
                         lastGap = message.gap;
                     }
 
-                    IdentActions.request(message.user, message.user);
+                    var lookup = [ message.origin, message.server, message.user ].join(':');
+                    IdentActions.request(lookup, message.user);
 
                     if (first) {
                         return <tr key={message.id}>
@@ -95,7 +101,7 @@ define(function (require, exports, module) {
                             <td className="content first">
                                 <div className="details">
                                     <a className="name" href="#!"
-                                        onClick={this.onUserDM.bind(this, message)}>{message.user}</a>
+                                        onClick={this.onUserDM.bind(this, message)}>{message.name}</a>
                                     <span className="when">{message.when}</span>
                                     <span className="ago">{message.ago}</span>
                                 </div>

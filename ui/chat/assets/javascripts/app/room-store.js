@@ -9,7 +9,6 @@ define(function(require, exports, module) {
     }
 
     function Room (origin, server, name) {
-        console.log('create Room', origin, server, name);
         this.info = { };
         this.users = { };
         this.origin = origin;

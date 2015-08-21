@@ -66,7 +66,6 @@ define(function(require, exports, module) {
             Object.keys(batch).forEach(function (origin) {
                 Object.keys(batch[origin]).forEach(function (server) {
                     var lookup = batch[origin][server];
-                    console.log('request', origin, server, lookup);
                     terminal.emit('request', {
                         route: 'chat/info',
                         json: {

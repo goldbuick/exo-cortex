@@ -32,7 +32,7 @@ function ChatSpec (name) {
     
     this.dataInfo = collected.create();
     this.dataInfo.on(function (data) {
-        debug('info', data);
+        // debug('info', data);
         this.channel.emit('info', {
             servers: data
         });
@@ -40,7 +40,7 @@ function ChatSpec (name) {
 
     this.dataMessage = collected.create();
     this.dataMessage.on(function (data) {
-        debug('message', data);
+        // debug('message', data);
         this.channel.emit('message', {
             keeplog: true,
             servers: data

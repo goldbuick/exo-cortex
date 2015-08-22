@@ -42,7 +42,7 @@ function gclientopen (host, port, nick, channels) {
     }    
 
     client.addListener('selfMessage', function (to, text) {
-        if (to[0] === '#') handleMessage(gnick, to, text);
+        if (to[0] === '#') handleMessage(nick, to, text);
     });
 
     client.addListener('message', handleMessage);    
@@ -66,9 +66,17 @@ chat.info(function (message, finish) {
 
     if (message.rooms !== undefined && message.rooms.forEach) {
         message.rooms.forEach(function (room) {
-            chat.room(message.server, room, {
-                name: room
-            });
+            var _channel = client.chans[room],
+                _info = {
+                    name: room
+                };
+            
+            if (_channel) {
+                _info.topic = _channel.topic;
+                _info.topicBy = _channel.topicBy.split('!')[0];
+            }
+            
+            chat.room(message.server, room, _info);
         });
     }
 

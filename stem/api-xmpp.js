@@ -154,7 +154,6 @@ chat.info(function (message, finish) {
     if (message.rooms !== undefined && message.rooms.forEach) {
         message.rooms.forEach(function (room) {
             var info = client.user(room);
-            console.log('lookup', room, info);
             chat.room(message.server, room, {
                 name: info.name
             });

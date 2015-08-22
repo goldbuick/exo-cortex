@@ -9,16 +9,16 @@ define(function (require, exports, module) {
             Reflux.connect(RoomStore, 'rooms')
         ],
 
-        currentChannel: function () {
-            if (!this.state.channels ||
-                !this.state.channels.all().length) return;
-            var _channel = this.state.channels.find(
-                this.props.origin, this.props.server, this.props.channel);
-            return _channel;
+        currentRoom: function () {
+            if (!this.state.rooms ||
+                !this.state.rooms.all().length) return;
+            var _room = this.state.rooms.find(
+                this.props.origin, this.props.server, this.props.room);
+            return _room;
         },
 
         userList: function () {
-            var current = this.currentChannel();
+            var current = this.currentRoom();
             if (current) return current.getUsers();
             return [ ];
         },
@@ -28,7 +28,7 @@ define(function (require, exports, module) {
                 op,
                 this.props.origin,
                 this.props.server,
-                this.props.channel
+                this.props.room
             ].join(':');
         },
 
@@ -128,7 +128,7 @@ define(function (require, exports, module) {
                         this.setState(this.state);
                     } else {
                         MessageActions.say(
-                            this.props.origin, this.props.server, this.props.channel, input);
+                            this.props.origin, this.props.server, this.props.room, input);
                         this.state[inputKey] = '';
                         this.setState(this.state);
                     }

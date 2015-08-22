@@ -144,9 +144,8 @@ define(function(require, exports, module) {
             case 'info':
                 Object.keys(event.meta.servers).forEach(function (server) {
                     event.meta.servers[server].forEach(function (info) {
-                        var prefix = event.meta.origin + ':' + server + ':';
                         if (info.room) {
-                            RoomActions.info(prefix + info.room, {
+                            RoomActions.info([event.meta.origin, server, info.room], {
                                 origin: event.meta.origin,
                                 server: server,
                                 room: info.room,
@@ -154,7 +153,7 @@ define(function(require, exports, module) {
                             });
                         }
                         if (info.user) {
-                            UserActions.info(prefix + info.user, {
+                            UserActions.info([event.meta.origin, server, info.user], {
                                 origin: event.meta.origin,
                                 server: server,
                                 user: info.user,
@@ -169,7 +168,6 @@ define(function(require, exports, module) {
                 Object.keys(event.meta.servers).forEach(function (server) {
                     Object.keys(event.meta.servers[server]).forEach(function (room) {
                         event.meta.servers[server][room].forEach(function (message) {
-                            var prefix = event.meta.origin + ':' + server + ':';
                             MessageActions.message({
                                 id: event.id,
                                 when: event.when,
@@ -179,12 +177,18 @@ define(function(require, exports, module) {
                                 user: message.user,
                                 text: message.text
                             });
-                            RoomActions.join(prefix + room, {
+                            RoomActions.join([event.meta.origin, server, room], {
                                 origin: event.meta.origin,
                                 server: server,
                                 room: room
                             });
-                            UserActions.lookup(prefix + message.user, {
+                            RoomActions.user([event.meta.origin, server, room, message.user], {
+                                origin: event.meta.origin,
+                                server: server,
+                                room: room,
+                                user: message.user
+                            });
+                            UserActions.lookup([event.meta.origin, server, message.user], {
                                 origin: event.meta.origin,
                                 server: server,
                                 user: message.user

@@ -69,8 +69,8 @@ define(function (require, exports, module) {
                 if (this.props.server) {
                     messages.server.filterExact(this.props.server);
                 }
-                if (this.props.channel) {
-                    messages.channel.filterExact(this.props.channel);
+                if (this.props.room) {
+                    messages.room.filterExact(this.props.room);
                 }
                 return messages.groupByMinutes.all().map(function (d) {
                     return {

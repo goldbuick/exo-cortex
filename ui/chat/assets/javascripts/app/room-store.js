@@ -14,7 +14,7 @@ define(function(require, exports, module) {
         this.origin = origin;
         this.server = server;
         this.name = name;
-        MessageActions.lookup('room-' + this.unique(), {
+        MessageActions.lookup(['room', this.unique()], {
             origin: this.origin,
             server: this.server,
             room: this.name
@@ -110,6 +110,16 @@ define(function(require, exports, module) {
                 Object.keys(info.info).forEach(function (prop) {
                     _room.info[prop] = info.info[prop];
                 });
+            }.bind(this));
+            this.trigger(this.rooms);
+        },
+
+        onUsers: function (users) {
+            users.forEach(function (join) {
+                var _room = this.rooms.find(join.origin, join.server, join.room);
+                if (!_room) _room = this.rooms.add(join.origin, join.server, join.room);
+                if (!_room) return;
+                _room.usersJoin([ join.user ]);
             }.bind(this));
             this.trigger(this.rooms);
         }

@@ -120,15 +120,15 @@ define(function (require, exports, module) {
                             origin={current.origin}
                             server={current.server}
                             room={current.name} />
+                        <RoomInfo
+                            origin={current.origin}
+                            server={current.server}
+                            room={current.name} />
                     </main>
                 </div>
             );
         }
     });
-                        // <RoomInfo
-                        //     origin={current.origin}
-                        //     server={current.server}
-                        //     room={current.name} />
 
     return Page;
 });

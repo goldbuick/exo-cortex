@@ -33,7 +33,7 @@ define(function (require, exports, module) {
                             <div className="nav-wrapper valign-wrapper">
                                 <a href="#" data-activates="slide-out" className="button-collapse">
                                     <i className="mdi-navigation-menu"></i></a>
-                                <h5 className="valign">STEM-CONFIG</h5>
+                                <h5 className="valign">exo-config</h5>
                             </div>
                         </nav>
                         <NodeList />

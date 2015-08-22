@@ -13,7 +13,7 @@ define(function(require, exports, module) {
         this.origin = origin;
         this.server = server;
         this.name = name;
-        MessageActions.lookup('user-' + this.unique(), {
+        MessageActions.lookup(['user', this.unique()], {
             origin: this.origin,
             server: this.server,
             user: this.name

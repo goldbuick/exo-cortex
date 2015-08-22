@@ -30,7 +30,7 @@ define(function (require, exports, module) {
 
             return <ul className="room-nav">
                 <li className="logo valign-wrapper">
-                    <h5 className="valign">exo-cortex</h5>
+                    <h5 className="valign">exo-chat</h5>
                 </li>
                 {this.state.rooms.all().map((room) => {
                     var elements = [ ];

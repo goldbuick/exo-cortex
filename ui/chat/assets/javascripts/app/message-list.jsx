@@ -65,11 +65,14 @@ define(function (require, exports, module) {
             }.bind(this));
         },
 
-        onUserDM: function (message, e) {
+        onUserDM: function (user, e) {
             e.preventDefault();
-            console.log(message);
-            // RoomActions.joinChannel(this.props.server, user);
-            // UIActions.activeRoom(user);
+            RoomActions.join([this.props.origin, this.props.server, user], {
+                origin: this.props.origin,
+                server: this.props.server,
+                room: user
+            });
+            UIActions.activeRoom(this.props.origin, this.props.server, user);
         },
 
         render: function () {
@@ -101,7 +104,7 @@ define(function (require, exports, module) {
                             <td className="content first">
                                 <div className="details">
                                     <a className="name" href="#!"
-                                        onClick={this.onUserDM.bind(this, message)}>{message.name}</a>
+                                        onClick={this.onUserDM.bind(this, message.user)}>{message.name}</a>
                                     <span className="when">{message.when}</span>
                                     <span className="ago">{message.ago}</span>
                                 </div>

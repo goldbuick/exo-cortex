@@ -5,10 +5,12 @@ define(function(require, exports, module) {
 
     module.exports = Reflux.createActions([
         'joins',
-        'infos'
+        'infos',
+        'users',
     ]);
     
     collect(module.exports, 'join', 'joins', 100);
     collect(module.exports, 'info', 'infos', 100);
+    collect(module.exports, 'user', 'users', 100);
 
 });

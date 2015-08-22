@@ -22,6 +22,9 @@ define(function(require, exports, module) {
             if (this.isarray) {
                 this.queue.push(arguments[0]);
             } else {
+                if (Array.isArray(arguments[0])) {
+                    arguments[0] = arguments[0].join(':');
+                }
                 this.queue[arguments[0]] = arguments[1];
             }
         },

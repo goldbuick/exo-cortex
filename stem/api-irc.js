@@ -2,7 +2,7 @@
 // IRC API
 
 var irc = require('irc'),
-    spec = require('./spec-chat');
+    spec = require('./toolkit/spec-chat');
 
 // create server
 var chat = spec.createServer('irc');

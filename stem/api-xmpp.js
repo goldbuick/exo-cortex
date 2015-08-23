@@ -3,7 +3,7 @@
 
 var ltx = require('ltx'),
     Client = require('node-xmpp-client'),
-    spec = require('./spec-chat');
+    spec = require('./toolkit/spec-chat');
 
 // user tracking class
 function Users (self, coms) {

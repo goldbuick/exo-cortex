@@ -28,7 +28,7 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 * auth/proxy - complete, put access to stem/ui behind an authenticated proxy
 * docker - complete, begin putting together deployable docker images
 
-## 0.2.0
+## 0.2.0 - complete
 * ui/chat - complete, add channel topic, username lists, attempt tab-to-complete usernames
 * ui/chat - complete, type '@' to trigger username completion
 * stem/pass-chat - complete, create an adapter to manage events from api-irc & api-xmpp
@@ -36,11 +36,11 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 * stem/api-xmpp - complete, integrate with still functioning google talk
 
 ## 0.3.0
-* stem/api-webhook, generate events from webhooks
-* stem/api-trigger, generate html get/post requests
-* stem/terminal-blocks, expose webhooks and triggers as simple binary switches
+* stem/api-webhook, generate events from webhooks & generate html get/post requests
+* ui/webhook, used to configure api-webhook
 
 ## 0.4.0
+* stem/terminal-blocks, expose webhooks and triggers as simple binary switches
 * stem/terminal-sim, a 3d space whereby blocks are place to interact with each other
 * ui/uplink, a visual interface to terminal-sim, whereby an authenticated user can edit the sim
 

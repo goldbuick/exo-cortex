@@ -1,8 +1,8 @@
 
 // CHAT SPEC
 
-var toolkit = require('./toolkit/lib'),
-    collected = require('./toolkit/collected');
+var toolkit = require('./lib'),
+    collected = require('./collected');
 
 function ChatSpec (name) {
     this.server = toolkit.createServer('api-' + name);

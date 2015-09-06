@@ -105,10 +105,10 @@ define(function(require, exports, module) {
             });
         },
 
-        checkMessage: function (message) {
+        checkMessage: function (message) { 
             // check for dupes
-            if (this.unique[message.id]) return false;
-            this.unique[message.id] = true;
+            if (this.unique[message.oid]) return false;
+            this.unique[message.oid] = true;
             // turn when into a date object
             message.when = new Date(message.when);
             // minutes since epoch
@@ -121,6 +121,25 @@ define(function(require, exports, module) {
             var added = messages.filter(function (message) {
                 return this.checkMessage(message);
             }.bind(this));
+
+            added.forEach(function (message) {
+                RoomActions.join([message.origin, message.server, message.room], {
+                    origin: message.origin,
+                    server: message.server,
+                    room: message.room
+                });
+                RoomActions.user([message.origin, message.server, message.room, message.user], {
+                    origin: message.origin,
+                    server: message.server,
+                    room: message.room,
+                    user: message.user
+                });
+                UserActions.lookup([message.origin, message.server, message.user], {
+                    origin: message.origin,
+                    server: message.server,
+                    user: message.user
+                });
+            });
 
             if (added.length) {
                 this.db.add(added);
@@ -171,27 +190,12 @@ define(function(require, exports, module) {
                             MessageActions.message({
                                 id: event.id,
                                 when: event.when,
+                                oid: event.meta.oid,
                                 origin: event.meta.origin,
                                 server: server,
                                 room: room,
                                 user: message.user,
                                 text: message.text
-                            });
-                            RoomActions.join([event.meta.origin, server, room], {
-                                origin: event.meta.origin,
-                                server: server,
-                                room: room
-                            });
-                            RoomActions.user([event.meta.origin, server, room, message.user], {
-                                origin: event.meta.origin,
-                                server: server,
-                                room: room,
-                                user: message.user
-                            });
-                            UserActions.lookup([event.meta.origin, server, message.user], {
-                                origin: event.meta.origin,
-                                server: server,
-                                user: message.user
                             });
                         });
                     });

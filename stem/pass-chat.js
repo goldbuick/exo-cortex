@@ -12,6 +12,18 @@ var channel = server.createChannel('chat');
 // globals
 var gapis = [ ];
 
+// message adapter
+function patch (json) {
+    // include origin id
+    json.meta.oid = json.id;
+    // patch on origin
+    json.meta.origin = json.channel;
+    // switch channel
+    json.channel = 'chat';
+    // pass result through
+    return json;
+}
+
 channel.message('history', function (message, finish) {
     // discovery
     if (!message) {
@@ -29,12 +41,8 @@ channel.message('history', function (message, finish) {
             endDate: message.endDate
         }
     }, function (response) {
-        finish(response.meta.map(function (json) {
-            json.meta.origin = json.channel;
-            json.channel = 'chat';
-            return json;
-        }));
-        finish();
+        // patch meta
+        finish(response.meta.map(patch));
 
     }, function (response) {
         console.log(response);
@@ -94,8 +102,8 @@ server.any(function (url, json) {
     // only consume certain apis
     if (gapis.indexOf(json.channel) === -1) return;
 
-    // patch on origin
-    json.meta.origin = json.channel;
+    // patch meta
+    patch(json);
 
     // transmit event
     channel.emit(json.type, json.meta);

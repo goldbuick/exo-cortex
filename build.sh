@@ -13,6 +13,7 @@ docker build -t $1/util-static .
 popd
 
 pushd ./stem
+docker build -f node.Dockerfile -t $1/stem-node .
 docker build -f api-ident.Dockerfile -t $1/stem-api-ident .
 docker build -f api-irc.Dockerfile -t $1/stem-api-irc .
 docker build -f api-xmpp.Dockerfile -t $1/stem-api-xmpp .
@@ -31,10 +32,10 @@ make clean build
 docker build -t $1/ui-config .
 popd
 
-# pushd ./ui/paracord
-# make clean build
-# docker build -t $1/ui-paracord .
-# popd
+pushd ./ui/paracord
+make clean build
+docker build -t $1/ui-paracord .
+popd
 
 pushd ./ui/uplink
 make clean build
@@ -48,6 +49,7 @@ if [ $2 = "push" ]; then
     docker push $1/util-barrier
     docker push $1/util-proxy
     docker push $1/util-static
+    docker push $1/stem-node
     docker push $1/stem-api-ident
     docker push $1/stem-api-irc
     docker push $1/stem-api-xmpp
@@ -56,5 +58,6 @@ if [ $2 = "push" ]; then
     docker push $1/stem-pass-log
     docker push $1/ui-chat
     docker push $1/ui-config
+    docker push $1/ui-paracord
     docker push $1/ui-uplink
 fi

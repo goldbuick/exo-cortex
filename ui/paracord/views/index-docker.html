@@ -8,11 +8,7 @@
         <link rel="stylesheet" href="stylesheets/vendor/materialize/materialize.css" />
         <link rel="stylesheet" href="stylesheets/style.css" />
     </head>
-    <body>
-        <!-- live reload -->
-        <script src="socket.io/socket.io.js"></script>
-        <script src="javascripts/reload-client.js"></script>
-
+    <body class="with-transitions">
         <!-- utils -->
         <script src="javascripts/vendor/moment/moment.js"></script>
 
@@ -31,5 +27,6 @@
 
         <!-- app loader -->
         <script src="javascripts/vendor/requirejs/require.js" data-main="javascripts/main.js"></script>
+        <script>window.docker = true;</script>
     </body>
 </html>

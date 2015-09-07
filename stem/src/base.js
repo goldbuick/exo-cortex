@@ -20,8 +20,8 @@ function exec (cmd, args) {
 
 // start base stem node servers
 var stem = [
-    [ './config-server', '--rethinkdb', 'rethinkdb:28015' ],
-    [ './terminal-server', '--control', 'localhost:7154' ]
+    [ './src/config-server', '--rethinkdb', 'rethinkdb:28015' ],
+    [ './src/terminal-server', '--control', 'localhost:7154' ]
 ];
 
 function next() {

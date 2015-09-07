@@ -1,4 +1,4 @@
 
-A query diver
-===========================
+A template exo-cortex project
+=============================
 

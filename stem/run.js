@@ -21,18 +21,18 @@ function exec (cmd, args) {
 
 // tell nodes where to find the config-server
 function node (run) {
-    return [ run, '--control', 'localhost:7154' ];
+    return [ './src/' + run, '--control', 'localhost:7154' ];
 }
 
 // start stem node servers
 var stem = [
-    [ './config-server', '--rethinkdb', '192.168.59.103:28015' ],
-    node('./terminal-server'),
-    node('./pass-log'),
-    node('./pass-chat'),
-    node('./api-irc'),
-    node('./api-xmpp'),
-    node('./api-ident'),
+    [ './src/config-server', '--rethinkdb', '192.168.59.103:28015' ],
+    node('terminal-server'),
+    node('pass-log'),
+    node('pass-chat'),
+    node('api-irc'),
+    node('api-xmpp'),
+    node('api-ident'),
 ];
 
 function next() {

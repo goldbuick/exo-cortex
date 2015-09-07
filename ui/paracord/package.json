@@ -1,8 +1,9 @@
 {
-  "name": "paracord",
+  "name": "template",
   "version": "0.0.1",
   "description": "A Mimosa starter skeleton",
   "devDependencies": {
-    "mimosa-less": "*"
+    "mimosa-less": "*",
+    "mimosa-html-templates": "*"
   }
 }

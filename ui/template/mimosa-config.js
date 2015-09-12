@@ -13,7 +13,7 @@ exports.config = {
     "react"
   ],
   "server": {
-    "port": 3001,
+    "port": 3000,
     "views": {
       "compileWith": "html",
       "extension": "html"

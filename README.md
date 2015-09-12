@@ -35,6 +35,9 @@ The server nodes are currently based off of nodejs. And I use http://mimosa.io/ 
 * ui/chat - complete, updated chat to interface with pass-chat only
 * stem/api-xmpp - complete, integrate with still functioning google talk
 
+## 0.2.5
+* ui/paracord - webgl based data-viz tool
+
 ## 0.3.0
 * stem/api-webhook, generate events from webhooks & generate html get/post requests
 * ui/webhook, used to configure api-webhook

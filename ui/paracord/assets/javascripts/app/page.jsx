@@ -1,21 +1,15 @@
-define(function (require, exports, module) {
-    'use strict';
+import RenderTest from './render-test';
+import ResizeContainer from './resize-container';
 
-    var RenderTest = require('./render-test'),
-        ResizeContainer = require('./resize-container');
+export Page React.createClass({
+    mixins: [
+    ],
 
-    var Page = React.createClass({
-        mixins: [
-        ],
-
-        render: function () {
-            return <div>
-                <ResizeContainer>
-                    <RenderTest />
-                </ResizeContainer>
-            </div>;
-        }
-    });
-
-    return Page;
+    render: function () {
+        return <div>
+            <ResizeContainer>
+                <RenderTest />
+            </ResizeContainer>
+        </div>;
+    }
 });

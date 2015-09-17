@@ -12,7 +12,7 @@
     "textures": "*",
     "animate.css": "~3.3.0",
     "d3": "~3.5.6",
-    "three.js": "~0.71.0"
+    "threejs": "*"
   },
   "resolutions": {
     "jquery": ">=2.1.1"

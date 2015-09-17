@@ -10,7 +10,8 @@ exports.config = {
     "live-reload",
     "bower",
     "less",
-    "react"
+    "react",
+    "babel"
   ],
   "server": {
     "port": 3003,
@@ -23,7 +24,6 @@ exports.config = {
     }
   },
   "react": {
-    "lib": undefined,
     "extensions": ["jsx"],
     "options": {
       "harmony": true,
@@ -42,6 +42,12 @@ exports.config = {
           "crossfilter.js"
         ]
       }
+    }
+  },
+  "babel": {
+    "extensions": ["js", "jsx"],
+    "options": {
+      "modules": "amd"
     }
   }
 }

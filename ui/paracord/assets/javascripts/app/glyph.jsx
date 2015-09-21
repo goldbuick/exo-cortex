@@ -160,7 +160,7 @@ export default class Glyph {
         fillGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array(this.fills), 1));
         fillGeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
         fillGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(this.colors.map(function (value) {
-            return value * 0.5;
+            return value * 0.3;
         })), 3));
         fillGeometry.computeBoundingSphere();
 

@@ -1,149 +1,123 @@
-define(function (require, exports, module) {
-    'use strict';
+import RenderTarget from './render-target';
+import RenderProject from './render-project';
+import Graph from './graph';
+import t1 from './three/shaders/CopyShader';
+import t2 from './three/shaders/ConvolutionShader';
+import t3 from './three/postprocessing/MaskPass';
+import t4 from './three/postprocessing/BloomPass';
+import t5 from './three/postprocessing/ShaderPass';
 
-    var RenderTarget = require('./render-target'),
-        Glyph = require('./glyph');
+function sphereTwist(ox, oy, group) {
+    group.rotation.y += ox;
+    group.rotation.z += oy;
+    return group;
+}
 
-    // assume x, y in radians, z is height
-    function sphereProject(radius, scale) {
-        return function (x, y, z) {
-            x = x * scale;
-            y = y * scale;
-            var xcos = Math.cos(x),
-                xsin = Math.sin(x),
-                ycos = Math.cos(y),
-                ysin = Math.sin(y),
-                height = z + radius,
-                _x = -height * xcos * ycos,
-                _y = height * xsin,
-                _z = height * xcos * ysin;
-            return [ _x, _y, _z ];
-        };
+function roundedRect( ctx, x, y, width, height, radius ) {
+    ctx.moveTo( x, y + radius );
+    ctx.lineTo( x, y + height - radius );
+    ctx.quadraticCurveTo( x, y + height, x + radius, y + height );
+    ctx.lineTo( x + width - radius, y + height) ;
+    ctx.quadraticCurveTo( x + width, y + height, x + width, y + height - radius );
+    ctx.lineTo( x + width, y + radius );
+    ctx.quadraticCurveTo( x + width, y, x + width - radius, y );
+    ctx.lineTo( x + radius, y );
+    ctx.quadraticCurveTo( x, y, x, y + radius );
+    return ctx;
+}
+
+var RenderTest = React.createClass({
+    mixins: [
+        RenderTarget
+    ],
+
+    componentDidMount: function () {
+        var size;
+        this.camera.position.z = 1040;
+        var effectBloom = new THREE.BloomPass(2);
+        var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+        this.composer.addPass(effectBloom);
+        this.composer.addPass(effectCopy);
+        effectCopy.renderToScreen = true;
+
+        size = 20;
+        var triangleShape = new THREE.Shape();
+        triangleShape.moveTo(0, -size);
+        triangleShape.lineTo(size, size);
+        triangleShape.lineTo(-size, size);
+        triangleShape.lineTo(0, -size);
+
+        var triangleShape2 = new THREE.Shape();
+        triangleShape2.moveTo(0, size);
+        triangleShape2.lineTo(size, -size);
+        triangleShape2.lineTo(-size, -size);
+        triangleShape2.lineTo(0, size);
+
+        size = 30;
+        var rectShape = roundedRect(new THREE.Shape(), -size, -size, size * 2, size * 2, size * 0.25);
+        // var holePath = new THREE.Path();
+        // holePath.absarc(0, 0, size * 0.5, 0, Math.PI*2, true);
+        // rectShape.holes.push( holePath );        
+
+        size = 25;
+        var rectShape2 = roundedRect(new THREE.Shape(), -size, -size, size * 2, size * 2, size * 0.25);
+
+        var bump = Math.PI * 0.25,
+            cursor = 0,
+            groups = [ ],
+            groups2 = [ ];
+        
+        [
+            triangleShape,
+            rectShape,
+            triangleShape2,
+            rectShape2,
+            triangleShape,
+            rectShape,
+            triangleShape2,
+            rectShape2,
+        ].forEach(shape => {
+            var test = new Graph();
+            test.drawShape(shape);
+            test.drawShapeLine(shape);
+            test.tessellate(10);
+            groups.push(sphereTwist(cursor, 0, test.build(RenderProject.sphereProject(512, 0.01))));
+            // groups.push(sphereTwist(cursor, Math.PI * 0.5, test.build(RenderProject.sphereProject(512, 0.01))));
+            // groups.push(sphereTwist(cursor, Math.PI * -0.5, test.build(RenderProject.sphereProject(512, 0.01))));
+            groups.push(sphereTwist(cursor, Math.PI * 0.25, test.build(RenderProject.sphereProject(512, 0.01))));
+            groups.push(sphereTwist(cursor, Math.PI * -0.25, test.build(RenderProject.sphereProject(512, 0.01))));
+
+            groups2.push(sphereTwist(cursor + bump, 0, test.build(RenderProject.sphereProject(312, 0.01))));
+            // groups2.push(sphereTwist(cursor + bump, Math.PI * 0.5, test.build(RenderProject.sphereProject(312, 0.01))));
+            // groups2.push(sphereTwist(cursor + bump, Math.PI * -0.5, test.build(RenderProject.sphereProject(312, 0.01))));
+            groups2.push(sphereTwist(cursor + bump, Math.PI * 0.25, test.build(RenderProject.sphereProject(312, 0.01))));
+            groups2.push(sphereTwist(cursor + bump, Math.PI * -0.25, test.build(RenderProject.sphereProject(312, 0.01))));
+            cursor += bump;
+        });
+
+        groups.forEach(function (group) {
+            this.scene.add(group);
+            // change to this =>
+            // http://projects.defmech.com/ThreeJSObjectRotationWithQuaternion/
+            setInterval(function () {
+                group.rotation.y += 0.001;
+            }, 10);
+        }.bind(this));
+
+        groups2.forEach(function (group) {
+            // group.rotation.x += Math.PI * 0.25;
+            this.scene.add(group);
+            setInterval(function () {
+                group.rotation.y -= 0.01;
+            }, 10);
+        }.bind(this));
+
+    },
+
+    render: function () {
+        return <div className="render-target"></div>;
     }
 
-    function sphereTwist(ox, oy, group) {
-        group.rotation.y += ox;
-        group.rotation.z += oy;
-        return group;
-    }
-
-    var RenderTest = React.createClass({
-        mixins: [
-            RenderTarget
-        ],
-
-        componentDidMount: function () {
-            this.camera.position.z = 1024;
-
-            var test = new Glyph();
-
-            var size = 32;
-            function rnd() { return Math.random() * size - (size - 2); }
-
-            var count = 128, twist = 0.05, step = 0.6;
-            for (var i=0; i < count; ++i) {
-                test.addVert(
-                    Math.cos(i * twist) * (i * step),
-                    Math.sin(i * twist) * (i * step),
-                    0);
-                step += Math.random() * 0.003 - 0.0015;
-                twist += Math.random() * 0.003 - 0.0015;
-            }
-
-            function idx() { return Math.round(Math.random() * (count - 1)); }
-            for (i=0; i < count - 1; ++i) {
-                test.addLine(i, i+1);
-            }
-
-            test.tessellate(20);
-
-            var test2 = new Glyph();
-
-            test2.addVert(0, 0, 0);
-
-            count = 64;
-            step = (Math.PI * 2) / count;
-            var ring = [ ];
-            for (i=0; i < count; ++i) {
-                twist = Math.random() * 5 + 10;
-                test2.addVert(
-                    Math.cos(i * step) * twist,
-                    Math.sin(i * step) * twist,
-                    0);
-                twist = Math.random() * 25 + twist;
-                test2.addVert(
-                    Math.cos(i * step) * twist,
-                    Math.sin(i * step) * twist,
-                    0);
-                test2.addLine(1 + i * 2, 2 + i * 2);
-                ring.push(1 + i * 2);
-            }
-            for (i=0; i < ring.length - 1; ++i) {
-                test2.addFill(0, ring[i], ring[i+1]);
-            }
-            test2.addFill(0, ring[0], ring[ring.length - 1]);
-
-            test2.tessellate(20);
-
-            var bump = Math.PI * 0.25;
-            var groups = [
-                sphereTwist(0, Math.PI * -0.5, test.build(sphereProject(512, 0.01))),
-                sphereTwist(0, Math.PI * 0.5, test.build(sphereProject(512, 0.01))),
-                sphereTwist(0, 0, test.build(sphereProject(512, 0.01))),
-                sphereTwist(Math.PI * 0.5, 0, test.build(sphereProject(512, 0.01))),
-                sphereTwist(Math.PI, 0, test.build(sphereProject(512, 0.01))),
-                sphereTwist(Math.PI * 1.5, 0, test.build(sphereProject(512, 0.01))),
-                sphereTwist(bump, 0.6, test.build(sphereProject(512, 0.01))),
-                sphereTwist(bump + Math.PI * 0.5, 0.6, test.build(sphereProject(512, 0.01))),
-                sphereTwist(bump + Math.PI, 0.6, test.build(sphereProject(512, 0.01))),
-                sphereTwist(bump + Math.PI * 1.5, 0.6, test.build(sphereProject(512, 0.01))),
-                sphereTwist(bump, -0.6, test.build(sphereProject(512, 0.01))),
-                sphereTwist(bump + Math.PI * 0.5, -0.6, test.build(sphereProject(512, 0.01))),
-                sphereTwist(bump + Math.PI, -0.6, test.build(sphereProject(512, 0.01))),
-                sphereTwist(bump + Math.PI * 1.5, -0.6, test.build(sphereProject(512, 0.01))),
-            ];
-
-            var groups2 = [
-                sphereTwist(0, Math.PI * -0.5, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(0, Math.PI * 0.5, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(0, 0, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(Math.PI * 0.5, 0, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(Math.PI, 0, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(Math.PI * 1.5, 0, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(bump, 0.6, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(bump + Math.PI * 0.5, 0.6, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(bump + Math.PI, 0.6, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(bump + Math.PI * 1.5, 0.6, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(bump, -0.6, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(bump + Math.PI * 0.5, -0.6, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(bump + Math.PI, -0.6, test2.build(sphereProject(312, 0.01))),
-                sphereTwist(bump + Math.PI * 1.5, -0.6, test2.build(sphereProject(312, 0.01))),
-            ];
-
-            groups.forEach(function (group) {
-                this.scene.add(group);
-                // change to this =>
-                // http://projects.defmech.com/ThreeJSObjectRotationWithQuaternion/
-                setInterval(function () {
-                    group.rotation.y += 0.001;
-                }, 10);
-            }.bind(this));
-
-            groups2.forEach(function (group) {
-                // group.rotation.x += Math.PI * 0.25;
-                this.scene.add(group);
-                setInterval(function () {
-                    group.rotation.y += 0.001;
-                }, 10);
-            }.bind(this));
-
-        },
-
-        render: function () {
-            return <div className="render-target"></div>;
-        }
-
-    });
-
-    return RenderTest;
 });
+
+export default RenderTest;

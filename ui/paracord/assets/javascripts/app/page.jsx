@@ -1,7 +1,7 @@
 import RenderTest from './render-test';
 import ResizeContainer from './resize-container';
 
-export Page React.createClass({
+var Page = React.createClass({
     mixins: [
     ],
 
@@ -13,3 +13,5 @@ export Page React.createClass({
         </div>;
     }
 });
+
+export default Page;

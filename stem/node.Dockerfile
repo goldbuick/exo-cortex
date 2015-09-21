@@ -2,8 +2,8 @@
 FROM mhart/alpine-node
 WORKDIR /module
 
-ADD package.json package.json
-ADD src src
+COPY package.json package.json
+COPY src src
 
 # native support -> npm install -> drop native -> clean 
 RUN apk-install make gcc g++ python && \

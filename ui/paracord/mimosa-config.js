@@ -45,7 +45,7 @@ exports.config = {
     }
   },
   "babel": {
-    "extensions": ["js", "jsx"],
+    "extensions": ["jsx"],
     "options": {
       "modules": "amd"
     }

@@ -34,7 +34,7 @@ var RenderTest = React.createClass({
     componentDidMount: function () {
         var size;
         this.camera.position.z = 1040;
-        var effectBloom = new THREE.BloomPass(2);
+        var effectBloom = new THREE.BloomPass(1.8);
         var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
         this.composer.addPass(effectBloom);
         this.composer.addPass(effectCopy);

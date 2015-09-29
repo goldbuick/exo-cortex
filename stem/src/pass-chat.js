@@ -102,6 +102,9 @@ server.any(function (url, json) {
     // only consume certain apis
     if (gapis.indexOf(json.channel) === -1) return;
 
+    // clone
+    json = JSON.parse(JSON.stringify(json));
+
     // patch meta
     patch(json);
 

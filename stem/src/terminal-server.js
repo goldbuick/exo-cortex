@@ -43,6 +43,7 @@ channel.message('request', function (message, finish) {
 // listen for any message type
 server.any(function (url, json) {
     if (url !== '/upstream' || !json || !io) return;
+    io.emit('upstream', json);
     io.emit(json.channel, json);
 });
 

@@ -40,6 +40,10 @@ exports.config = {
         ],
         "crossfilter": [
           "crossfilter.js"
+        ],
+        "jquery.terminal": [
+          "js/jquery.terminal-min.js",
+          "css/jquery.terminal.css"
         ]
       }
     }

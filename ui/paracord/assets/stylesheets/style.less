@@ -1,6 +1,19 @@
 
 @import "flexbox.less";
 
+@fg-color: #00D8FF;
+@bg-color: darken(@fg-color, 45%);
+@alt-color: darken(@fg-color, 15%);
+@soft-color: darken(@fg-color, 42%);
+
+@font-light: 100;
+@font-normal: 500;
+@font-heavy: 800;
+
+body, html {
+    background-color: @bg-color;
+}
+
 .resize-container {
     position: relative;
 }
@@ -11,4 +24,20 @@
     right: 0;
     bottom: 0;
     position: absolute;
+}
+
+.diver {
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0;
+    position: fixed;
+    border-bottom: 2px solid @alt-color;
+    -webkit-transition: height 0.4s;
+    -moz-transition: height 0.4s;
+    transition: height 0.4s;    
+}
+
+.diver.closed {
+    height: 0 !important;
 }

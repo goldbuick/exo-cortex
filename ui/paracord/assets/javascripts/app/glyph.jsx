@@ -9,6 +9,7 @@ export default class Glyph {
     }
 
     addVert (x, y, z) {
+        // 00D8FF
         this.colors.push(0, (216 / 255), (255 / 255));
         this.positions.push(-y, x, z);
         return this.count++;

@@ -1,4 +1,5 @@
 import terminal from 'app/lib/terminal-server';
+import FeedStore from 'app/feed-store';
 
 var term;
 terminal.on('upstream', message => {
@@ -12,6 +13,7 @@ terminal.on('upstream', message => {
 
 var Diver = React.createClass({
     mixins: [
+        Reflux.connect(FeedStore, 'feed'),
     ],
 
     componentDidMount: function () {
@@ -19,7 +21,6 @@ var Diver = React.createClass({
 
         term = element.terminal({
             help: function () {
-                this.echo('FUCK HELP');
             },
             // add: function(a, b) {
             //     this.echo(a + b);
@@ -48,12 +49,10 @@ var Diver = React.createClass({
             if (e.which == 96) {
                 term.toggleClass('closed');
                 term.focus(focus = !focus);
-                term.attr({
-                    scrollTop: term.attr("scrollHeight")
-                });
+                term.attr({ scrollTop: term.attr('scrollHeight') });
                 e.preventDefault();
             }
-        });    
+        });
     },
 
     componentWillUnmount: function () {
@@ -64,8 +63,7 @@ var Diver = React.createClass({
     },
 
     render: function () {
-        return <div className="diver">
-        </div>;
+        return <div className="diver"></div>;
     }
 });
 

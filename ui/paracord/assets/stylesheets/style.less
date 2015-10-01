@@ -1,5 +1,6 @@
 
 @import "flexbox.less";
+@import url(http://fonts.googleapis.com/css?family=VT323);
 
 @fg-color: #00D8FF;
 @bg-color: darken(@fg-color, 45%);
@@ -14,6 +15,11 @@ body, html {
     background-color: @bg-color;
 }
 
+.fg-color { color: @fg-color; }
+.bg-color { color: @bg-color; }
+.alt-color { color: @alt-color; }
+.soft-color { color: @soft-color; }
+
 .resize-container {
     position: relative;
 }
@@ -26,6 +32,20 @@ body, html {
     position: absolute;
 }
 
+@cmd-line-anim: 0.1s;
+@cmd-line-font-size: 18px;
+@cmd-line-height: (@cmd-line-font-size + 4px);
+
+.terminal, .cmd {
+    font-family: 'VT323';
+    font-size: @cmd-line-font-size;
+    line-height: @cmd-line-height;
+}
+
+.terminal .terminal-output div div, .cmd .prompt {
+    line-height: @cmd-line-height;    
+}
+
 .diver {
     top: 0;
     left: 0;
@@ -33,9 +53,9 @@ body, html {
     padding: 0;
     position: fixed;
     border-bottom: 2px solid @alt-color;
-    -webkit-transition: height 0.4s;
-    -moz-transition: height 0.4s;
-    transition: height 0.4s;    
+    -webkit-transition: height @cmd-line-anim;
+    -moz-transition: height @cmd-line-anim;
+    transition: height @cmd-line-anim;
 }
 
 .diver.closed {

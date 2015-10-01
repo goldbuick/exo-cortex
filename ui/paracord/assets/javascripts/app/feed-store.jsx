@@ -56,6 +56,7 @@ export default Reflux.createStore({
     listenables: [ FeedActions ],
 
     init: function () {
+        this.queue = [ ];
         this.unique = { };
         this.feed = {
             matches: [ ],
@@ -128,11 +129,28 @@ export default Reflux.createStore({
                 return self.checkMessage(message);
             });
 
+        self.queue = self.queue.concat(added);
+        FeedActions.queue();
+    },
+
+    onQueue: function () {
+        var self = this,
+            added = [ ];
+
+        if (this.queue.length) {
+            for (let i=0; i<32 && i<this.queue.length; ++i) {
+                added.push(this.queue.shift());
+            }
+        }
+
         added.forEach(message => {
             self.matchMessage(message);
         });
 
-        if (added.length) self.trigger(self.feed);
+        if (added.length) {
+            self.trigger(self.feed);
+            setTimeout(() => { FeedActions.queue(); }, 100);
+        }
     }
 });
 

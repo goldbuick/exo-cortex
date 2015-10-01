@@ -1,3 +1,4 @@
+import css from 'app/lib/css';
 import t1 from './three/postprocessing/EffectComposer';
 import t2 from './three/postprocessing/RenderPass';
 
@@ -18,14 +19,16 @@ var RenderTarget = {
 
         // core rendering objects
         this.scene = new THREE.Scene();
-        this.renderer = new THREE.WebGLRenderer();
+        this.renderer = new THREE.WebGLRenderer({
+            alpha: true,
+            preserveDrawingBuffer: true
+        });
         this.camera = new THREE.PerspectiveCamera(60, 4 / 3, 0.1, 10000);
         
         // default scene setup
         this.scene.add(this.camera);
-        this.renderer.autoClear = false;
         this.renderer.setSize(800, 600);
-        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.autoClear = false;
         this.composer = new THREE.EffectComposer(this.renderer);
         this.renderPass = new THREE.RenderPass(this.scene, this.camera);
         this.composer.addPass(this.renderPass);

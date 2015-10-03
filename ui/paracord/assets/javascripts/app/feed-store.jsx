@@ -137,15 +137,15 @@ export default Reflux.createStore({
         var self = this,
             added = [ ];
 
+        FeedActions.queueStatus(this.queue.length);
+
         if (this.queue.length) {
             for (let i=0; i<32 && i<this.queue.length; ++i) {
                 added.push(this.queue.shift());
             }
         }
 
-        added.forEach(message => {
-            self.matchMessage(message);
-        });
+        added.forEach(message => { self.matchMessage(message); });
 
         if (added.length) {
             self.trigger(self.feed);

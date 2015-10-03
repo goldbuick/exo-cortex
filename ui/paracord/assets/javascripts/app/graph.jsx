@@ -13,12 +13,23 @@ export default class Graph {
         return this.glyph.build(transform);
     }
 
-    drawLine () {
+    drawLine (points) {
         // list of points turned into a drawn line
+        var self = this,
+            offset = self.glyph.count;
+
+        points.forEach(vert => {
+            self.glyph.addVert(vert.x, vert.y, vert.z);
+        });
+
+        for (var i=0; i < points.length-1; ++i) {
+            self.glyph.addLine(offset + i, offset + i + 1);
+        }
     }
 
-    drawCurve () {
-        // draw a curve through the given list of points
+    drawCurve (curve, divisions) {
+        // draw a Three.Curve
+        this.drawLine(curve.getSpacedPoints(divisions));
     }
 
     drawShape (shape) {
@@ -32,7 +43,7 @@ export default class Graph {
         });
 
         geometry.faces.forEach(face => {
-            self.glyph.addFill(face.a, face.b, face.c);
+            self.glyph.addFill(offset + face.a, offset + face.b, offset + face.c);
         });
     }
 

@@ -2,6 +2,7 @@ import collect from 'app/lib/collected-actions';
 
 var actions = Reflux.createActions([
     'queue',
+    'queueStatus',
     'history',
     'messages',
     'matched',

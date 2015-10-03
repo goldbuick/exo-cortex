@@ -1,6 +1,5 @@
 
 @import "flexbox.less";
-@import url(http://fonts.googleapis.com/css?family=VT323);
 
 @fg-color: #00D8FF;
 @bg-color: darken(@fg-color, 45%);
@@ -33,11 +32,12 @@ body, html {
 }
 
 @cmd-line-anim: 0.1s;
-@cmd-line-font-size: 18px;
+@cmd-line-font-size: 14px;
 @cmd-line-height: (@cmd-line-font-size + 4px);
 
+@import url(http://fonts.googleapis.com/css?family=Anonymous+Pro);
 .terminal, .cmd {
-    font-family: 'VT323';
+    font-family: 'Anonymous Pro';
     font-size: @cmd-line-font-size;
     line-height: @cmd-line-height;
 }

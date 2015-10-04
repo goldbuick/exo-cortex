@@ -65,6 +65,36 @@ function test (construct) {
         }]
     }));
 
+    construct.push(new ConstructView({
+        base: {
+            x: 0,
+            y: 0.7,
+            z: -64
+        },
+        graphs: [{
+            container: 'chat',
+            filter: {
+            },
+            group: 'byMinutes',
+            base: {
+                x: 0,
+                y: 0,
+                z: 0,                
+            },
+            params: {
+                type: ConstructView.HALO,
+                seed: 'all.servers',
+                radius: 32,
+                width: 20,
+                tickMarks: 12,
+                range: {
+                    start: 'return Math.round(((new Date().valueOf() / 60000) - 1440) / 5)',
+                    end: 'return Math.round((new Date().valueOf() / 60000) / 5)'
+                }
+            }
+        }]
+    }));
+
 }
 
 export default Reflux.createStore({

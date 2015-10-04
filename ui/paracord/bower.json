@@ -15,7 +15,8 @@
     "threejs": "*",
     "jquery.terminal": "~0.8.8",
     "jquery-mousewheel": "~3.1.13",
-    "Alea": "*"
+    "Alea": "*",
+    "tweenjs": "~16.3.1"
   },
   "resolutions": {
     "jquery": ">=2.1.1"

@@ -19,8 +19,6 @@ class ConstructView {
                 });
             }
         });
-
-        console.log(self);
     }
 
     update (feed) {

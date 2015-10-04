@@ -2,6 +2,7 @@ import RenderTarget from 'app/render-target';
 import RenderProject from 'app/render-project';
 import ConstructRender from 'app/construct-render';
 import ConstructStore from 'app/construct-store';
+import t1 from 'app/three/controls/OrbitControls';
 
 var DashBoard = React.createClass({
     mixins: [
@@ -10,46 +11,17 @@ var DashBoard = React.createClass({
     ],
 
     componentDidMount: function () {
-        this.camera.position.z = 1100;
+        this.camera.position.z = 1024;
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enablePan = false;
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.15;
+        this.controls.minDistance = this.camera.position.z * 0.7;
+        this.controls.maxDistance = this.camera.position.z;
+    },
 
-        // var self = this,
-        //     plot = function (group, ox, oy) {
-        //         group.rotation.y += ox;
-        //         group.rotation.z += oy;
-        //         return group;                
-        //     },
-        //     project = RenderProject.sphereProject(512, 0.01);
-
-        // var gen = function () {
-        //     var data = [ ];
-        //     for (var i=0; i < 16; ++i) data.push(Math.round(Math.random() * 32));
-        //     data.map(v => { return v + Math.random() * 64; }).forEach(v => { data.push(v); });
-        //     data.map(v => { return Math.abs(v - Math.random() * 64); }).forEach(v => { data.push(v); });
-        //     data.map(v => { return v + Math.random() * 64; }).forEach(v => { data.push(v); });
-        //     data.map(v => { return Math.abs(v - Math.random() * 64); }).forEach(v => { data.push(v); });
-        //     return data;
-        // };
-
-        // var halo = function (i) {
-        //     return plot(ConstructRender.HALO({
-        //         project: RenderProject.sphereProject(512 - Math.round(Math.random() * 256), 0.01),
-        //         seed: 'irc.freenode.net' + i,
-        //         data: gen(),
-        //         radius: 32 + Math.round(Math.random() * 5),
-        //         width: 16,
-        //         tickMarks: 16
-        //     }), Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
-        // };
-
-        // var graphs = [ ]
-        // for (var i=0; i<8; ++i) graphs.push(halo(i));
-
-        // graphs.forEach(function (group) {
-        //     self.scene.add(group);
-        //     setInterval(function () {
-        //         group.rotation.y += 0.004;
-        //     }, 10);
-        // });
+    update: function (delta) {
+        if (this.controls) this.controls.update();
     },
 
     render: function () {

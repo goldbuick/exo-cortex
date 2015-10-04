@@ -51,8 +51,11 @@ var DashBoard = React.createClass({
     },
 
     render: function () {
-        // this.pruneBegin();
-        // this.pruneEnd();
+        this.pruneBegin();
+
+        
+
+        this.pruneEnd();
         return <div className="render-target"></div>;
     }
 

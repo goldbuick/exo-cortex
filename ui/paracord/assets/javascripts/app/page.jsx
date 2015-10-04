@@ -9,10 +9,21 @@ var Page = React.createClass({
 
     render: function () {
         return <div>
-            <ResizeContainer>
-                <Dashboard />
-            </ResizeContainer>
-            <Diver />
+            <div className="page-dashboard">
+                <div className="top" />
+                <div className="bottom" />
+                <ResizeContainer>
+                    <Dashboard />
+                </ResizeContainer>
+            </div>
+            <div className="page-layout">
+                <div className="page-left">
+                    <Diver />
+                </div>
+                <div className="page-right closed">
+                    <div>Testing... </div>
+                </div>
+            </div>
         </div>;
     }
 });

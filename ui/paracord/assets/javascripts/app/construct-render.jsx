@@ -107,6 +107,13 @@ var ConstructRender = {
                     circleShape.absarc(a.x, a.y, 1, 0, Math.PI * 2, false);
                     graph.drawShape(circleShape);
                 }
+                if (r() < 0.1) {
+                    a.x = Math.cos(angle) * (args.radius - tick - 7);
+                    a.y = Math.sin(angle) * (args.radius - tick - 7);
+                    circleShape = new THREE.Shape();
+                    circleShape.absarc(a.x, a.y, 1, 0, Math.PI * 2, false);
+                    graph.drawShape(circleShape);
+                }
             }
             angle += step;
         }

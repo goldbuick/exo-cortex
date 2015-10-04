@@ -67,7 +67,7 @@ var DashBoard = React.createClass({
 
             if (objectCount) {
                 if (construct.anim.intro === undefined) {
-                    var position = { y: -2048 };
+                    var position = { y: -1024 };
                     var target = { y: 0 };
                     construct.anim.intro = new TWEEN.Tween(position)
                         .to(target, 1000 + Math.random() * 1000);
@@ -79,7 +79,7 @@ var DashBoard = React.createClass({
                     construct.anim.intro.easing(TWEEN.Easing.Elastic.Out);
                     construct.anim.intro.start();
                     construct.graphs.forEach(graph => {
-                        graph.object.position.y = 10000;
+                        graph.object.position.y = -10000;
                     });
                 }
             }

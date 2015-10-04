@@ -23,6 +23,7 @@ var DashBoard = React.createClass({
 
     update: function (delta) {
         var self = this;
+        TWEEN.update();
         if (self.controls) self.controls.update();
         self.state.constructs.forEach(construct => {
             if (!construct.objectCount) return;
@@ -35,7 +36,6 @@ var DashBoard = React.createClass({
                 graph.object.rotation.z += Math.sin(Math.PI + construct.anim.tick) * 0.01;
             });
         });
-        TWEEN.update();
     },
 
     render: function () {
@@ -67,7 +67,7 @@ var DashBoard = React.createClass({
 
             if (objectCount) {
                 if (construct.anim.intro === undefined) {
-                    var position = { y: 2048 };
+                    var position = { y: -2048 };
                     var target = { y: 0 };
                     construct.anim.intro = new TWEEN.Tween(position)
                         .to(target, 1000 + Math.random() * 1000);

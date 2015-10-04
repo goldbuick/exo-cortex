@@ -3,6 +3,7 @@ import FeedActions from 'app/feed-actions';
 import FeedMatch from 'app/feed-match';
 import FeedExtract from 'app/feed-extract';
 import FeedContainer from 'app/feed-container';
+import ConstructActions from 'app/construct-actions';
 
 function test (feed) {
     feed.matches.push(new FeedMatch([{
@@ -44,11 +45,11 @@ function test (feed) {
     }, {
         // crossfilter dimensions
         server: 'd.server',
-        minutes: 'd.when.valueOf() / 60000',
+        minutes: 'Math.round(d.when.valueOf() / 60000)',
     }, {
         // dimension groups
         server: [ 'server', 'd' ],
-        halfHour: [ 'minutes', 'Math.floor(d / 30)' ]
+        byMinutes: [ 'minutes', 'Math.round(d / 5)' ]
     });
 }
 
@@ -73,7 +74,7 @@ export default Reflux.createStore({
     onHistory: function () {
         var end = new Date(),
             start = new Date();
-        start.setDate(start.getDate() - 7);
+        start.setDate(start.getDate() - 1);
 
         terminal.emit('request', {
             route: 'log/list',
@@ -137,20 +138,19 @@ export default Reflux.createStore({
         var self = this,
             added = [ ];
 
-        FeedActions.queueStatus(this.queue.length);
+        FeedActions.queueStatus(self.queue.length);
 
-        if (this.queue.length) {
-            for (let i=0; i<32 && i<this.queue.length; ++i) {
-                added.push(this.queue.shift());
+        if (self.queue.length) {
+            for (let i=0; i<1000 && i<self.queue.length; ++i) {
+                added.push(self.queue.shift());
             }
+        } else {
+            self.trigger(self.feed);
+            ConstructActions.updated(self.feed);
         }
 
         added.forEach(message => { self.matchMessage(message); });
-
-        if (added.length) {
-            self.trigger(self.feed);
-            setTimeout(() => { FeedActions.queue(); }, 100);
-        }
+        if (added.length) setTimeout(() => { FeedActions.queue(); }, 100);
     }
 });
 

@@ -20,6 +20,30 @@ function finish(args, graph) {
 
 var ConstructRender = {
 
+    build: function (args) {
+        var group;
+
+        if (args.type) {
+            group = ConstructRender[args.type](args);
+            group.keep = true;
+            if (args.changed) {
+                group.flicker = 32;
+                group.animFunc = function (delta) {
+                    if (this.flicker > 0) {
+                        this.visible = this.flicker % 5 !== 0;
+                        --this.flicker;
+                        if (this.flicker <= 0) {
+                            this.visible = true;
+                            delete this.animFunc;
+                        }
+                    }
+                };
+            }
+        }
+
+        return group;
+    },
+
     HALO: function (args) {
         // project - projectection function
         // seed string
@@ -76,13 +100,13 @@ var ConstructRender = {
                 b.x = Math.cos(angle) * (args.radius - tick);
                 b.y = Math.sin(angle) * (args.radius - tick);
                 graph.drawLine([ a, b ]);
-                // if (r() < 0.2) {
-                //     a.x = Math.cos(angle) * (args.radius - tick - 3);
-                //     a.y = Math.sin(angle) * (args.radius - tick - 3);
-                //     circleShape = new THREE.Shape();
-                //     circleShape.absarc(a.x, a.y, 1, 0, Math.PI * 2, false);
-                //     graph.drawShapeLine(circleShape);
-                // }
+                if (r() < 0.2) {
+                    a.x = Math.cos(angle) * (args.radius - tick - 3);
+                    a.y = Math.sin(angle) * (args.radius - tick - 3);
+                    circleShape = new THREE.Shape();
+                    circleShape.absarc(a.x, a.y, 1, 0, Math.PI * 2, false);
+                    graph.drawShape(circleShape);
+                }
             }
             angle += step;
         }

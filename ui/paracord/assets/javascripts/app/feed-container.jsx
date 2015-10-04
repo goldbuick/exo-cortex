@@ -53,4 +53,11 @@ export default class FeedContainer {
         self.db.add([ data ]);
     }
 
+    resetFilters () {
+        var self = this;
+        Object.keys(self.dimensions).forEach(prop => {
+            self.dimensions[prop].filterAll();
+        });
+    }
+
 }

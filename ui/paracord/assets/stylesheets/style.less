@@ -1,6 +1,11 @@
 
 @import "flexbox.less";
 
+@font-face {
+    font-family: "cpunk";
+    src: url("/media/OCRA.woff") format('woff');
+}
+
 @fg-color: #00D8FF;
 @bg-color: darken(@fg-color, 45%);
 @alt-color: darken(@fg-color, 15%);
@@ -19,8 +24,40 @@ body, html {
 .alt-color { color: @alt-color; }
 .soft-color { color: @soft-color; }
 
+@glow: rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 20%,
+    rgba(255,255,255,0.001) 40%, rgba(255,255,255,0) 100%;
+
 .page-dashboard {
     position: absolute;
+
+    .top, .bottom {
+        width: 100%;
+        height: 200px;
+        position: absolute;
+    }
+
+    .top {
+        top: 0;
+        background: -moz-radial-gradient(top, ellipse cover, @glow);
+        background: -webkit-radial-gradient(top, ellipse cover, @glow);
+        background: radial-gradient(ellipse at top, @glow);
+    }
+
+    .bottom {
+        bottom: 0;
+        background: -moz-radial-gradient(bottom, ellipse cover, @glow);
+        background: -webkit-radial-gradient(bottom, ellipse cover, @glow);
+        background: radial-gradient(ellipse at bottom, @glow);
+    }
+
+    .queue {
+        right: 0;
+        position: absolute;
+        color: @fg-color;
+        font-family: 'cpunk';
+        font-size: 64px;
+        padding-right: 20px;
+    }
 }
 
 .page-layout {
@@ -53,11 +90,6 @@ body, html {
 @cmd-line-font-size: 12px;
 @cmd-line-height: (@cmd-line-font-size + 4px);
 
-@font-face {
-    font-family: "cpunk";
-    src: url("/media/OCRA.woff") format('woff');
-}
-
 .terminal, .cmd {
     font-family: 'cpunk';
     font-size: @cmd-line-font-size;
@@ -82,27 +114,4 @@ body, html {
 
 .diver.closed {
     height: 0 !important;
-}
-
-.page-dashboard .top, .page-dashboard .bottom {
-    width: 100%;
-    height: 200px;
-    position: absolute;
-}
-
-@glow: rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 20%,
-    rgba(255,255,255,0.001) 40%, rgba(255,255,255,0) 100%;
-
-.page-dashboard .top {
-    top: 0;
-    background: -moz-radial-gradient(top, ellipse cover, @glow);
-    background: -webkit-radial-gradient(top, ellipse cover, @glow);
-    background: radial-gradient(ellipse at top, @glow);
-}
-
-.page-dashboard .bottom {
-    bottom: 0;
-    background: -moz-radial-gradient(bottom, ellipse cover, @glow);
-    background: -webkit-radial-gradient(bottom, ellipse cover, @glow);
-    background: radial-gradient(ellipse at bottom, @glow);
 }

@@ -63,8 +63,13 @@ var RenderTarget = {
     },
 
     draw: function () {
+        var delta = (1.0 / 60.0);
+
+        this.scene.traverse(node => { if (node.animFunc) node.animFunc(delta); });
+
         this.renderer.clear();
-        this.composer.render(1.0 / 60.0);
+        this.composer.render(delta);
+
         this.renderTimer = window.requestAnimationFrame(this.draw);
     },
 

@@ -15,7 +15,8 @@ var DashBoard = React.createClass({
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enablePan = false;
         this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.15;
+        this.controls.rotateSpeed = 0.3;
+        this.controls.dampingFactor = 0.10;
         this.controls.minDistance = this.camera.position.z * 0.7;
         this.controls.maxDistance = this.camera.position.z;
     },

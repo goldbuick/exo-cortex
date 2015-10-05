@@ -1,4 +1,3 @@
-import css from 'app/lib/css';
 import t1 from 'app/three/postprocessing/EffectComposer';
 import t2 from 'app/three/postprocessing/RenderPass';
 import t3 from 'app/three/shaders/CopyShader';
@@ -35,6 +34,7 @@ var RenderTarget = {
         this.scene.add(this.camera);
         this.renderer.setSize(800, 600);
         this.renderer.autoClear = false;
+        window.maxAni = this.renderer.getMaxAnisotropy();
 
         this.composer = new THREE.EffectComposer(this.renderer);
         this.renderPass = new THREE.RenderPass(this.scene, this.camera);

@@ -1,6 +1,47 @@
+import css from 'app/lib/css';
 import Graph from 'app/graph';
+import BmFontText from 'app/three/bmfont/text';
+import BmFontShader from 'app/three/bmfont/sdf';
+import BmFontLoad from 'app/three/bmfont/load';
 
-function roundedRect( ctx, x, y, width, height, radius ) {
+var fontColor, fontConfig, fontTexture;
+BmFontLoad({
+    font: '/media/OCRA.fnt',
+    image: '/media/OCRA.png'
+}, (font, texture) => {
+    fontColor = css.getStyleRuleValue('.fg-color', 'color');
+    fontConfig = font;
+    fontTexture = texture;
+    fontTexture.needsUpdate = true;
+    fontTexture.minFilter = THREE.LinearMipMapLinearFilter;
+    fontTexture.magFilter = THREE.LinearFilter;
+    fontTexture.generateMipmaps = true;
+    fontTexture.anisotropy = window.maxAni;
+});
+
+function genText (pos, text) {
+    if (!fontConfig) return;
+    var geometry = BmFontText({
+            text: text,
+            font: fontConfig
+        }),
+        material = new THREE.ShaderMaterial(BmFontShader({
+            map: fontTexture,
+            smooth: 1 / 2048,
+            transparent: true,
+            side: THREE.DoubleSide,
+            color: fontColor
+        })),
+        text = new THREE.Mesh(geometry, material);
+
+    text.scale.multiplyScalar(0.5);
+    text.position.set(pos[0], pos[1], pos[2] - (geometry.layout.width / 4));
+    text.rotation.y = Math.PI * 0.5;
+    text.rotation.z = Math.PI;
+    return text;
+}
+
+function roundedRect ( ctx, x, y, width, height, radius ) {
     ctx.moveTo( x, y + radius );
     ctx.lineTo( x, y + height - radius );
     ctx.quadraticCurveTo( x, y + height, x + radius, y + height );
@@ -128,7 +169,14 @@ var ConstructRender = {
             graph.drawShapeLine(circleShape);
         }
 
-        return finish(args, graph);
+        var group = finish(args, graph);
+
+        if (fontConfig) {
+            var text = genText(args.project(0, 0, 10), args.seed);
+            if (text) group.add(text);
+        }
+
+        return group;
     }
 
 };

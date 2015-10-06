@@ -63,15 +63,15 @@ var DashBoard = React.createClass({
             });
 
             if (objectCount) {
+                var intro = { value: 0 };
+                var target = { value: 1 };
                 if (construct.anim.intro === undefined) {
-                    var intro = { value: 0 };
-                    var target = { value: 1 };
                     construct.anim.intro = new TWEEN.Tween(intro)
                         .to(target, 512 + Math.random() * 512);
 
                     construct.anim.intro.onUpdate(() => {
                         construct.graphs.forEach(graph => {
-                            if (graph.object.intro) graph.object.intro(intro.value);
+                            if (graph.object.animIntro) graph.object.animIntro(intro.value);
                         });
                     });
 
@@ -79,8 +79,29 @@ var DashBoard = React.createClass({
                     construct.anim.intro.start();
                     
                     construct.graphs.forEach(graph => {
-                        if (graph.object.intro) graph.object.intro(intro.value);
+                        if (graph.object.animIntro) graph.object.animIntro(intro.value);
                     });
+
+                } else if (construct.anim.changed === undefined) {
+                    construct.anim.changed = new TWEEN.Tween(intro)
+                        .to(target, 512 + Math.random() * 512);
+
+                    construct.anim.changed.onUpdate(() => {
+                        construct.graphs.forEach(graph => {
+                            if (graph.object.animChanged) graph.object.animChanged(intro.value);
+                        });
+                    });
+                    construct.anim.changed.onComplete(() => {
+                        construct.anim.changed = undefined;
+                    });
+
+                    construct.anim.changed.easing(TWEEN.Easing.Elastic.Out);
+                    construct.anim.changed.start();
+                    
+                    construct.graphs.forEach(graph => {
+                        if (graph.object.animChanged) graph.object.animChanged(intro.value);
+                    });
+
                 }
             }
 

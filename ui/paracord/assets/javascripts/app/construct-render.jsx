@@ -60,29 +60,16 @@ function finish(args, graph) {
     return graph.build(args.project);    
 }
 
+function keep(graph) {
+    graph.keep = true;
+    return graph;
+}
+
 var ConstructRender = {
 
     build: function (args) {
         var group;
-
-        if (args.type) {
-            group = ConstructRender[args.type](args);
-            group.keep = true;
-            // if (args.changed) {
-            //     group.flicker = 32;
-            //     group.animFunc = function (delta) {
-            //         if (this.flicker > 0) {
-            //             this.visible = this.flicker % 5 !== 0;
-            //             --this.flicker;
-            //             if (this.flicker <= 0) {
-            //                 this.visible = true;
-            //                 delete this.animFunc;
-            //             }
-            //         }
-            //     };
-            // }
-        }
-
+        if (args.type) group = ConstructRender[args.type](args);
         return group;
     },
 
@@ -180,12 +167,18 @@ var ConstructRender = {
             if (text) group.add(text);
         }
 
-        group.intro = function (value) {
-            object.visible = Math.round(value * 100) % 100 === 0;
+        group.animIntro = function (value) {
+            object.visible = Math.round(value * 100) % 5 === 0;
             text.material.uniforms.scramble.value = (1.0 - value) * 2.0;
         };
 
-        return group;
+        if (args.changed) {
+            group.animChanged = function (value) {
+                object.visible = Math.round(value * 100) % 5 === 0;
+            };
+        }
+
+        return keep(group);
     }
 
 };

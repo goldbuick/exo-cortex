@@ -66,7 +66,7 @@ var RenderTarget = {
         var delta = (1.0 / 60.0);
 
         if (this.update) this.update(delta);
-        this.scene.traverse(node => { if (node.animFunc) node.animFunc(delta); });
+        // this.scene.traverse(node => { if (node.animFunc) node.animFunc(delta); });
 
         this.renderer.clear();
         this.composer.render(delta);

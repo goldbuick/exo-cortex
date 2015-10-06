@@ -47,9 +47,6 @@ var DashBoard = React.createClass({
             construct.anim.tick = construct.anim.tick ||
                 (Math.random() * 1000);
 
-            construct.anim.offset = construct.anim.offset ||
-                (4000 + Math.random() * 1000);
-
             let objectCount = 0;
             construct.graphs.forEach(graph => {
                 if (graph.params.data) {
@@ -67,19 +64,22 @@ var DashBoard = React.createClass({
 
             if (objectCount) {
                 if (construct.anim.intro === undefined) {
-                    var position = { y: -1024 };
-                    var target = { y: 0 };
-                    construct.anim.intro = new TWEEN.Tween(position)
-                        .to(target, 1000 + Math.random() * 1000);
+                    var intro = { value: 0 };
+                    var target = { value: 1 };
+                    construct.anim.intro = new TWEEN.Tween(intro)
+                        .to(target, 512 + Math.random() * 512);
+
                     construct.anim.intro.onUpdate(() => {
                         construct.graphs.forEach(graph => {
-                            graph.object.position.y = position.y;
+                            if (graph.object.intro) graph.object.intro(intro.value);
                         });
                     });
+
                     construct.anim.intro.easing(TWEEN.Easing.Elastic.Out);
                     construct.anim.intro.start();
+                    
                     construct.graphs.forEach(graph => {
-                        graph.object.position.y = -10000;
+                        if (graph.object.intro) graph.object.intro(intro.value);
                     });
                 }
             }

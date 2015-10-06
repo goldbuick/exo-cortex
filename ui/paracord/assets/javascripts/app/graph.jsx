@@ -62,7 +62,4 @@ export default class Graph {
         }
     }
 
-    // need a collection of calls to generate THREE.shapes
-    // start looking at the graphs c3js does
-
 }

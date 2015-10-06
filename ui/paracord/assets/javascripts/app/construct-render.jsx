@@ -27,18 +27,19 @@ function genText (pos, text) {
         }),
         material = new THREE.ShaderMaterial(BmFontShader({
             map: fontTexture,
-            smooth: 1 / 2048,
+            smooth: 1 / 16,//2048,
             transparent: true,
             side: THREE.DoubleSide,
-            color: fontColor
+            color: fontColor,
+            scramble: 0
         })),
-        text = new THREE.Mesh(geometry, material);
+        mesh = new THREE.Mesh(geometry, material);
 
-    text.scale.multiplyScalar(0.5);
-    text.position.set(pos[0], pos[1], pos[2] - (geometry.layout.width / 4));
-    text.rotation.y = Math.PI * 0.5;
-    text.rotation.z = Math.PI;
-    return text;
+    mesh.scale.multiplyScalar(0.5);
+    mesh.position.set(pos[0], pos[1], pos[2] - (geometry.layout.width / 4));
+    mesh.rotation.y = Math.PI * 0.5;
+    mesh.rotation.z = Math.PI;
+    return mesh;
 }
 
 function roundedRect ( ctx, x, y, width, height, radius ) {
@@ -67,19 +68,19 @@ var ConstructRender = {
         if (args.type) {
             group = ConstructRender[args.type](args);
             group.keep = true;
-            if (args.changed) {
-                group.flicker = 32;
-                group.animFunc = function (delta) {
-                    if (this.flicker > 0) {
-                        this.visible = this.flicker % 5 !== 0;
-                        --this.flicker;
-                        if (this.flicker <= 0) {
-                            this.visible = true;
-                            delete this.animFunc;
-                        }
-                    }
-                };
-            }
+            // if (args.changed) {
+            //     group.flicker = 32;
+            //     group.animFunc = function (delta) {
+            //         if (this.flicker > 0) {
+            //             this.visible = this.flicker % 5 !== 0;
+            //             --this.flicker;
+            //             if (this.flicker <= 0) {
+            //                 this.visible = true;
+            //                 delete this.animFunc;
+            //             }
+            //         }
+            //     };
+            // }
         }
 
         return group;
@@ -169,12 +170,20 @@ var ConstructRender = {
             graph.drawShapeLine(circleShape);
         }
 
-        var group = finish(args, graph);
+        var object = finish(args, graph),
+            group = new THREE.Group();
+
+        group.add(object);
 
         if (fontConfig) {
             var text = genText(args.project(0, 0, 10), args.seed);
             if (text) group.add(text);
         }
+
+        group.intro = function (value) {
+            object.visible = Math.round(value * 100) % 100 === 0;
+            text.material.uniforms.scramble.value = (1.0 - value) * 2.0;
+        };
 
         return group;
     }

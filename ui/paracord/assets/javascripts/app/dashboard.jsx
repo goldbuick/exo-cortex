@@ -37,18 +37,18 @@ var DashBoard = React.createClass({
 
     genPool: function () {
         var pool = new Graph(),
-            radius = 64,
-            count = Math.round(this.state.pool.size() / 512);
+            radius = 96,
+            count = Math.round(this.state.pool.size() / 1000);
         
+        // figure out the upper limit on geometry here ... 
         for (var i=0; i<count; ++i) {
-            pool.drawLoop(6, radius, Math.sin(i / 0.001) * 16);
-            radius += 16;
+            radius += (i % 10 === 0) ? 48 : 16;
+            pool.drawLoop(6, radius, Math.sin(i / 0.001) * 8);
         }
         pool.tessellate(10);
 
         var object = pool.build(RenderProject.plane(1.0));
         this.scene.add(keep(object)); 
-        object.position.y = -512;
 
         object.animIntro = function (value) {
             object.visible = Math.round(value * 100) % 4 === 0;
@@ -80,12 +80,16 @@ var DashBoard = React.createClass({
                 innerRadius = radius - 64,
                 outerRadius = radius + 256,
                 category = new Graph();
-            category.drawLoop(32, radius, 0);
+            category.drawLoop(64, radius, 0);
 
             var circleShape, angle = start;
             for (var i=0; i<types.length; ++i) {
                 category.drawLine([
                     { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius, z: 0 },
+                    { x: Math.cos(angle) * innerRadius, y: Math.sin(angle) * innerRadius, z: 32 }
+                ]);
+                category.drawLine([
+                    { x: Math.cos(angle) * innerRadius, y: Math.sin(angle) * innerRadius, z: 32 },
                     { x: Math.cos(angle) * innerRadius, y: Math.sin(angle) * innerRadius, z: 0 }
                 ]);
 
@@ -94,12 +98,12 @@ var DashBoard = React.createClass({
                     32, 0, Math.PI * 2, false);
                 category.drawShape(circleShape);
 
-                angle += 0.2;
-
                 circleShape = new THREE.Shape();
                 circleShape.absarc(Math.cos(angle) * outerRadius, Math.sin(angle) * outerRadius,
                     16, 0, Math.PI * 2, false);
-                category.drawShape(circleShape);
+                category.drawShapeLine(circleShape);
+
+                angle += 0.2;
             }
             start += 0.5;
 
@@ -167,7 +171,7 @@ var DashBoard = React.createClass({
 
         if (this.poolBase) {
             this.poolBase.tick += delta;
-            this.poolBase.position.y = -512 + Math.cos(this.poolBase.tick) * 4;
+            this.poolBase.position.y = -550 + Math.cos(this.poolBase.tick) * 4;
         }
 
         if (self.categories)

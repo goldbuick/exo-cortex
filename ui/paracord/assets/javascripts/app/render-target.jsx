@@ -1,10 +1,12 @@
-import t1 from 'app/three/postprocessing/EffectComposer';
-import t2 from 'app/three/postprocessing/RenderPass';
-import t3 from 'app/three/shaders/CopyShader';
-import t4 from 'app/three/shaders/ConvolutionShader';
-import t5 from 'app/three/postprocessing/MaskPass';
-import t6 from 'app/three/postprocessing/BloomPass';
-import t7 from 'app/three/postprocessing/ShaderPass';
+import 'app/three/shaders/CopyShader';
+import 'app/three/shaders/DigitalGlitch';
+import 'app/three/shaders/ConvolutionShader';
+import 'app/three/postprocessing/EffectComposer';
+import 'app/three/postprocessing/MaskPass';
+import 'app/three/postprocessing/BloomPass';
+import 'app/three/postprocessing/ShaderPass';
+import 'app/three/postprocessing/GlitchPass';
+import 'app/three/postprocessing/RenderPass';
 
 var RenderTarget = {
 
@@ -37,12 +39,15 @@ var RenderTarget = {
         window.maxAni = this.renderer.getMaxAnisotropy();
 
         this.composer = new THREE.EffectComposer(this.renderer);
-        this.renderPass = new THREE.RenderPass(this.scene, this.camera);
-        this.composer.addPass(this.renderPass);
-        var effectBloom = new THREE.BloomPass(1.8);
+        var renderPass = new THREE.RenderPass(this.scene, this.camera);
+        var effectBloom = new THREE.BloomPass(2);
         var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+        // var effectGlitch = new THREE.GlitchPass(64);
+
+        this.composer.addPass(renderPass);
         this.composer.addPass(effectBloom);
         this.composer.addPass(effectCopy);
+        // this.composer.addPass(effectGlitch);
         effectCopy.renderToScreen = true;
 
         // handle window size changing
@@ -75,8 +80,9 @@ var RenderTarget = {
     },
 
     pruneBegin: function () {
-        if (!this.scene) return;
+        if (!this.scene) return false;
         this.scene.children.forEach(child => { child.keep = false; });
+        return true;
     },
 
     pruneEnd: function () {

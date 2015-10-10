@@ -32,6 +32,23 @@ export default class Graph {
         this.drawLine(curve.getSpacedPoints(divisions));
     }
 
+    drawLoop (sides, radius, z) {
+        var points = [ ],
+            step = (Math.PI * 2) / sides;
+
+        var angle = 0;
+        for (var i=0; i<=sides; ++i) {
+            points.push({
+                x: Math.cos(angle) * radius,
+                y: Math.sin(angle) * radius,
+                z: z
+            });
+            angle += step;
+        }
+
+        return this.drawLine(points);
+    }
+
     drawShape (shape) {
         // given a THREE.shape destruct it into glyph addVert, addFills 
         var self = this,

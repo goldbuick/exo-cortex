@@ -6,11 +6,24 @@ var Page = React.createClass({
     ],
 
     render: function () {
-        if (this.state.queue) {
-            return <div className="queue">{this.state.queue}</div>;
+        var total = this.state.queue.pool + this.state.queue.feed,
+            status = {
+                width: Math.round(total / 32) + 'px'
+            };
+
+        var anim;
+        if (this.state.queue.pool === -1) {
+            anim = 'queue hidden';
+        } else {
+            anim = (total > 10) ? 'queue animated fadeIn' : 'queue animated fadeOut';
         }
-        return <div className="queue"></div>;
+
+        return <div className={anim}>
+            <div className="logo"><img src="/media/exo-paracord.png" /></div>
+            <div className="bar" style={status}></div>
+        </div>
     }
+
 });
 
 export default Page;

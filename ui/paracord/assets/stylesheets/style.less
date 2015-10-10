@@ -6,10 +6,12 @@
     src: url("/media/OCRA.woff") format('woff');
 }
 
-@fg-color: #00D8FF;
-@bg-color: darken(@fg-color, 45%);
-@alt-color: darken(@fg-color, 15%);
-@soft-color: darken(@fg-color, 42%);
+@base-color: #69BAFF;
+
+@fg-color: darken(@base-color, 4%);
+@bg-color: darken(@base-color, 64%);
+@alt-color: darken(@base-color, 25%);
+@soft-color: darken(@base-color, 42%);
 
 @font-light: 100;
 @font-normal: 500;
@@ -26,6 +28,31 @@ body, html {
 
 @glow: rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 20%,
     rgba(255,255,255,0.001) 40%, rgba(255,255,255,0) 100%;
+
+.queue {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: absolute;
+    pointer-events: none;
+
+    .logo {
+        width: 404px;
+        margin: 0 auto;
+        padding-top: 128px;
+    }
+
+    .bar {
+        height: 1px;
+        margin: 16px auto 0 auto;
+        background-color: @base-color;
+    }
+}
+
+.queue.hidden {
+    visibility: hidden;
+}
 
 .page-dashboard {
     position: absolute;
@@ -57,20 +84,6 @@ body, html {
         font-family: 'cpunk';
         font-size: 64px;
         padding-right: 20px;
-    }
-}
-
-.page-layout {
-    .flex-display;
-    .flex-direction(row);
-
-    .page-left, .page-right {
-        .flex(1 0 auto);
-        position: relative;
-    }
-
-    .page-left.closed, .page-right.closed {
-        display: none;
     }
 }
 

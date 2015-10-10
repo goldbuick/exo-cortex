@@ -1,7 +1,8 @@
 
 // toolkit api
 
-var config = require('./config'),
+var url = require('url'),
+    config = require('./config'),
     httpjson = require('./httpjson'),
     httppost = require('./httppost'),
     uuid = require('node-uuid'),
@@ -233,6 +234,16 @@ Server.prototype = {
     // generic http post
     post: function (host, port, path, json, success, failure) {
         httppost(host, port, path, json, success, failure);
+    },
+
+    // parse url
+    parseUrl: function (str) {
+        var args = url.parse(str);
+        return {
+            host: args.hostname,
+            port: args.port || (args.protocol === 'https:' ? 443 : 80),
+            path: args.path
+        };
     },
 
     // register handled api routes to config-server

@@ -1,7 +1,16 @@
 var RenderProject = {
+
+    plane: function (scale) {
+        return function (x, y, z) {
+            var _x = x * scale,
+                _y = z * scale,
+                _z = y * scale;
+            return [ _x, _y, _z ];
+        }
+    },
     
     // assume x, y in radians, z is height
-    sphereProject: function (radius, scale) {
+    sphere: function (radius, scale) {
         return function (x, y, z) {
             x = x * scale;
             y = y * scale;

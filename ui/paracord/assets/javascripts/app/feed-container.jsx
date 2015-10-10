@@ -1,6 +1,6 @@
 export default class FeedContainer {
 
-    constructor (format, capture, dimensions, groups) {
+    constructor (format, dimensions, groups) {
         var self = this;
 
         // result data
@@ -11,12 +11,6 @@ export default class FeedContainer {
         self.format = { };
         Object.keys(format).forEach(prop => {
             self.format[prop] = new Function('d', 'return ' + format[prop]);
-        });
-
-        // capture transformed record into meta-data
-        self.capture = { };
-        Object.keys(capture).forEach(prop => {
-            self.capture[prop] = new Function('d', 'return ' + capture[prop]);
         });
 
         // be able to filter data
@@ -42,11 +36,6 @@ export default class FeedContainer {
         var data = { };
         Object.keys(self.format).forEach(prop => {
             data[prop] = self.format[prop](record);
-        });
-
-        // execute capture to meta
-        Object.keys(self.capture).forEach(prop => {
-            self.meta[prop] = self.capture[prop](data);
         });
 
         // add to cross filter

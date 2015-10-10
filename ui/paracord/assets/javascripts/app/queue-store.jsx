@@ -1,18 +1,30 @@
-import FeedActions from 'app/feed-actions';
+import PoolActions from 'app/pool-actions';
+// import FeedActions from 'app/feed-actions';
 
 export default Reflux.createStore({
-    listenables: [ FeedActions ],
+    listenables: [
+        // FeedActions,
+        PoolActions
+    ],
 
     init: function () {
-        this.count = 0;
+        this.count = {
+            pool: -1,
+            feed: 0
+        };
     },
 
     getInitialState: function () {
         return this.count;
     },
 
-    onQueueStatus: function (count) {
-        this.count = count;
+    onPoolQueueStatus: function (count) {
+        this.count.pool = count;
+        this.trigger(this.count);
+    },
+
+    onFeedQueueStatus: function (count) {
+        this.count.feed = count;
         this.trigger(this.count);
     }
 

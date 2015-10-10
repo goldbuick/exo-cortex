@@ -40,16 +40,53 @@ function test (feed) {
         text: 'd.text',
         user: 'd.user'
     },{
-        // meta data capture
-        // when: 'd.when.format("dddd, MMMM Do YYYY, h:mm:ss a")'
-    }, {
         // crossfilter dimensions
         server: 'd.server',
         minutes: 'Math.round(d.when.valueOf() / 60000)',
-    }, {
+    },{
         // dimension groups
         server: [ 'server', 'd' ],
         byMinutes: [ 'minutes', 'Math.round(d / 5)' ]
+    });
+
+
+    feed.matches.push(new FeedMatch([{
+        channel: 'ping',
+        type: 'gohome'
+    },{
+        channel: 'ping',
+        type: 'gowork'
+    }], [ 'travel' ]));
+
+    feed.extractors.travel = new FeedExtract({
+        id: '$id',
+        when: '$when',
+        type: '$type',
+        meta: {
+            rows: {
+                elements: {
+                    duration: {
+                        text: '$text',
+                        value: '$duration'
+                    }
+                }
+            }
+        }
+    }, [ 'travel' ]);
+
+    feed.containers.travel = new FeedContainer({
+        // format
+        id: 'd.id',
+        when: 'moment(d.when)',
+        type: 'd.type',
+        text: 'd.text',
+        duration: 'd.duration'
+    },{
+        // crossfilter dimensions
+        type: 'd.type',
+        minutes: 'Math.round(d.when.valueOf() / 60000)',
+    },{
+        // dimension groups
     });
 }
 
@@ -138,7 +175,7 @@ export default Reflux.createStore({
         var self = this,
             added = [ ];
 
-        FeedActions.queueStatus(self.queue.length);
+        FeedActions.feedQueueStatus(self.queue.length);
 
         if (self.queue.length) {
             for (let i=0; i<1000 && i<self.queue.length; ++i) {

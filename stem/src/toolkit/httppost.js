@@ -1,7 +1,8 @@
 
 // standard helper code to POST json data to a given url
 
-var http = require('http');
+var http = require('http'),
+    https = require('https');
 
 module.exports = function(host, port, path, data, success, fail) {
     function writeError() {
@@ -26,8 +27,10 @@ module.exports = function(host, port, path, data, success, fail) {
         headers: headers
     };
 
+    var proto = (options.port === 443) ? https : http;
+
     // setup request
-    var req = http.request(options, function (res) {
+    var req = proto.request(options, function (res) {
         var responseBody = '';
 
         function callbackError (message) {

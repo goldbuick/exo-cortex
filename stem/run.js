@@ -33,6 +33,7 @@ var stem = [
     node('api-irc'),
     node('api-xmpp'),
     node('api-ident'),
+    node('api-ping'),
 ];
 
 function next() {

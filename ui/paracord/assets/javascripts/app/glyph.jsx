@@ -1,3 +1,10 @@
+import css from 'app/lib/css';
+
+var baseColor = css.getStyleRuleValue('.fg-color', 'color');
+baseColor = baseColor.substring(4, baseColor.length - 1).split(',').map(str => {
+    return parseFloat(str.trim(str)) / 255.0;
+});
+
 export default class Glyph {
     constructor () {
         this.count = 0;
@@ -10,13 +17,13 @@ export default class Glyph {
 
     addVert (x, y, z) {
         // 00D8FF
-        this.colors.push(0, (216 / 255), (255 / 255));
+        this.colors.push(baseColor[0], baseColor[1], baseColor[2]);
         this.positions.push(-y, x, z);
         return this.count++;
     }
 
     splitVert (x, y, z) {
-        this.colors.push(0, (216 / 255), (255 / 255));
+        this.colors.push(baseColor[0], baseColor[1], baseColor[2]);
         this.positions.push(x, y, z);
         return this.count++;
     }
@@ -161,7 +168,7 @@ export default class Glyph {
         fillGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array(this.fills), 1));
         fillGeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
         fillGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(this.colors.map(function (value) {
-            return value * 0.3;
+            return value * 0.9;
         })), 3));
         fillGeometry.computeBoundingSphere();
 

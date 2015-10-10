@@ -19,7 +19,7 @@ BmFontLoad({
     fontTexture.anisotropy = window.maxAni;
 });
 
-function genText (pos, text) {
+function genText (pos, text, scale) {
     if (!fontConfig) return;
     var geometry = BmFontText({
             text: text,
@@ -27,7 +27,7 @@ function genText (pos, text) {
         }),
         material = new THREE.ShaderMaterial(BmFontShader({
             map: fontTexture,
-            smooth: 1 / 16,//2048,
+            smooth: 1 / 16,
             transparent: true,
             side: THREE.DoubleSide,
             color: fontColor,
@@ -35,8 +35,10 @@ function genText (pos, text) {
         })),
         mesh = new THREE.Mesh(geometry, material);
 
-    mesh.scale.multiplyScalar(0.5);
-    mesh.position.set(pos[0], pos[1], pos[2] - (geometry.layout.width / 4));
+    var _width = geometry.layout.width * (scale * 0.5),
+        _height = geometry.layout.height * (scale * 0.25);
+    mesh.scale.multiplyScalar(scale);
+    mesh.position.set(pos[0], pos[1] - _height, pos[2] - _width);
     mesh.rotation.y = Math.PI * 0.5;
     mesh.rotation.z = Math.PI;
     return mesh;
@@ -55,33 +57,65 @@ function roundedRect ( ctx, x, y, width, height, radius ) {
     return ctx;
 }
 
-function finish(args, graph) {
+function finish (args, graph) {
     graph.tessellate(10);
     return graph.build(args.project);    
 }
 
-function keep(graph) {
+function keep (graph) {
     graph.keep = true;
     return graph;
 }
 
+function metaStr (meta, str) {
+    return str.replace(/\$([a-zA-z0-9_]*)/, function(match, name, string) {
+        return meta[name] || match;
+    });
+}
+
 var ConstructRender = {
 
-    build: function (args) {
+    build: function (graph) {
         var group;
-        if (args.type) group = ConstructRender[args.type](args);
+        if (graph.params && graph.params.type) {
+            group = ConstructRender[graph.params.type](graph.meta, graph.params);
+        }
         return group;
     },
 
-    HALO: function (args) {
+    TEXT: function (meta, args) {
         // project - projectection function
-        // seed string
+        // text - string
+        var object = new THREE.Group();
+
+        if (fontConfig) {
+            var pos = args.project(0, 0, 0),
+                text = genText(pos, metaStr(meta, args.text), args.scale);
+            if (text) object.add(text);
+        }
+
+        object.animIntro = function (value) {
+            text.material.uniforms.scramble.value = (1.0 - value);
+        };
+
+        if (args.changed) {
+            object.animChanged = function (value) {
+                text.material.uniforms.scramble.value = (1.0 - value);
+            };
+        }
+
+        return keep(object);
+    },
+
+    HALO: function (meta, args) {
+        // project - projectection function
+        // seed - string
         // data - list of data samples
         // radius - when does the inner edge start
         // width - how thick is the halo
         // tickMarks - every x data samples
 
-        var r = new alea(args.seed),
+        var r = new alea(metaStr(meta, args.seed)),
             graph = new Graph(),
             angle = 0,
             a = new THREE.Vector3(0, 0, 0),
@@ -157,28 +191,19 @@ var ConstructRender = {
             graph.drawShapeLine(circleShape);
         }
 
-        var object = finish(args, graph),
-            group = new THREE.Group();
+        var object = finish(args, graph);
 
-        group.add(object);
-
-        if (fontConfig) {
-            var text = genText(args.project(0, 0, 10), args.seed);
-            if (text) group.add(text);
-        }
-
-        group.animIntro = function (value) {
-            object.visible = Math.round(value * 100) % 5 === 0;
-            text.material.uniforms.scramble.value = (1.0 - value) * 2.0;
+        object.animIntro = function (value) {
+            object.visible = Math.round(value * 100) % 4 === 0;
         };
 
         if (args.changed) {
-            group.animChanged = function (value) {
-                object.visible = Math.round(value * 100) % 5 === 0;
+            object.animChanged = function (value) {
+                object.visible = Math.round(value * 100) % 4 === 0;
             };
         }
 
-        return keep(group);
+        return keep(object);
     }
 
 };

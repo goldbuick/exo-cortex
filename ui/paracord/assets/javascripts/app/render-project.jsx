@@ -8,6 +8,15 @@ var RenderProject = {
             return [ _x, _y, _z ];
         }
     },
+
+    altPlane: function (scale) {
+        return function (x, y, z) {
+            var _x = z * scale,
+                _y = x * scale,
+                _z = y * scale;
+            return [ _x, _y, _z ];
+        }
+    },
     
     // assume x, y in radians, z is height
     sphere: function (radius, scale) {

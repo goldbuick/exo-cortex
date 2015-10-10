@@ -79,21 +79,16 @@ var RenderTarget = {
         this.renderTimer = window.requestAnimationFrame(this.draw);
     },
 
-    pruneBegin: function () {
-        if (!this.scene) return false;
-        this.scene.children.forEach(child => { child.keep = false; });
-        return true;
-    },
+    genScene: function (fn) {
+        var self = this;
+        if (!self.scene) return;
 
-    pruneEnd: function () {
-        if (!this.scene) return;
-        var self = this,
-            remove = [ ];
+        self.scene.children.forEach(child => { child.keep = false; });
+        fn.apply(self);
 
+        var remove = [ ];
         self.scene.children.forEach(child => {
-            if (!child.keep && !child.alwaysKeep) {
-                remove.push(child);
-            }
+            if (!child.keep && !child.alwaysKeep) remove.push(child);
         });
 
         remove.forEach(child => { self.scene.remove(child); });

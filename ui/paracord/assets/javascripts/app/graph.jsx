@@ -32,15 +32,17 @@ export default class Graph {
         this.drawLine(curve.getSpacedPoints(divisions));
     }
 
-    drawLoop (sides, radius, z) {
+    drawLoop (x, y, z, sides, radius, skip) {
         var points = [ ],
             step = (Math.PI * 2) / sides;
+
+        if (skip !== undefined) sides -= skip;
 
         var angle = 0;
         for (var i=0; i<=sides; ++i) {
             points.push({
-                x: Math.cos(angle) * radius,
-                y: Math.sin(angle) * radius,
+                x: x + Math.cos(angle) * radius,
+                y: y + Math.sin(angle) * radius,
                 z: z
             });
             angle += step;

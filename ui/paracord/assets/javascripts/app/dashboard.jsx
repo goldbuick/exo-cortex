@@ -1,184 +1,77 @@
 import RenderTarget from 'app/render-target';
 import RenderProject from 'app/render-project';
 import PoolStore from 'app/pool-store';
-import Graph from 'app/graph';
-// import ConstructRender from 'app/construct-render';
-// import ConstructStore from 'app/construct-store';
+import DashBoardPool from 'app/dashboard-pool';
+import DashBoardCategories from 'app/dashboard-categories';
 // import 'app/three/controls/OrbitControls';
-
-function keep (graph) {
-    graph.keep = true;
-    return graph;
-}
 
 var DashBoard = React.createClass({
     mixins: [
         RenderTarget,
         Reflux.connect(PoolStore, 'pool'),
-        // Reflux.connect(ConstructStore, 'constructs'),
     ],
 
-    getInitialState: function () {
-        return {
-            init: true
-        };
+    addObject: function (object, state, value) {
+        object.keep = true;
+        this.scene.add(object);
+        this.applyGraphStatus(state, object, value);
+    },
+
+    getGraphState: function (key, name) {
+        var prop = 'graph-' + key + '-' + name,
+            data = this[prop];
+        if (data === undefined) this[prop] = data = { };
+        return data;
+    },
+
+    applyGraphStatus: function (state, object, value) {
+        this.applyGraphIntro(state, object);
+        var strValue = JSON.stringify(value);
+        if (state.lastValue !== strValue) {
+            state.lastValue = strValue;
+            this.applyGraphChanged(state, object);
+        }
+    },
+
+    applyGraphChanged: function (state, object) {
+        this.applyGraphIntro(state, object, 128, true);
+    },
+
+    applyGraphIntro: function (state, object, range, force) {
+        var self = this,
+            intro = { value: 0 },
+            target = { value: 1 };
+
+        range = range || 256;
+        if (force || state.intro === undefined) {
+            state.intro = new TWEEN.Tween(intro)
+                .to(target, range + Math.random() * range);
+
+            state.intro.onUpdate(() => {
+                if (object.animIntro) object.animIntro(intro.value);
+            });
+
+            state.intro.easing(TWEEN.Easing.Back.InOut);
+            state.intro.start();
+        }
     },
 
     componentDidMount: function () {
         this.camera.position.z = 1440;
-        // this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        // this.controls.enablePan = false;
-        // this.controls.enableDamping = true;
-        // this.controls.rotateSpeed = 0.3;
-        // this.controls.dampingFactor = 0.10;
-        // this.controls.minDistance = this.camera.position.z * 0.7;
-        // this.controls.maxDistance = this.camera.position.z;
     },
-
-    genPool: function () {
-        var pool = new Graph(),
-            radius = 96,
-            count = Math.round(this.state.pool.size() / 1000);
-        
-        // figure out the upper limit on geometry here ... 
-        for (var i=0; i<count; ++i) {
-            radius += (i % 10 === 0) ? 48 : 16;
-            pool.drawLoop(6, radius, Math.sin(i / 0.001) * 8);
-        }
-        pool.tessellate(10);
-
-        var object = pool.build(RenderProject.plane(1.0));
-        this.scene.add(keep(object)); 
-
-        object.animIntro = function (value) {
-            object.visible = Math.round(value * 100) % 4 === 0;
-        };
-
-        this.applyStatus('pool', 'base', object, count);
-        this.poolBase = object;
-        this.poolBase.tick = 0;
-    },
-
-    genCategories: function () {
-        var self = this,
-            pool = self.state.pool;
-
-        pool.reset();
-        var channels = pool.groupByChannels.all().map(item => { return item.key; });
-
-        var offset = 0, start = Math.PI * 0.5;
-        self.categories = channels.map(channel => {
-            pool.reset();
-            pool.channel.filterExact(channel);
-            var types = pool.groupByTypes.all().filter(item => {
-                return item.value > 0;
-            }).map(item => {
-                return item.key;
-            });
-
-            var radius = 768,
-                innerRadius = radius - 64,
-                outerRadius = radius + 256,
-                category = new Graph();
-            category.drawLoop(64, radius, 0);
-
-            var circleShape, angle = start;
-            for (var i=0; i<types.length; ++i) {
-                category.drawLine([
-                    { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius, z: 0 },
-                    { x: Math.cos(angle) * innerRadius, y: Math.sin(angle) * innerRadius, z: 32 }
-                ]);
-                category.drawLine([
-                    { x: Math.cos(angle) * innerRadius, y: Math.sin(angle) * innerRadius, z: 32 },
-                    { x: Math.cos(angle) * innerRadius, y: Math.sin(angle) * innerRadius, z: 0 }
-                ]);
-
-                circleShape = new THREE.Shape();
-                circleShape.absarc(Math.cos(angle) * innerRadius, Math.sin(angle) * innerRadius,
-                    32, 0, Math.PI * 2, false);
-                category.drawShape(circleShape);
-
-                circleShape = new THREE.Shape();
-                circleShape.absarc(Math.cos(angle) * outerRadius, Math.sin(angle) * outerRadius,
-                    16, 0, Math.PI * 2, false);
-                category.drawShapeLine(circleShape);
-
-                angle += 0.2;
-            }
-            start += 0.5;
-
-            var object = category.build(RenderProject.plane(1.0));
-            self.scene.add(keep(object)); 
-            object.position.y = -512 + offset;
-            object.rotation.x = 0.03;
-            offset += 48;
-
-            object.animIntro = function (value) {
-                object.visible = Math.round(value * 100) % 4 === 0;
-            };
-
-            self.applyStatus('category', channel, object, types);
-            return object;
-        });
-    },
-
+    
     render: function () {
-        if (this.pruneBegin()) {
-            this.genPool();
-            this.genCategories();
-            this.pruneEnd();
-        }
+        this.genScene(() => {
+            DashBoardPool.gen(this);
+            DashBoardCategories.gen(this);
+        });
         return <div className="render-target"></div>;
-    },
-
-    applyStatus: function (key, name, object, value) {
-        this.applyIntro(key, name, object);
-        var prop = 'status-' + key + '-' + name,
-            strValue = JSON.stringify(value);
-        if (this[prop] !== strValue) {
-            this[prop] = strValue;
-            this.applyChanged(key, name, object);
-        }
-    },
-
-    applyChanged: function (key, name, object) {
-        this.applyIntro(key, name, object, 128, true);
-    },
-
-    applyIntro: function (key, name, object, range, force) {
-        var self = this,
-            intro = { value: 0 },
-            target = { value: 1 },
-            prop = 'intro-' + key + '-' + name;
-
-        range = range || 256;
-        if (force || self[prop] === undefined) {
-            self[prop] = new TWEEN.Tween(intro)
-                .to(target, range + Math.random() * range);
-
-            self[prop].onUpdate(() => {
-                if (object.animIntro) object.animIntro(intro.value);
-            });
-
-            self[prop].easing(TWEEN.Easing.Back.InOut);
-            self[prop].start();
-        }
     },
 
     update: function (delta) {
         TWEEN.update();
-        var self = this;
-
-        if (this.poolBase) {
-            this.poolBase.tick += delta;
-            this.poolBase.position.y = -550 + Math.cos(this.poolBase.tick) * 4;
-        }
-
-        if (self.categories)
-            self.categories.forEach(category => {
-                var velocity = Math.cos(category.position.y);
-                category.rotation.y += (delta + velocity) * 0.001;
-            });
+        DashBoardPool.update(this, delta);
+        DashBoardCategories.update(this, delta);
     }
 
     // update: function (delta) {

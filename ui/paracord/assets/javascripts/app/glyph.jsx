@@ -168,12 +168,12 @@ export default class Glyph {
         fillGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array(this.fills), 1));
         fillGeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
         fillGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(this.colors.map(function (value) {
-            return value * 0.9;
+            return value * 0.5;
         })), 3));
         fillGeometry.computeBoundingSphere();
 
         var fillMaterial = new THREE.MeshBasicMaterial({
-                opacity: 0.9,
+                opacity: 0.7,
                 transparent: true,
                 side: THREE.DoubleSide,
                 vertexColors: THREE.VertexColors

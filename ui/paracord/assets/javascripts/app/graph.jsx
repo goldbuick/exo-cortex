@@ -51,11 +51,9 @@ export default class Graph {
         return this.drawLine(points);
     }
 
-    drawShape (shape) {
-        // given a THREE.shape destruct it into glyph addVert, addFills 
+    drawGeometry (geometry) {
         var self = this,
-            offset = self.glyph.count,
-            geometry = shape.makeGeometry();
+            offset = self.glyph.count;
 
         geometry.vertices.forEach(vert => {
             self.glyph.addVert(vert.x, vert.y, vert.z);
@@ -64,6 +62,25 @@ export default class Graph {
         geometry.faces.forEach(face => {
             self.glyph.addFill(offset + face.a, offset + face.b, offset + face.c);
         });
+    }
+
+    drawGeometryLine (geometry) {
+        var self = this,
+            offset = self.glyph.count;
+
+        geometry.vertices.forEach(vert => {
+            self.glyph.addVert(vert.x, vert.y, vert.z);
+        });
+
+        geometry.faces.forEach(face => {
+            self.glyph.addLine(offset + face.a, offset + face.b);
+            self.glyph.addLine(offset + face.b, offset + face.c);
+        });
+    }
+
+    drawShape (shape) {
+        // given a THREE.shape destruct it into glyph addVert, addFills 
+        this.drawGeometry(shape.makeGeometry());
     }
 
     drawShapeLine (shape) {

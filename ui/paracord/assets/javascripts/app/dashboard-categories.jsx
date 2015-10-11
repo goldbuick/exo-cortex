@@ -2,7 +2,7 @@ import RenderProject from 'app/render-project';
 import Graph from 'app/graph';
 
 function getBaseState (dash) {
-    return dash.getGraphState('categoryBase', 'list');
+    return dash.getGraphState('base', 'category');
 }
 
 function getState (dash, channel) {
@@ -10,6 +10,10 @@ function getState (dash, channel) {
 }
 
 var DashboardCategories = {
+
+    base: function (dash) {
+        return getBaseState(dash);
+    },
     
     gen: function (dash) {
         var state = getBaseState(dash),
@@ -20,6 +24,8 @@ var DashboardCategories = {
 
         var r = new alea('category-system');
         var offset = 0, radius = 600, step = 48, start = Math.PI * 0.25;
+        state.basePosition = state.basePosition || -470;
+        state.basePositionMin = state.basePositionMin || -470;
         state.channels = channels.map(channel => {
             var _state = getState(dash, channel);
 
@@ -37,8 +43,6 @@ var DashboardCategories = {
             category.drawLoop(0, 0, 0, 64, radius);
             if (r() < 0.3) category.drawLoop(0, 0, 6, 64, radius - 8);
             _state.object = category.build(RenderProject.plane(1.0));
-            _state.object.position.y = -470 + offset;
-            offset += step;
 
             var angle = 0;
             for (var i=0; i<types.length; ++i) {
@@ -68,6 +72,7 @@ var DashboardCategories = {
                 angle += 0.2;
             }
 
+            _state.basePosition = offset;
             _state.animDelta = _state.animDelta || (0.01 + 0.01 * r());
             _state.animRotation = _state.animRotation || start;
             _state.object.animIntro = function (value) {
@@ -75,6 +80,7 @@ var DashboardCategories = {
             };
 
             radius += step;
+            offset += step;
             start += Math.PI * 0.7;
             dash.addObject(_state.object, _state, types.length);
             return _state;
@@ -89,6 +95,7 @@ var DashboardCategories = {
         state.channels.forEach((channel => {
             channel.animRotation += channel.animDelta * delta;
             channel.object.rotation.y = channel.animRotation;
+            channel.object.position.y = state.basePosition + channel.basePosition;
         }));
     }
 

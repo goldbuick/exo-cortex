@@ -38,9 +38,6 @@ var DashboardPool = {
     update: function (dash, delta) {
         var state = getState(dash);
         if (!state.object) return;
-
-        // state.object.position.y = -512 + Math.cos(state.animTick) * 8;
-        // state.animTick += delta;
     }
 
 };

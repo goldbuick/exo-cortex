@@ -3,13 +3,23 @@ import RenderProject from 'app/render-project';
 import PoolStore from 'app/pool-store';
 import DashBoardPool from 'app/dashboard-pool';
 import DashBoardCategories from 'app/dashboard-categories';
+import DashBoardFeed from 'app/dashboard-feed';
+import DashBoardConstruct from 'app/dashboard-construct';
 // import 'app/three/controls/OrbitControls';
+
+function getBaseState (dash) {
+    return dash.getGraphState('base', 'state');
+}
 
 var DashBoard = React.createClass({
     mixins: [
         RenderTarget,
         Reflux.connect(PoolStore, 'pool'),
     ],
+
+    componentDidMount: function () {
+        this.camera.position.z = 1440;
+    },
 
     addObject: function (object, state, value) {
         object.keep = true;
@@ -56,115 +66,51 @@ var DashBoard = React.createClass({
         }
     },
 
-    componentDidMount: function () {
-        this.camera.position.z = 1440;
+    handleWheel: function (e) {
+        e.preventDefault();
+        var state = getBaseState(this);
+        state.mode = (state.mode || 0) + e.deltaY * 0.25;
+        state.mode = Math.min(Math.max(0, state.mode), 300);
+        
+        var ratio,
+            mode = state.mode;
+        // place constructs
+        ratio = (mode / 100);
+        if (ratio > 1) ratio = 1;
+        state = DashBoardConstruct.base(this);
+        state.basePosition = state.basePositionMin + (ratio * 3000);
+
+        // place feed containers
+        ratio = ((mode - 100) / 100);
+        if (ratio < 0) ratio = 0;
+        if (ratio > 1) ratio = 1;
+        state = DashBoardFeed.base(this);
+        state.basePosition = state.basePositionMin + (ratio * 2000);
+
+        // place categories
+        ratio = ((mode - 200) / 100);
+        if (ratio < 0) ratio = 0;
+        state = DashBoardCategories.base(this);
+        state.basePosition = state.basePositionMin + (ratio * 360);
     },
-    
+
     render: function () {
         this.genScene(() => {
             DashBoardPool.gen(this);
             DashBoardCategories.gen(this);
+            DashBoardFeed.gen(this);
+            DashBoardConstruct.gen(this);
         });
-        return <div className="render-target"></div>;
+        return <div className="render-target" onWheel={this.handleWheel}></div>;
     },
 
     update: function (delta) {
         TWEEN.update();
         DashBoardPool.update(this, delta);
         DashBoardCategories.update(this, delta);
+        DashBoardFeed.update(this, delta);
+        DashBoardConstruct.update(this, delta);
     }
-
-    // update: function (delta) {
-    //     var self = this;
-    //     TWEEN.update();
-    //     if (self.controls) self.controls.update();
-    //     self.state.constructs.forEach(construct => {
-    //         if (!construct.objectCount) return;
-    //         construct.anim.tick += delta;
-    //         construct.graphs.forEach(graph => {
-    //             if (!graph.object) return;
-    //             graph.object.rotation.y = construct.base.x + graph.base.x;
-    //             graph.object.rotation.z = construct.base.y + graph.base.y;
-    //             graph.object.rotation.y += Math.cos(construct.anim.tick) * 0.01;
-    //             graph.object.rotation.z += Math.sin(Math.PI + construct.anim.tick) * 0.01;
-    //         });
-    //     });
-    // },
-
-    // render: function () {
-    //     var self = this;
-
-    //     self.pruneBegin();
-    //     self.state.constructs.forEach(construct => {
-    //         construct.anim = construct.anim || { };
-    //         construct.anim.tick = construct.anim.tick ||
-    //             (Math.random() * 1000);
-
-    //         let objectCount = 0;
-    //         construct.graphs.forEach(graph => {
-    //             if (graph.params.data) {
-    //                 graph.params.project =
-    //                     RenderProject.sphereProject(512 + construct.base.z, 0.01);
-    //                 graph.object = ConstructRender.build(graph);
-    //                 if (graph.object) {
-    //                     ++objectCount;
-    //                     graph.object.rotation.y = construct.base.x + graph.base.x;
-    //                     graph.object.rotation.z = construct.base.y + graph.base.y;
-    //                     self.scene.add(graph.object);
-    //                 }
-    //             }
-    //         });
-
-    //         if (objectCount) {
-    //             var intro = { value: 0 };
-    //             var target = { value: 1 };
-    //             if (construct.anim.intro === undefined) {
-    //                 construct.anim.intro = new TWEEN.Tween(intro)
-    //                     .to(target, 256 + Math.random() * 256);
-
-    //                 construct.anim.intro.onUpdate(() => {
-    //                     construct.graphs.forEach(graph => {
-    //                         if (graph.object && graph.object.animIntro)
-    //                             graph.object.animIntro(intro.value);
-    //                     });
-    //                 });
-
-    //                 construct.anim.intro.easing(TWEEN.Easing.Back.InOut);
-    //                 construct.anim.intro.start();
-                    
-    //                 construct.graphs.forEach(graph => {
-    //                     if (graph.object && graph.object.animIntro)
-    //                         graph.object.animIntro(intro.value);
-    //                 });
-
-    //             } else if (construct.anim.changed === undefined) {
-    //                 construct.anim.changed = new TWEEN.Tween(intro)
-    //                     .to(target, 128 + Math.random() * 128);
-
-    //                 construct.anim.changed.onUpdate(() => {
-    //                     construct.graphs.forEach(graph => {
-    //                         if (graph.object.animChanged) graph.object.animChanged(intro.value);
-    //                     });
-    //                 });
-    //                 construct.anim.changed.onComplete(() => {
-    //                     construct.anim.changed = undefined;
-    //                 });
-
-    //                 construct.anim.changed.easing(TWEEN.Easing.Back.InOut);
-    //                 construct.anim.changed.start();
-                    
-    //                 construct.graphs.forEach(graph => {
-    //                     if (graph.object.animChanged) graph.object.animChanged(intro.value);
-    //                 });
-    //             }
-    //         }
-
-    //         construct.objectCount = objectCount;
-    //     });
-    //     self.pruneEnd();
-
-    //     return <div className="render-target"></div>;
-    // }
 
 });
 

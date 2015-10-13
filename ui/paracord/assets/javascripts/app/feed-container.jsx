@@ -1,52 +1,31 @@
 export default class FeedContainer {
 
-    constructor (format, dimensions, groups) {
-        var self = this;
-
-        // result data
-        self.meta = { };
-        self.db = crossfilter();
-        
-        // transform incoming records
-        self.format = { };
-        Object.keys(format).forEach(prop => {
-            self.format[prop] = new Function('d', 'return ' + format[prop]);
-        });
-
-        // be able to filter data
-        self.dimensions = { };
-        Object.keys(dimensions).forEach(prop => {
-            var func = new Function('d', 'return ' + dimensions[prop]);
-            self.dimensions[prop] = self.db.dimension(func);
-        });
-
-        // be able to group data
-        self.groups = { };
-        Object.keys(groups).forEach(prop => {
-            var from = groups[prop][0],
-                func = new Function('d', 'return ' + groups[prop][1]);
-            self.groups[prop] = self.dimensions[from].group(func);
-        });
+    constructor (args) {
+        this.queue = [ ];
+        this.unique = { };
+        this.rules = args.match;
+        console.log(this);
     }
 
-    map (record) {
-        var self = this;
-        
-        // apply format
-        var data = { };
-        Object.keys(self.format).forEach(prop => {
-            data[prop] = self.format[prop](record);
-        });
+    match (obj) {
+        var rule, count, props, success = false;
 
-        // add to cross filter
-        self.db.add([ data ]);
-    }
+        for (var i=0; i < this.rules.length && !success; ++i) {
+            rule = this.rules[i];
+            props = Object.keys(rule);
 
-    resetFilters () {
-        var self = this;
-        Object.keys(self.dimensions).forEach(prop => {
-            self.dimensions[prop].filterAll();
-        });
+            count = 0;
+            props.forEach(prop => {
+                if (obj[prop] !== undefined &&
+                    obj[prop] === rule[prop]) {
+                    ++count;
+                }
+            });
+            
+            success = (count === props.length);
+        }
+
+        return success;
     }
 
 }

@@ -23,7 +23,7 @@ var DashboardFeed = {
         var feed = new Graph(),
             radius = 800;
         feed.drawLoop(0, 0, 0, 64, radius);
-        feed.drawLoop(0, 0, -16, 64, radius);
+        // feed.drawLoop(0, 0, -16, 64, radius);
         state.object = feed.build(RenderProject.plane(1.0));
         dash.addObject(state.object, state, 1);
 

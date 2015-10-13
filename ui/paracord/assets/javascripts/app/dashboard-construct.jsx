@@ -18,8 +18,8 @@ var DashboardConstruct = {
 
     gen: function (dash) {
         var state = getBaseState(dash);
-        state.basePosition = state.basePosition || 100;
-        state.basePositionMin = state.basePositionMin || 100;
+        state.basePosition = state.basePosition || 0;
+        state.basePositionMin = state.basePositionMin || 0;
 
         var feed = new Graph(),
             innerRadius = 400,

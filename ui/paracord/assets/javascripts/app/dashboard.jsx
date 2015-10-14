@@ -70,30 +70,53 @@ var DashBoard = React.createClass({
 
     handleWheel: function (e) {
         e.preventDefault();
+
         var state = getBaseState(this);
-        state.mode = (state.mode || 0) + e.deltaY * 0.25;
-        state.mode = Math.min(Math.max(0, state.mode), 300);
-        
-        var ratio,
-            mode = state.mode;
-        // place constructs
-        ratio = (mode / 100);
-        if (ratio > 1) ratio = 1;
-        state = DashBoardConstruct.base(this);
-        state.basePosition = state.basePositionMin + (ratio * 3000);
+        if (state.scrolling || Math.abs(e.deltaY) < 20) return;
 
-        // place feed containers
-        ratio = ((mode - 100) / 100);
-        if (ratio < 0) ratio = 0;
-        if (ratio > 1) ratio = 1;
-        state = DashBoardFeed.base(this);
-        state.basePosition = state.basePositionMin + (ratio * 2000);
+        state.mode = state.mode || 0;
+        var delta = e.deltaY > 0 ? 1 : -1,
+            modeTarget = Math.round(state.mode / 100) + delta;
 
-        // place categories
-        ratio = ((mode - 200) / 100);
-        if (ratio < 0) ratio = 0;
-        state = DashBoardCategories.base(this);
-        state.basePosition = state.basePositionMin + (ratio * 360);
+        modeTarget = Math.min(Math.max(0, modeTarget), 2) * 100;
+        var scroll = { value: state.mode },
+            target = { value: modeTarget };
+
+        state.scrolling = new TWEEN.Tween(scroll).to(target, 512);
+        state.scrolling.onUpdate(() => {
+            state.mode = scroll.value;
+            var _state, ratio;
+    
+            // place constructs
+            ratio = (state.mode / 100);
+            if (ratio > 1) ratio = 1;
+            _state = DashBoardConstruct.base(this);
+            _state.basePosition = _state.basePositionMin + (ratio * 1000);
+
+            // place feed containers
+            ratio = (state.mode / 100);
+            if (ratio <= 1) {
+                _state = DashBoardFeed.base(this);
+                _state.basePosition = _state.basePositionMin + (ratio * 90);
+            } else {
+                ratio = ratio - 1;
+                _state = DashBoardFeed.base(this);
+                _state.basePosition = _state.basePositionMin + 90 + (ratio * 800);
+            }
+
+            // place categories
+            ratio = ((state.mode - 100) / 100);
+            if (ratio < 0) ratio = 0;
+            _state = DashBoardCategories.base(this);
+            _state.basePosition = _state.basePositionMin + (ratio * 360);        
+        });
+        state.scrolling.onComplete(() => {
+            state.scrolling = undefined;
+            console.log('complete', state.mode);
+        });
+
+        state.scrolling.easing(TWEEN.Easing.Exponential.InOut);
+        state.scrolling.start();
     },
 
     render: function () {

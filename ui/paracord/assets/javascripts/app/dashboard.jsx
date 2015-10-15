@@ -95,13 +95,14 @@ var DashBoard = React.createClass({
 
             // place feed containers
             ratio = (state.mode / 100);
+            var middle = 128;
             if (ratio <= 1) {
                 _state = DashBoardFeed.base(this);
-                _state.basePosition = _state.basePositionMin + (ratio * 90);
+                _state.basePosition = _state.basePositionMin + (ratio * middle);
             } else {
                 ratio = ratio - 1;
                 _state = DashBoardFeed.base(this);
-                _state.basePosition = _state.basePositionMin + 90 + (ratio * 800);
+                _state.basePosition = _state.basePositionMin + middle + (ratio * 800);
             }
 
             // place categories

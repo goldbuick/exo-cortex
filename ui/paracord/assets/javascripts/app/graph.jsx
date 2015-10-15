@@ -48,7 +48,56 @@ export default class Graph {
             angle += step;
         }
 
-        return this.drawLine(points);
+        this.drawLine(points);
+    }
+
+    drawLoopDash (x, y, z, sides, radius, skip) {
+        skip = skip || 1;
+        var points = [ ],
+            step = (Math.PI * 2) / sides;
+
+        var angle = 0;
+        for (var i=0; i<=sides; ++i) {
+            points.push({
+                x: x + Math.cos(angle) * radius,
+                y: y + Math.sin(angle) * radius,
+                z: z
+            });
+            angle += step;
+
+            if (points.length > 1) {
+                this.drawLine(points);
+                if (i % skip === 0) {
+                    points = [ ];
+                } else {
+                    points.shift();
+                }
+            }
+        }
+    }
+
+    drawLoopR (x, y, z, sides, radius, r, threshold) {
+        var points = [ ],
+            step = (Math.PI * 2) / sides;
+
+        var angle = 0;
+        for (var i=0; i<=sides; ++i) {
+            points.push({
+                x: x + Math.cos(angle) * radius,
+                y: y + Math.sin(angle) * radius,
+                z: z
+            });
+            angle += step;
+
+            if (points.length > 1) {
+                this.drawLine(points);
+                if (r() < threshold) {
+                    points = [ ];
+                } else {
+                    points.shift();
+                }
+            }
+        }
     }
 
     drawGeometry (geometry) {

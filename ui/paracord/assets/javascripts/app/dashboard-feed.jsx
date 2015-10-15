@@ -21,12 +21,16 @@ var DashboardFeed = {
         state.basePositionMin = state.basePositionMin || -100;
 
         var feed = new Graph(),
-            radius = 800;
-        feed.drawLoop(0, 0, 0, 64, radius);
-        // feed.drawLoop(0, 0, -16, 64, radius);
+            radius = 950,
+            r = new alea('feed-loop');
+
+        feed.drawLoop(0, 0, 8, 128, radius - 12);
+        feed.drawLoopR(0, 0, 0, 128, radius - 6, r, 0.2);
+        feed.drawLoopR(0, 0, -8, 128, radius, r, 0.2);
         state.object = feed.build(RenderProject.plane(1.0));
         dash.addObject(state.object, state, 1);
 
+        state.animRotation = state.animRotation || 0;
         state.object.animIntro = function (value) {
             state.object.visible = Math.round(value * 100) % 4 === 0;
         };
@@ -36,6 +40,8 @@ var DashboardFeed = {
         var state = getBaseState(dash);
 
         if (!state.object) return;
+        state.animRotation -= delta * 0.01;
+        state.object.rotation.y = state.animRotation;
         state.object.position.y = state.basePosition;
 
         if (!state.containers) return;

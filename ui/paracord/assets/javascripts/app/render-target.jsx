@@ -42,13 +42,19 @@ var RenderTarget = {
         var renderPass = new THREE.RenderPass(this.scene, this.camera);
         var effectBloom = new THREE.BloomPass(2);
         var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-        // var effectGlitch = new THREE.GlitchPass(64);
+        var effectGlitch = new THREE.GlitchPass(64);
 
-        this.composer.addPass(renderPass);
-        this.composer.addPass(effectBloom);
-        this.composer.addPass(effectCopy);
-        // this.composer.addPass(effectGlitch);
-        effectCopy.renderToScreen = true;
+        var passes = [
+            renderPass,
+            effectBloom,
+            effectCopy,
+            // effectGlitch,
+        ];
+        for (var i=0; i<passes.length; ++i) {
+            this.composer.addPass(passes[i]);
+        }
+        var lastPass = passes.pop();
+        lastPass.renderToScreen = true;
 
         // handle window size changing
         window.addEventListener('resize', this.handleResize);

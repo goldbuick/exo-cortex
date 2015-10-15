@@ -10,17 +10,23 @@ export default Reflux.createStore({
         self.queue = [ ];
         self.unique = { };
         self.db = crossfilter();
+        self.db.byTime = self.db.dimension(d => { return d.when.valueOf(); });
         self.startSize = 0;
         self.pool = {
             size: function () {
                 return self.db.size();
             },
+            all: function () {
+                return self.db.byTime.top(Infinity);
+            },
             reset: function () {
+                self.pool.id.filterAll();
                 self.pool.when.filterAll();
                 self.pool.type.filterAll();
                 self.pool.channel.filterAll();
             },
-            when: self.db.dimension(d => { return d.when.valueOf(); }),
+            id: self.db.dimension(d => { return d.id; }),
+            when: self.db.dimension(d => { return d.when; }),
             type: self.db.dimension(d => { return d.type; }),
             channel: self.db.dimension(d => { return d.channel; }),
         };

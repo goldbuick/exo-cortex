@@ -40,8 +40,9 @@ var DashboardCategories = {
             var innerRadius = radius - 64,
                 outerRadius = radius + 64,
                 category = new Graph();
-            category.drawLoop(0, 0, 0, 64, radius);
-            if (r() < 0.3) category.drawLoop(0, 0, 6, 64, radius - 8);
+
+            category.drawLoop(0, 0, 6, 128, radius - 8);
+            if (r() < 0.3) category.drawLoopR(0, 0, 0, 128, radius, r, 0.1);
             _state.object = category.build(RenderProject.plane(1.0));
 
             var angle = 0;

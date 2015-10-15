@@ -29,11 +29,11 @@ export default class FeedContainer {
     add (pool) {
         var self = this,
             matches = this.matchRecords(pool);
-        if (matches.length === 0) return;
+        if (matches.length === 0) return false;
 
         var records = [ ];
         this.extractRecords(records, { }, this.extract, matches);
-        if (records.length === 0) return;
+        if (records.length === 0) return false;
 
         // FORMAT
 
@@ -48,6 +48,7 @@ export default class FeedContainer {
         // DB
         
         self.db.add(formatted);
+        return true;
     }
 
     // MATCH

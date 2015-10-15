@@ -1,9 +1,10 @@
 import FeedActions from 'app/feed-actions';
 import FeedContainer from 'app/feed-container';
+import ConstructActions from 'app/construct-actions';
 
 function test (feed) {
 
-    feed.push(new FeedContainer({
+    feed.chat = new FeedContainer({
         match: [
             { channel: 'irc', type: 'message' },
             { channel: 'xmpp', type: 'message' },
@@ -40,14 +41,14 @@ function test (feed) {
             server: [ 'server', 'd' ],
             byMinutes: [ 'minutes', 'Math.round(d / 5)' ]        
         }
-    }));
+    });
 }
 
 export default Reflux.createStore({
     listenables: [ FeedActions ],
 
     init: function () {
-        this.feed = [ ];
+        this.feed = { };
         test(this.feed);
     },
 
@@ -56,9 +57,14 @@ export default Reflux.createStore({
     },
 
     onPool: function (pool) {
-        this.feed.forEach(container => {
-            container.add(pool);
+        var self = this,
+            updated = false;
+
+        Object.keys(self.feed).forEach(name => {
+            if (self.feed[name].add(pool)) updated = true;
         });
+
+        if (updated) ConstructActions.feed(self.feed);
     }
 
 });

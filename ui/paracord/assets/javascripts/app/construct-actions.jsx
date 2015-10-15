@@ -1,7 +1,7 @@
 import collect from 'app/lib/collected-actions';
 
 var actions = Reflux.createActions([
-    'updated'
+    'feed'
 ]);
 
 export default actions;

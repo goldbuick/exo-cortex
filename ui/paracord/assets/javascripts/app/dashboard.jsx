@@ -2,6 +2,7 @@ import RenderTarget from 'app/render-target';
 import RenderProject from 'app/render-project';
 import PoolStore from 'app/pool-store';
 import FeedStore from 'app/feed-store';
+import ConstructStore from 'app/construct-store';
 import DashBoardPool from 'app/dashboard-pool';
 import DashBoardCategories from 'app/dashboard-categories';
 import DashBoardFeed from 'app/dashboard-feed';
@@ -16,7 +17,8 @@ var DashBoard = React.createClass({
     mixins: [
         RenderTarget,
         Reflux.connect(PoolStore, 'pool'),
-        Reflux.connect(FeedStore, 'feed')
+        Reflux.connect(FeedStore, 'feed'),
+        Reflux.connect(ConstructStore, 'constructs'),
     ],
 
     componentDidMount: function () {

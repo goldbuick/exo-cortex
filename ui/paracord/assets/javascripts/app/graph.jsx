@@ -1,4 +1,23 @@
-import Glyph from './glyph';
+import css from 'app/lib/css';
+import Glyph from 'app/glyph';
+import BmFontText from 'app/three/bmfont/text';
+import BmFontShader from 'app/three/bmfont/sdf';
+import BmFontLoad from 'app/three/bmfont/load';
+
+var fontColor, fontConfig, fontTexture;
+BmFontLoad({
+    font: '/media/OCRA.fnt',
+    image: '/media/OCRA.png'
+}, (font, texture) => {
+    fontColor = css.getStyleRuleValue('.fg-color', 'color');
+    fontConfig = font;
+    fontTexture = texture;
+    fontTexture.needsUpdate = true;
+    fontTexture.minFilter = THREE.LinearMipMapLinearFilter;
+    fontTexture.magFilter = THREE.LinearFilter;
+    fontTexture.generateMipmaps = true;
+    fontTexture.anisotropy = window.maxAni;
+});
 
 export default class Graph {
     constructor () {
@@ -145,6 +164,31 @@ export default class Graph {
         for (var i=0; i < geometry.vertices.length-1; ++i) {
             self.glyph.addLine(offset + i, offset + i + 1);
         }
+    }
+
+    genText (pos, text, scale) {
+        if (!fontConfig) return;
+        var geometry = BmFontText({
+                text: text,
+                font: fontConfig
+            }),
+            material = new THREE.ShaderMaterial(BmFontShader({
+                map: fontTexture,
+                smooth: 1 / 16,
+                transparent: true,
+                side: THREE.DoubleSide,
+                color: fontColor,
+                scramble: 0
+            })),
+            mesh = new THREE.Mesh(geometry, material);
+
+        var _width = geometry.layout.width * (scale * 0.5),
+            _height = geometry.layout.height * (scale * 0.25);
+        mesh.scale.multiplyScalar(scale);
+        mesh.position.set(pos[0], pos[1] - _height, pos[2] - _width);
+        mesh.rotation.y = Math.PI * 0.5;
+        mesh.rotation.z = Math.PI;
+        return mesh;
     }
 
 }

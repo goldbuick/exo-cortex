@@ -17,7 +17,7 @@ var DashboardPool = {
         for (var i=0; i<count; ++i) {
             if (i % 10 === 0) {
                 y += 80;
-                radius += 300;                
+                radius += 200;                
             } else {
                 radius += 12;
             }
@@ -27,7 +27,6 @@ var DashboardPool = {
         state.object = pool.build(RenderProject.plane(1.0));
         dash.addObject(state.object, state, count);
 
-        state.object.position.y = -720;
         state.object.rotation.y = Math.PI * 0.75;
         state.animTick = state.animTick || 0;
         state.object.animIntro = function (value) {
@@ -38,6 +37,9 @@ var DashboardPool = {
     update: function (dash, delta) {
         var state = getState(dash);
         if (!state.object) return;
+        state.animTick += delta;
+        state.object.position.y =
+            (Math.cos(state.animTick) * 2) - 720;
     }
 
 };

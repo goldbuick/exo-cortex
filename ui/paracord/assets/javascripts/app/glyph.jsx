@@ -154,32 +154,36 @@ export default class Glyph {
             positions.push(result[0], result[1], result[2]);
         }
 
-        var lineGeometry = new THREE.BufferGeometry();
-        lineGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array(this.lines), 1));
-        lineGeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
-        lineGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(this.colors), 3));
-        lineGeometry.computeBoundingSphere();
+        if (this.lines.length) {
+            var lineGeometry = new THREE.BufferGeometry();
+            lineGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array(this.lines), 1));
+            lineGeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+            lineGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(this.colors), 3));
+            lineGeometry.computeBoundingSphere();
 
-        var lineMaterial = new THREE.LineBasicMaterial({ vertexColors: THREE.VertexColors }),
-            lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
-        group.add(lineMesh);
+            var lineMaterial = new THREE.LineBasicMaterial({ vertexColors: THREE.VertexColors }),
+                lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
+            group.add(lineMesh);
+        }
 
-        var fillGeometry = new THREE.BufferGeometry();
-        fillGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array(this.fills), 1));
-        fillGeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
-        fillGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(this.colors.map(function (value) {
-            return value * 0.5;
-        })), 3));
-        fillGeometry.computeBoundingSphere();
+        if (this.fills.length) {
+            var fillGeometry = new THREE.BufferGeometry();
+            fillGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array(this.fills), 1));
+            fillGeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+            fillGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(this.colors.map(function (value) {
+                return value * 0.5;
+            })), 3));
+            fillGeometry.computeBoundingSphere();
 
-        var fillMaterial = new THREE.MeshBasicMaterial({
-                opacity: 0.7,
-                transparent: true,
-                side: THREE.DoubleSide,
-                vertexColors: THREE.VertexColors
-            }),
-            fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
-        group.add(fillMesh);
+            var fillMaterial = new THREE.MeshBasicMaterial({
+                    opacity: 0.7,
+                    transparent: true,
+                    side: THREE.DoubleSide,
+                    vertexColors: THREE.VertexColors
+                }),
+                fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
+            group.add(fillMesh);
+        }
 
         return group;
     }

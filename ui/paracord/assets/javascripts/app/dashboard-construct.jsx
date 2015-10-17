@@ -1,13 +1,14 @@
-import css from 'app/lib/css';
-import RenderProject from 'app/render-project';
 import Graph from 'app/graph';
+import RenderProject from 'app/render-project';
+import ConstructRender from 'app/construct-render';
 
 function getBaseState (dash) {
     return dash.getGraphState('base', 'construct');
 }
 
-function getState (dash, construct) {
-    return dash.getGraphState('construct', construct);
+function getState (dash, construct, graph) {
+    var name = [ construct.uid, graph.uid ].join('-');
+    return dash.getGraphState('construct', name);
 }
 
 var DashboardConstruct = {
@@ -21,34 +22,63 @@ var DashboardConstruct = {
         state.basePosition = state.basePosition || 0;
         state.basePositionMin = state.basePositionMin || 0;
 
-        var feed = new Graph(),
-            innerRadius = 400,
-            outerRadius = 800,
-            core = new THREE.IcosahedronGeometry(innerRadius + 1, 0);
-
-        feed.drawGeometryLine(core);
-        state.object = feed.build(RenderProject.plane(1.0));
-
-        core = new THREE.IcosahedronGeometry(innerRadius, 0);
-        var material = new THREE.MeshBasicMaterial({
-                color: css.getStyleRuleValue('.deep-color', 'color')
-            }),
-            mesh = new THREE.Mesh(core, material);
-        state.object.add(mesh);
-
+        state.object = new THREE.Group();
+        state.spin = state.spin || new THREE.Vector3();
+        state.orientation = state.orientation || new THREE.Vector3();
         dash.addObject(state.object, state, 1);
-        state.object.animIntro = function (value) {
-            state.object.visible = Math.round(value * 100) % 4 === 0;
-        };
+
+        // render graphs
+        var radius = 650;
+        state.animTick = state.animTick || 0;
+        state.graphs = dash.state.constructs.map(construct => {
+            var group = new THREE.Group();
+
+            construct.graphs.forEach(graph => {
+                var _state = getState(dash, construct, graph);
+                _state.object = ConstructRender.build(RenderProject.sphere(radius, 0.01), graph);
+                if (_state.object) {
+                    group.add(_state.object);
+                    dash.addSubObject(_state.object, _state, graph.view.changed);
+                }
+            });
+
+            return group;
+        });
     },
 
     update: function (dash, delta) {
         var state = getBaseState(dash);
 
         if (!state.object) return;
+        var spinDelta = new THREE.Vector3();
+        spinDelta.copy(state.spin);
+        spinDelta.multiplyScalar(delta);
+        state.orientation.add(spinDelta);
+
+        spinDelta.multiplyScalar(4.5);
+        state.spin.sub(spinDelta);
+
+        state.object.rotation.x = state.orientation.x;
+        state.object.rotation.y = state.orientation.y;
+        state.object.rotation.z = state.orientation.z;
         state.object.position.y = state.basePosition;
 
-        if (!state.containers) return;
+        if (!state.graphs) return;
+
+        // plot graphs
+        state.animTick += delta;
+        var range = 0.004,
+            angle = Math.PI * 0.25,
+            step = (Math.PI * 2) / 10;
+        for (var i=0; i<state.graphs.length; ++i) {
+            // add & look
+            state.graphs[i].rotation.y =
+                (Math.cos(state.animTick + i) * range) + angle;
+            state.graphs[i].rotation.z =
+                (Math.sin(state.animTick + i) * range) + (i % 2 === 0 ? -0.4 : 0.4);
+            state.object.add(state.graphs[i]);
+            angle += step;
+        }
     }
 
 };

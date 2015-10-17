@@ -1,113 +1,80 @@
 import ConstructActions from 'app/construct-actions';
-// import ConstructView from 'app/construct-view';
+import ConstructView from 'app/construct-view';
 
-function test (construct) {
+function test (constructs) {
 
-    // construct.push(new ConstructView({
-    //     base: {
-    //         x: 0,
-    //         y: -0.6,
-    //         z: 0
-    //     },
-    //     graphs: [{
-    //         container: 'chat',
-    //         filter: { },
-    //         base: { x: 0, y: 0, z: 10 },
-    //         params: {
-    //             type: ConstructView.TEXT,
-    //             text: 'irc.freenode.net',
-    //             scale: 0.5
-    //         }
-    //     },{
-    //         container: 'chat',
-    //         filter: {
-    //             server: 'd === "irc.freenode.net"'
-    //         },
-    //         group: 'byMinutes',
-    //         base: { x: 0, y: 0, z: 0 },
-    //         params: {
-    //             type: ConstructView.HALO,
-    //             seed: 'irc.freenode.net',
-    //             radius: 32,
-    //             width: 20,
-    //             tickMarks: 12,
-    //             range: {
-    //                 start: 'return Math.round(((new Date().valueOf() / 60000) - 1440) / 5)',
-    //                 end: 'return Math.round((new Date().valueOf() / 60000) / 5)'
-    //             }
-    //         }
-    //     }]
-    // }));
+    // for (var i=0; i<5; ++i)
+    constructs.push(new ConstructView([{
+        viz: {
+            type: ConstructView.TEXT,
+            text: 'all.servers',
+            scale: 0.5            
+        }
+    },{
+        container: 'chat',
+        group: 'byMinutes',
+        range: {
+            start: 'return Math.round(((new Date().valueOf() / 60000) - 1440) / 5)',
+            end: 'return Math.round((new Date().valueOf() / 60000) / 5)'          
+        },
+        viz: {
+            type: ConstructView.HALO,
+            seed: 'all.servers',
+            radius: 32,
+            width: 20,
+            tickMarks: 12
+        }
+    }]));
 
-    // construct.push(new ConstructView({
-    //     base: {
-    //         x: Math.PI * 0.5,
-    //         y: -0.6,
-    //         z: 0
-    //     },
-    //     graphs: [{
-    //         container: 'chat',
-    //         filter: { },
-    //         base: { x: 0, y: 0, z: 10 },
-    //         params: {
-    //             type: ConstructView.TEXT,
-    //             text: 'irc.afternet.org',
-    //             scale: 0.5
-    //         }
-    //     },{
-    //         container: 'chat',
-    //         filter: {
-    //             server: 'd === "irc.afternet.org"'
-    //         },
-    //         group: 'byMinutes',
-    //         base: { x: 0, y: 0, z: 0 },
-    //         params: {
-    //             type: ConstructView.HALO,
-    //             seed: 'irc.afternet.org',
-    //             radius: 32,
-    //             width: 20,
-    //             tickMarks: 12,
-    //             range: {
-    //                 start: 'return Math.round(((new Date().valueOf() / 60000) - 1440) / 5)',
-    //                 end: 'return Math.round((new Date().valueOf() / 60000) / 5)'
-    //             }
-    //         }
-    //     }]
-    // }));
+    constructs.push(new ConstructView([{
+        viz: {
+            type: ConstructView.TEXT,
+            text: 'irc.freenode.net',
+            scale: 0.5            
+        }
+    },{
+        container: 'chat',
+        dimensions: {
+            server: 'd === "irc.freenode.net"'
+        },
+        group: 'byMinutes',
+        range: {
+            start: 'return Math.round(((new Date().valueOf() / 60000) - 1440) / 5)',
+            end: 'return Math.round((new Date().valueOf() / 60000) / 5)'          
+        },
+        viz: {
+            type: ConstructView.HALO,
+            seed: 'irc.freenode.net',
+            radius: 32,
+            width: 20,
+            tickMarks: 12
+        }
+    }]));
 
-    // construct.push(new ConstructView({
-    //     base: {
-    //         x: 0,
-    //         y: 0.6,
-    //         z: 0
-    //     },
-    //     graphs: [{
-    //         container: 'chat',
-    //         filter: { },
-    //         base: { x: 0, y: 0, z: 10 },
-    //         params: {
-    //             type: ConstructView.TEXT,
-    //             text: 'all.servers',
-    //             scale: 0.5
-    //         }
-    //     },{
-    //         container: 'chat',
-    //         filter: { },
-    //         group: 'byMinutes',
-    //         base: { x: 0, y: 0, z: 0 },
-    //         params: {
-    //             type: ConstructView.HALO,
-    //             seed: 'all.servers',
-    //             radius: 32,
-    //             width: 20,
-    //             tickMarks: 12,
-    //             range: {
-    //                 start: 'return Math.round(((new Date().valueOf() / 60000) - 1440) / 5)',
-    //                 end: 'return Math.round((new Date().valueOf() / 60000) / 5)'
-    //             }
-    //         }
-    //     }]
-    // }));
+    constructs.push(new ConstructView([{
+        viz: {
+            type: ConstructView.TEXT,
+            text: 'irc.afternet.org',
+            scale: 0.5            
+        }
+    },{
+        container: 'chat',
+        dimensions: {
+            server: 'd === "irc.afternet.org"'
+        },
+        group: 'byMinutes',
+        range: {
+            start: 'return Math.round(((new Date().valueOf() / 60000) - 1440) / 5)',
+            end: 'return Math.round((new Date().valueOf() / 60000) / 5)'          
+        },
+        viz: {
+            type: ConstructView.HALO,
+            seed: 'irc.afternet.org',
+            radius: 32,
+            width: 20,
+            tickMarks: 12
+        }
+    }]));
 
     // construct.push(new ConstructView({
     //     base: {
@@ -192,13 +159,12 @@ export default Reflux.createStore({
     },
 
     onFeed: function (feed) {
-        console.log(feed);
-        // var update = false;
+        var update = false;
 
-        // this.constructs.forEach(construct => {
-        //     if (construct.update(feed)) update = true;
-        // });
+        this.constructs.forEach(construct => {
+            if (construct.updateData(feed)) update = true;
+        });
 
-        // if (update) this.trigger(this.constructs);
+        if (update) this.trigger(this.constructs);
     }
 });

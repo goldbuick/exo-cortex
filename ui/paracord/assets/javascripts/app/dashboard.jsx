@@ -7,7 +7,6 @@ import DashBoardPool from 'app/dashboard-pool';
 import DashBoardCategories from 'app/dashboard-categories';
 import DashBoardFeed from 'app/dashboard-feed';
 import DashBoardConstruct from 'app/dashboard-construct';
-// import 'app/three/controls/OrbitControls';
 
 function getBaseState (dash) {
     return dash.getGraphState('base', 'state');
@@ -31,6 +30,11 @@ var DashBoard = React.createClass({
         this.applyGraphStatus(state, object, value);
     },
 
+    addSubObject: function (object, state, value) {
+        object.keep = true;
+        this.applyGraphStatus(state, object, value);
+    },
+
     getGraphState: function (key, name) {
         var prop = 'graph-' + key + '-' + name,
             data = this[prop];
@@ -39,7 +43,7 @@ var DashBoard = React.createClass({
     },
 
     applyGraphStatus: function (state, object, value) {
-        this.applyGraphIntro(state, object);
+        this.applyGraphIntro(state, object, 512);
         var strValue = JSON.stringify(value);
         if (state.lastValue !== strValue) {
             state.lastValue = strValue;
@@ -72,7 +76,6 @@ var DashBoard = React.createClass({
 
     handleWheel: function (e) {
         e.preventDefault();
-
         var state = getBaseState(this);
         if (state.scrolling || Math.abs(e.deltaY) < 20) return;
 
@@ -91,9 +94,9 @@ var DashBoard = React.createClass({
     
             // place constructs
             ratio = (state.mode / 100);
-            if (ratio > 1) ratio = 1;
+            if (ratio > 2) ratio = 2;
             _state = DashBoardConstruct.base(this);
-            _state.basePosition = _state.basePositionMin + (ratio * 1000);
+            _state.basePosition = _state.basePositionMin + (ratio * 800);
 
             // place feed containers
             ratio = (state.mode / 100);
@@ -122,6 +125,49 @@ var DashBoard = React.createClass({
         state.scrolling.start();
     },
 
+    handleMouseDown: function (e) {
+        e.preventDefault();
+        var state = getBaseState(this);
+        state.dragStart = { x: e.clientX, y: e.clientY };
+    },
+
+    handleMouseMove: function (e) {
+        e.preventDefault();
+        var state = getBaseState(this);
+        if (!state.dragStart) return;
+
+        var dx = e.clientX - state.dragStart.x,
+            dy = e.clientY - state.dragStart.y,
+            speed = 0.04;
+
+        state.dragStart.x = e.clientX;
+        state.dragStart.y = e.clientY;
+
+        var _state;
+        switch (Math.round((state.mode || 0) / 100)) {
+            case 0: _state = DashBoardConstruct.base(this); break;
+            case 1: break;
+            case 2: break;
+        }
+
+        if (_state) {
+            _state.spin.x += dy * speed;
+            _state.spin.y += dx * speed;
+        }
+    },
+
+    handleMouseUp: function (e) {
+        e.preventDefault();
+        var state = getBaseState(this);
+        if (!state.dragStart) return;
+        var dx = e.clientX - state.dragStart.x,
+            dy = e.clientY - state.dragStart.y;
+        if (Math.abs(dx) + Math.abs(dy) < 2) {
+            console.log('click ?', dx, dy);
+        }
+        delete state.dragStart;
+    },
+
     render: function () {
         this.genScene(() => {
             DashBoardPool.gen(this);
@@ -129,7 +175,11 @@ var DashBoard = React.createClass({
             DashBoardFeed.gen(this);
             DashBoardConstruct.gen(this);
         });
-        return <div className="render-target" onWheel={this.handleWheel}></div>;
+        return <div className="render-target"
+            onWheel={this.handleWheel}
+            onMouseDown={this.handleMouseDown}
+            onMouseMove={this.handleMouseMove}
+            onMouseUp={this.handleMouseUp}></div>;
     },
 
     update: function (delta) {

@@ -1,86 +1,98 @@
+var uid = 0;
 class ConstructView {
 
     constructor (args) {
         var self = this;
-        Object.keys(args).forEach(prop => {
-            self[prop] = args[prop];
-        });
+        self.uid = ++uid;
 
-        self.graphs.forEach(graph => {
-            // compile graph filters
-            Object.keys(graph.filter).forEach(prop => {
-                graph.filter[prop] = new Function('d', 'return ' + graph.filter[prop]);
-            });
+        var gid = 0;
+        self.graphs = args.map(graph => {
+            graph.uid = ++gid;
 
-            // compile params
-            if (graph.params.range) {
-                Object.keys(graph.params.range).forEach(prop => {
-                    graph.params.range[prop] = new Function(graph.params.range[prop]);
+            // compile graph dimension filters
+            if (graph.dimensions) {
+                Object.keys(graph.dimensions).forEach(prop => {
+                    graph.dimensions[prop] = new Function('d', 'return ' + graph.dimensions[prop]);
                 });
             }
-            if (graph.params.list) {
-                graph.params.list = new Function('d', graph.params.list);
+
+            // compile data collectors
+            if (graph.range) {
+                Object.keys(graph.range).forEach(prop => {
+                    graph.range[prop] = new Function(graph.range[prop]);
+                });
             }
+            if (graph.list) {
+                graph.list = new Function('d', graph.list);
+            }
+
+            // setup values
+            graph.view = { };
+
+            // return config'd graph object
+            return graph;
         });
     }
 
-    update (feed) {
-        var updated = false;
+    updateData (feed) {
+        var self = this;
+        if (self.graphs === undefined) return false;
 
-        this.graphs.forEach(graph => {
-            var container = feed.containers[graph.container];
-            if (!container || !graph.params) return;
-            
-            // apply filters
-            container.resetFilters();
-            Object.keys(graph.filter).forEach(prop => {
-                var dimension = container.dimensions[prop];
-                if (dimension) {
-                    dimension.filterFunction(graph.filter[prop]);
-                }
-            });
-
+        let updated = false;
+        self.graphs.forEach(graph => {
             // clear data
-            graph.lastData = JSON.stringify(graph.params.data);
-            graph.meta = undefined;
-            graph.params.data = [ ];
+            graph.view.lastData = JSON.stringify(graph.view.data);
+            graph.view.data = [ ];
 
-            // process data
-            if (graph.params.range) {
-                // query group
-                let group = container.groups[graph.group];
-                if (group) {
-                    let start = graph.params.range.start();
-                    let end = graph.params.range.end();
-                    let values = { };
-                    group.all().forEach(record => {
-                        values[record.key - start] = record.value;
+            // select container
+            let container = feed[graph.container];
+            if (container) {
+                // apply dimension filters
+                container.reset();
+                if (graph.dimensions) {
+                    Object.keys(graph.dimensions).forEach(prop => {
+                        let dimension = container.dimensions[prop];
+                        if (dimension === undefined) return;
+                        dimension.filterFunction(graph.dimensions[prop]);
                     });
-                    for (let i=0; i <= (end - start); ++i) {
-                        graph.params.data.push(values[i] || 0);
+                }
+
+                // process data
+                if (graph.range) {
+                    // query group
+                    let group = container.groups[graph.group];
+                    if (group) {
+                        let start = graph.range.start();
+                        let end = graph.range.end();
+                        let values = { };
+                        group.all().forEach(record => {
+                            if (record.key >= start && record.key <= end)
+                                values[record.key - start] = record.value;
+                        });
+                        for (let i=0; i <= (end - start); ++i) {
+                            graph.view.data.push(values[i] || 0);
+                        }
+                        updated = true;
+                    }
+                }
+
+                if (graph.list) {
+                    // query dimension
+                    let dimension = container.dimensions[graph.dimension];
+                    if (dimension) {
+                        dimension.top(Infinity).forEach(record => {
+                            graph.view.data.push(graph.list(record));
+                            if (graph.meta === undefined) graph.meta = record;
+                        });
                     }
                     updated = true;
                 }
             }
 
-            if (graph.params.list) {
-                // query dimension
-                let dimension = container.dimensions[graph.dimension];
-                if (dimension) {
-                    dimension.top(Infinity).forEach(record => {
-                        graph.params.data.push(graph.params.list(record));
-                        if (graph.meta === undefined) graph.meta = record;
-                    });
-                }
-                updated = true;
+            // track changes
+            if (graph.view.lastData !== JSON.stringify(graph.view.data)) {
+                graph.view.changed = Math.random() * 100000000;
             }
-
-            if (graph.meta === undefined) {
-                graph.meta = { };
-            }
-
-            graph.newData = JSON.stringify(graph.params.data);
-            graph.params.changed = (graph.lastData !== graph.newData);
         });
 
         return updated;
@@ -89,12 +101,12 @@ class ConstructView {
 }
 
 // display a centered string 
-ConstructView.TEXT = 'TEXT';
+ConstructView.TEXT = 'text';
 // a bar graph in terms of a ring
-ConstructView.HALO = 'HALO';
+ConstructView.HALO = 'halo';
 // used to show the path of a graph from point a to b
-ConstructView.TRACK = 'TRACK';
+ConstructView.TRACK = 'track';
 // a generated drawing based on a seed string
-ConstructView.PICO = 'PICO';
+ConstructView.PICO = 'pico';
 
 export default ConstructView;

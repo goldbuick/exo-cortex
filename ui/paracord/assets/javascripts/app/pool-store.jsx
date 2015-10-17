@@ -39,11 +39,9 @@ export default Reflux.createStore({
     },
 
     onHistory: function () {
-        var end = new Date(),
-            start = new Date();
-
-        // get a weeks worth of data
-        start.setDate(start.getDate() - 7);
+        // get two weeks worth of data
+        var start = moment().subtract(14, 'days').toDate(),
+            end = new Date();
 
         terminal.emit('request', {
             route: 'log/list',

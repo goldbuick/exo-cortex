@@ -74,6 +74,7 @@ var DashboardFeed = {
 
         dash.addObject(state.object, state, 1);
 
+        state.animTick = state.animTick || 0;
         state.animRotation = state.animRotation || 0;
         state.object.animIntro = function (value) {
             state.object.visible = Math.round(value * 100) % 4 === 0;
@@ -84,9 +85,11 @@ var DashboardFeed = {
         var state = getBaseState(dash);
 
         if (!state.object) return;
+        state.animTick += delta;
         state.animRotation -= delta * 0.01;
         state.object.rotation.y = state.animRotation;
-        state.object.position.y = state.basePosition;
+        state.object.position.y =
+            (Math.cos(state.animTick) * 3) + state.basePosition;
 
         if (!state.containers) return;
     }

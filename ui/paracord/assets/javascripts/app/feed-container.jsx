@@ -26,6 +26,13 @@ export default class FeedContainer {
         });
     }
 
+    reset () {
+        var self = this;
+        Object.keys(self.dimensions).forEach(prop => {
+            self.dimensions[prop].filterAll();
+        });
+    }
+
     add (pool) {
         var self = this,
             matches = this.matchRecords(pool);

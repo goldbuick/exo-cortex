@@ -26,49 +26,43 @@ var DashboardFeed = {
             radius = 950,
             r = new alea('feed-loop');
 
-        feed.drawLoop(0, 0, 8, 128, radius - 12);
-        feed.drawLoopR(0, 0, 0, 128, radius - 6, r, 0.2);
+        feed.drawLoopR(0, 0, 8, 128, radius - 12, r, 0.2);
+        feed.drawSwipe(0, 0, 0, 128, radius - 12, 8);
         feed.drawLoopR(0, 0, -8, 128, radius, r, 0.2);
+        state.texts = [ ];
         state.object = feed.build(RenderProject.plane(1.0));
 
         var angle = Math.PI * 0.5, tunnel = 3;
         for (var i=0; i<feeds.length * tunnel; ++i) {
-            var container = new Graph(),
-                r2 = new alea('feed-container' + feeds[Math.floor(i / tunnel)]);
+            var slice = (i % tunnel),
+                container = new Graph(),
+                name = feeds[Math.floor(i / tunnel)],
+                r2 = new alea(['feed-container', name, i].join('-'));
 
-            container.drawLoop(radius, 0, 0, Math.round(3 + r2() * 3), 45);
-            if (i % tunnel === 1) {
-                // TODO: add more deco
-                var stroke1 = 32 + r2() * 128,
-                    stroke2 = 32 + r2() * 128,
-                    stroke3 = 32 + r2() * 128;
-                container.drawLine([
-                    { x: radius, y: 0, z: 0 },
-                    { x: radius + stroke1, y: stroke1, z: 0 }
-                ]);
-                container.drawLoop(radius + stroke1, stroke1, 0,
-                    Math.round(3 + r2() * 3), 6 + r2() * 2);
-                container.drawLine([
-                    { x: radius, y: 0, z: 0 },
-                    { x: radius + stroke2, y: -stroke2, z: 0 }
-                ]);
-                container.drawLoop(radius + stroke2, -stroke2, 0,
-                    Math.round(3 + r2() * 3), 6 + r2() * 2);
-                container.drawLine([
-                    { x: radius, y: 0, z: 0 },
-                    { x: radius - stroke3, y: 0, z: 0 }
-                ]);
-                container.drawLoop(radius - stroke3, 0, 0,
-                    Math.round(3 + r2() * 3), 6 + r2() * 2);
+            var _radius = slice === 1 ? 32 : 24;
+            container.drawSwipe(radius, 0, 0, 64, _radius,
+                6 + Math.round(r2() * 8), Math.round(r2() * 30), Math.round(r2() * 30));
+            if (slice === 1) {
+                container.drawLoopR(radius, 0, 0, 64, _radius + 32, r2, 0.4);
+                if (r2() < 0.3) container.drawLoopR(radius, 0, 0, 64, _radius + 32 + 8, r2, 0.7);
             }
 
-            var _object = container.build(RenderProject.altPlane(1.0));
+            var _project = RenderProject.altPlane(1.0),
+                _object = container.build(_project);
+
+            if (slice === 1) {
+                let _text = container.genText(_project(0, radius + 64, 0), name, 0.4);
+                state.texts.push(_text);
+                _object.add(_text);
+            }
+
             _object.rotation.y = angle;
             state.object.add(_object);
-            if (i > 0 && i % tunnel === 0) {
+
+            if (i > 0 && slice === 0) {
                 angle += 0.6;
             } else {
-                angle += 0.03;
+                angle += 0.06;
             }
         }
 
@@ -77,7 +71,10 @@ var DashboardFeed = {
         state.animTick = state.animTick || 0;
         state.animRotation = state.animRotation || 0;
         state.object.animIntro = function (value) {
-            state.object.visible = Math.round(value * 100) % 4 === 0;
+            // state.object.visible = Math.round(value * 100) % 2 === 0;
+            state.texts.forEach(text => {
+                text.material.uniforms.scramble.value = (1.0 - value);
+            });
         };
     },
 

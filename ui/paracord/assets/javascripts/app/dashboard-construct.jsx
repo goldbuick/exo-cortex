@@ -23,6 +23,7 @@ var DashboardConstruct = {
         state.basePositionMin = state.basePositionMin || 0;
 
         state.object = new THREE.Group();
+        state.scale = state.scale || 1;
         state.spin = state.spin || new THREE.Vector3();
         state.orientation = state.orientation || new THREE.Vector3();
         dash.addObject(state.object, state, 1);
@@ -62,6 +63,7 @@ var DashboardConstruct = {
         state.object.rotation.y = state.orientation.y;
         state.object.rotation.z = state.orientation.z;
         state.object.position.y = state.basePosition;
+        state.object.scale.set(state.scale, state.scale, state.scale);
 
         if (!state.graphs) return;
 

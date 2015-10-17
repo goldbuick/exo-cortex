@@ -83,7 +83,7 @@ var DashBoard = React.createClass({
         var delta = e.deltaY > 0 ? 1 : -1,
             modeTarget = Math.round(state.mode / 100) + delta;
 
-        modeTarget = Math.min(Math.max(0, modeTarget), 2) * 100;
+        modeTarget = Math.min(Math.max(-1, modeTarget), 2) * 100;
         var scroll = { value: state.mode },
             target = { value: modeTarget };
 
@@ -96,6 +96,12 @@ var DashBoard = React.createClass({
             ratio = (state.mode / 100);
             if (ratio > 2) ratio = 2;
             _state = DashBoardConstruct.base(this);
+            if (ratio < 0) {
+                _state.scale = 1 + Math.abs(ratio) * 0.25;
+                ratio = 0;
+            } else {
+                _state.scale = 1;
+            }
             _state.basePosition = _state.basePositionMin + (ratio * 800);
 
             // place feed containers
@@ -145,12 +151,12 @@ var DashBoard = React.createClass({
 
         var _state;
         switch (Math.round((state.mode || 0) / 100)) {
-            case 0: _state = DashBoardConstruct.base(this); break;
+            default: _state = DashBoardConstruct.base(this); break;
             case 1: break;
             case 2: break;
         }
 
-        if (_state) {
+        if (_state && _state.spin) {
             _state.spin.x += dy * speed;
             _state.spin.y += dx * speed;
         }

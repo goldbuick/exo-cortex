@@ -119,6 +119,36 @@ export default class Graph {
         }
     }
 
+    drawSwipe (x, y, z, sides, radius, width, front, back, drift) {
+        var self = this,
+            offset = this.glyph.count,
+            innerRadius = radius,
+            outerRadius = radius + width,
+            ipoints = self.genArc(x, y, z, sides, innerRadius, front, back, drift),
+            opoints = self.genArc(x, y, z, sides, outerRadius, front, back, drift);
+
+        ipoints.forEach(vert => { self.glyph.addVert(vert.x , vert.y, vert.z); });
+        opoints.forEach(vert => { self.glyph.addVert(vert.x , vert.y, vert.z); });
+
+        var base, len = ipoints.length;
+        for (var i=0; i<len-1; ++i) {
+            base = offset + i;
+            this.glyph.addFill(base, base + 1, base + len);
+            this.glyph.addFill(base + len, base + len + 1, base + 1);
+        }
+    }
+
+    drawSwipeLine (x, y, z, sides, radius, width, front, back, drift) {
+        var self = this,
+            innerRadius = radius,
+            outerRadius = radius + width,
+            ipoints = self.genArc(x, y, z, sides, innerRadius, front, back, drift),
+            opoints = self.genArc(x, y, z, sides, outerRadius, front, back, drift);
+
+        this.drawLine(ipoints);
+        this.drawLine(opoints);
+    }
+
     drawGeometry (geometry) {
         var self = this,
             offset = self.glyph.count;
@@ -164,6 +194,30 @@ export default class Graph {
         for (var i=0; i < geometry.vertices.length-1; ++i) {
             self.glyph.addLine(offset + i, offset + i + 1);
         }
+    }
+
+    genArc (x, y, z, sides, radius, front, back, drift) {
+        var points = [ ],
+            step = (Math.PI * 2) / sides;
+
+        front = front || 0;
+        back = back || 0;
+        drift = drift || 0;
+
+        sides -= front + back;
+
+        var angle = front * step;
+        for (var i=0; i <= sides; ++i) {
+            points.push({
+                x: x + Math.cos(angle) * radius,
+                y: y + Math.sin(angle) * radius,
+                z: z
+            });
+            angle += step;
+            radius += drift;
+        }
+
+        return points;
     }
 
     genText (pos, text, scale) {

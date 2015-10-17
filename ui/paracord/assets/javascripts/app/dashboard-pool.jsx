@@ -7,6 +7,10 @@ function getState (dash) {
 
 var DashboardPool = {
 
+    base: function (dash) {
+        return getState(dash);
+    },
+
     gen: function (dash) {
         var state = getState(dash),
             pool = new Graph(),
@@ -29,6 +33,8 @@ var DashboardPool = {
 
         state.object.rotation.y = Math.PI * 0.75;
         state.animTick = state.animTick || 0;
+        state.basePosition = state.basePosition || -720;
+        state.basePositionMin = state.basePositionMin || -720;
         state.object.animIntro = function (value) {
             state.object.visible = Math.round(value * 100) % 4 === 0;
         };
@@ -38,8 +44,7 @@ var DashboardPool = {
         var state = getState(dash);
         if (!state.object) return;
         state.animTick += delta;
-        state.object.position.y =
-            (Math.cos(state.animTick) * 2) - 720;
+        state.object.position.y = state.basePosition + (Math.cos(state.animTick) * 2);
     }
 
 };

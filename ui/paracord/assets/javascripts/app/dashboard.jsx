@@ -94,6 +94,7 @@ var DashBoard = React.createClass({
     
             // place constructs
             ratio = (state.mode / 100);
+            var top = 700;
             if (ratio > 2) ratio = 2;
             _state = DashBoardConstruct.base(this);
             if (ratio < 0) {
@@ -102,29 +103,44 @@ var DashBoard = React.createClass({
             } else {
                 _state.scale = 1;
             }
-            _state.basePosition = _state.basePositionMin + (ratio * 800);
+            _state.basePosition = _state.basePositionMin + (ratio * top);
 
             // place feed containers
             ratio = (state.mode / 100);
             var middle = 128;
             if (ratio <= 1) {
+                if (ratio < 0) ratio *= 1.5;
                 _state = DashBoardFeed.base(this);
                 _state.basePosition = _state.basePositionMin + (ratio * middle);
             } else {
                 ratio = ratio - 1;
                 _state = DashBoardFeed.base(this);
-                _state.basePosition = _state.basePositionMin + middle + (ratio * 800);
+                _state.basePosition = _state.basePositionMin + middle + (ratio * top);
             }
 
             // place categories
             ratio = ((state.mode - 100) / 100);
-            if (ratio < 0) ratio = 0;
+            var bottom = 360;
+            if (ratio < -1) {
+                ++ratio;
+            } else if (ratio < 0) {
+                ratio = 0;
+            }
             _state = DashBoardCategories.base(this);
-            _state.basePosition = _state.basePositionMin + (ratio * 360);        
+            _state.basePosition = _state.basePositionMin + (ratio * bottom);
+
+            // place pool       
+            ratio = ((state.mode - 100) / 100);
+            if (ratio < -1) {
+                ++ratio;
+            } else {
+                ratio = 0;
+            }
+            _state = DashBoardPool.base(this);
+            _state.basePosition = _state.basePositionMin + (ratio * bottom);
         });
         state.scrolling.onComplete(() => {
             state.scrolling = undefined;
-            console.log('complete', state.mode);
         });
 
         state.scrolling.easing(TWEEN.Easing.Exponential.InOut);

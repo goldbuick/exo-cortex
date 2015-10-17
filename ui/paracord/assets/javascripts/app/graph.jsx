@@ -51,23 +51,8 @@ export default class Graph {
         this.drawLine(curve.getSpacedPoints(divisions));
     }
 
-    drawLoop (x, y, z, sides, radius, skip) {
-        var points = [ ],
-            step = (Math.PI * 2) / sides;
-
-        if (skip !== undefined) sides -= skip;
-
-        var angle = 0;
-        for (var i=0; i<=sides; ++i) {
-            points.push({
-                x: x + Math.cos(angle) * radius,
-                y: y + Math.sin(angle) * radius,
-                z: z
-            });
-            angle += step;
-        }
-
-        this.drawLine(points);
+    drawLoop (x, y, z, sides, radius, front, back, drift) {
+        this.drawLine(this.genArc(x, y, z, sides, radius, front, back, drift));
     }
 
     drawLoopDash (x, y, z, sides, radius, skip) {

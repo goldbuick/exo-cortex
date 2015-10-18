@@ -36,23 +36,24 @@ export default Reflux.createStore({
     },
 
     droneFreq: function () {
-        return 160 + Math.round(Math.random() * 80);
+        return 160 + Math.round(Math.random() * 60);
     },
 
     onDrone: function () {
-        var i, rate = 2;
+        var i;
+
         if (this.dronesStarted) {
             i = Math.floor(Math.random() * this.drones.length);
             this.drones[i].frequency.setCurrentValueNow();
-            this.drones[i].frequency.rampTo(this.droneFreq(), rate);
+            this.drones[i].frequency.rampTo(this.droneFreq(), 4);
             return;
         }
 
         this.dronesStarted = false;
         for (i=0; i<this.drones.length; ++i) {
-            this.drones[i].start();
             this.drones[i].frequency.setCurrentValueNow();
-            this.drones[i].frequency.rampTo(this.droneFreq(), 0.1);
+            this.drones[i].frequency.rampTo(this.droneFreq(), i * 0.25);
+            this.drones[i].start();
         }
     }
     

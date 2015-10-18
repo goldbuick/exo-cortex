@@ -97,7 +97,7 @@ export default class Graph {
         }
 
         for (var i=0; i<points.length-1; ++i) {
-            this.glyph.addFill(center, base + i, base + i + 1);
+            this.glyph.addFill(center, base + i + 1, base + i);
         }
     }
 
@@ -116,7 +116,7 @@ export default class Graph {
         for (var i=0; i<len-1; ++i) {
             base = offset + i;
             this.glyph.addFill(base, base + 1, base + len);
-            this.glyph.addFill(base + len, base + len + 1, base + 1);
+            this.glyph.addFill(base + len, base + 1, base + len + 1);
         }
     }
 

@@ -5,6 +5,15 @@ baseColor = baseColor.substring(4, baseColor.length - 1).split(',').map(str => {
     return parseFloat(str.trim(str)) / 255.0;
 });
 
+var lineMaterial = new THREE.LineBasicMaterial({
+    vertexColors: THREE.VertexColors
+});
+
+var fillMaterial = new THREE.MeshBasicMaterial({
+    side: THREE.DoubleSide,
+    vertexColors: THREE.VertexColors
+});
+
 export default class Glyph {
     constructor () {
         this.count = 0;
@@ -146,11 +155,7 @@ export default class Glyph {
 
         var positions = [ ];
         for (var i=0; i<this.positions.length; i+=3) {
-            var result = transform(
-                this.positions[i],
-                this.positions[i+1],
-                this.positions[i+2]
-            );
+            var result = transform(this.positions[i], this.positions[i+1], this.positions[i+2]);
             positions.push(result[0], result[1], result[2]);
         }
 
@@ -161,8 +166,7 @@ export default class Glyph {
             lineGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(this.colors), 3));
             lineGeometry.computeBoundingSphere();
 
-            var lineMaterial = new THREE.LineBasicMaterial({ vertexColors: THREE.VertexColors }),
-                lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
+            var lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
             group.add(lineMesh);
         }
 
@@ -170,18 +174,10 @@ export default class Glyph {
             var fillGeometry = new THREE.BufferGeometry();
             fillGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array(this.fills), 1));
             fillGeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
-            fillGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(this.colors.map(function (value) {
-                return value * 0.5;
-            })), 3));
+            fillGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(this.colors), 3));
             fillGeometry.computeBoundingSphere();
 
-            var fillMaterial = new THREE.MeshBasicMaterial({
-                    opacity: 0.7,
-                    transparent: true,
-                    side: THREE.DoubleSide,
-                    vertexColors: THREE.VertexColors
-                }),
-                fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
+            var fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
             group.add(fillMesh);
         }
 

@@ -1,8 +1,10 @@
+import 'app/three/shaders/FilmShader';
 import 'app/three/shaders/CopyShader';
 import 'app/three/shaders/DigitalGlitch';
 import 'app/three/shaders/ConvolutionShader';
 import 'app/three/postprocessing/EffectComposer';
 import 'app/three/postprocessing/MaskPass';
+import 'app/three/postprocessing/FilmPass';
 import 'app/three/postprocessing/BloomPass';
 import 'app/three/postprocessing/ShaderPass';
 import 'app/three/postprocessing/GlitchPass';
@@ -42,12 +44,14 @@ var RenderTarget = {
         var renderPass = new THREE.RenderPass(this.scene, this.camera);
         var effectBloom = new THREE.BloomPass(2);
         var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+        var effectFilm = new THREE.FilmPass(2.0, 0.5, 2048, false);
         var effectGlitch = new THREE.GlitchPass(64);
 
         var passes = [
             renderPass,
             effectBloom,
             effectCopy,
+            effectFilm,
             // effectGlitch,
         ];
         for (var i=0; i<passes.length; ++i) {
@@ -75,13 +79,9 @@ var RenderTarget = {
 
     draw: function () {
         var delta = (1.0 / 60.0);
-
         if (this.update) this.update(delta);
-        // this.scene.traverse(node => { if (node.animFunc) node.animFunc(delta); });
-
         this.renderer.clear();
         this.composer.render(delta);
-
         this.renderTimer = window.requestAnimationFrame(this.draw);
     },
 

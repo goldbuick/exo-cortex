@@ -1,5 +1,4 @@
 import Graph from 'app/graph';
-import Shapes from 'app/shapes';
 
 export default function (project, args, meta, data) {
     if (data === undefined) return;
@@ -49,43 +48,32 @@ export default function (project, args, meta, data) {
                 graph.drawLine([ a, b ]);                    
             }
 
-            let bibbly = new THREE.Shape();
-            Shapes.roundedRect(bibbly, b.x - 2, b.y - 2, 4, 4, 0.5);
-            graph.drawShape(bibbly);
-            graph.drawShapeLine(bibbly);
+            graph.drawSwipe (b.x, b.y, 0, 6, 2, 1);
 
         } else if (i % args.tickMarks === 0) {
-            a.x = Math.cos(angle) * (args.radius - 3);
-            a.y = Math.sin(angle) * (args.radius - 3);
+            a.x = Math.cos(angle) * (args.radius - 4);
+            a.y = Math.sin(angle) * (args.radius - 4);
             b.x = Math.cos(angle) * (args.radius - tick);
             b.y = Math.sin(angle) * (args.radius - tick);
             graph.drawLine([ a, b ]);
             if (r() < 0.2) {
-                a.x = Math.cos(angle) * (args.radius - tick - 3);
-                a.y = Math.sin(angle) * (args.radius - tick - 3);
-                circleShape = new THREE.Shape();
-                circleShape.absarc(a.x, a.y, 1, 0, Math.PI * 2, false);
-                graph.drawShape(circleShape);
+                a.x = Math.cos(angle) * (args.radius - tick - 4);
+                a.y = Math.sin(angle) * (args.radius - tick - 4);
+                graph.drawFill (a.x, a.y, 0, 6, 1);
             }
             if (r() < 0.1) {
                 a.x = Math.cos(angle) * (args.radius - tick - 7);
                 a.y = Math.sin(angle) * (args.radius - tick - 7);
-                circleShape = new THREE.Shape();
-                circleShape.absarc(a.x, a.y, 1, 0, Math.PI * 2, false);
-                graph.drawShape(circleShape);
+                graph.drawFill (a.x, a.y, 0, 6, 1);
             }
         }
         angle += step;
     }
 
-    var circleShape = new THREE.Shape();
-    circleShape.absarc(0, 0, args.radius - 1, 0, Math.PI * 2, false);
-    graph.drawShapeLine(circleShape);
+    graph.drawSwipe (0, 0, 0, 64, args.radius - 2, 1);
     
     if (r() < 0.5) {
-        circleShape = new THREE.Shape();
-        circleShape.absarc(0, 0, args.radius - r() * 4, 0, Math.PI * 2, false);
-        graph.drawShapeLine(circleShape);
+        graph.drawLoop (0, 0, 0, 64, args.radius - 3);
     }
 
     var object = self.finish(project, args, graph);

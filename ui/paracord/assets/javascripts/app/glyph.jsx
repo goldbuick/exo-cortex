@@ -187,8 +187,4 @@ export default class Glyph {
 
         return group;
     }
-
-    update (geometry) {
-
-    }
 }

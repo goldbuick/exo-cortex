@@ -17,21 +17,29 @@ var DashboardPool = {
             radius = 0,
             count = Math.round(dash.state.pool.size() / 1000);
         
-        var y = 0, arch = (Math.PI * 2) / 20;
+        var y = 0,
+            sides = 128,
+            gap, turn, twist,
+            inc = (Math.PI * 2) / 10,
+            arch = (Math.PI * 2) / 20;
+
         for (var i=0; i<count; ++i) {
+            gap = Math.floor(sides * 0.25);
+            turn = gap + Math.floor(gap * 0.5);
+            twist = Math.floor(Math.cos((i % 10) * inc) * 2);
+            turn -= twist; gap += twist * 2;
             if (i % 10 === 0) {
                 y += 80;
-                radius += 200;                
+                radius += 200;
             } else {
                 radius += 12;
             }
-            pool.drawLoop(0, 0, y + Math.cos(i * arch) * 32, 64, radius, 16);
+            pool.drawLoop(0, 0, y + Math.cos(i * arch) * 32, sides, radius, -turn, turn + gap);
         }
 
         state.object = pool.build(RenderProject.plane(1.0));
         dash.addObject(state.object, state, count);
 
-        state.object.rotation.y = Math.PI * 0.75;
         state.animTick = state.animTick || 0;
         state.basePosition = state.basePosition || -720;
         state.basePositionMin = state.basePositionMin || -720;

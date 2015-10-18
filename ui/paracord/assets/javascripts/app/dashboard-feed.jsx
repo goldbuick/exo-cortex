@@ -58,6 +58,9 @@ var DashboardFeed = {
                 let _text = container.genText(_project(0, radius + 64, 0), name, 0.4);
                 state.texts.push(_text);
                 _object.add(_text);
+                // _text = container.genText(_project(0, radius - 64, 0), name, 0.4, true);
+                // state.texts.push(_text);
+                // _object.add(_text);
             }
 
             _object.rotation.y = angle;

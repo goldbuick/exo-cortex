@@ -1,6 +1,7 @@
 import terminal from 'app/lib/terminal-server';
 import PoolActions from 'app/pool-actions';
 import FeedActions from 'app/feed-actions';
+import AudioActions from 'app/audio-actions';
 
 export default Reflux.createStore({
     listenables: [ PoolActions ],
@@ -83,6 +84,7 @@ export default Reflux.createStore({
         } else {
             self.trigger(self.pool);
             FeedActions.pool(self.pool);
+            AudioActions.drone();
         }
 
         if (added.length) {

@@ -43,8 +43,8 @@ export default function (project, args, meta, data) {
             if (i === 0) {
                 a.x = Math.cos(angle) * (args.radius + args.width);
                 a.y = Math.sin(angle) * (args.radius + args.width);
-                b.x = a.x + Math.cos(angle + Math.PI * 0.5) * tick * 0.57;
-                b.y = a.y + Math.sin(angle + Math.PI * 0.5) * tick * 0.57;
+                b.x = a.x + Math.cos(angle + Math.PI * -0.5) * tick * 0.57;
+                b.y = a.y + Math.sin(angle + Math.PI * -0.5) * tick * 0.57;
                 graph.drawLine([ a, b ]);                    
             }
 

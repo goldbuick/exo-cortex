@@ -7,6 +7,8 @@ import DashBoardPool from 'app/dashboard-pool';
 import DashBoardCategories from 'app/dashboard-categories';
 import DashBoardFeed from 'app/dashboard-feed';
 import DashBoardConstruct from 'app/dashboard-construct';
+import AudioStore from 'app/audio-store';
+import AudioActions from 'app/audio-actions';
 
 function getBaseState (dash) {
     return dash.getGraphState('base', 'state');
@@ -83,6 +85,7 @@ var DashBoard = React.createClass({
         var delta = e.deltaY > 0 ? 1 : -1,
             modeTarget = Math.round(state.mode / 100) + delta;
 
+        if (modeTarget >= -1 && modeTarget <= 2) AudioActions.swish();
         modeTarget = Math.min(Math.max(-1, modeTarget), 2) * 100;
         var scroll = { value: state.mode },
             target = { value: modeTarget };

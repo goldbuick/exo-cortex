@@ -44,7 +44,7 @@ var RenderTarget = {
         var renderPass = new THREE.RenderPass(this.scene, this.camera);
         var effectBloom = new THREE.BloomPass(2);
         var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-        var effectFilm = new THREE.FilmPass(2.0, 0.5, 2048, false);
+        var effectFilm = new THREE.FilmPass(2.0, 0.5, window.innerHeight, false);
         var effectGlitch = new THREE.GlitchPass(64);
 
         var passes = [

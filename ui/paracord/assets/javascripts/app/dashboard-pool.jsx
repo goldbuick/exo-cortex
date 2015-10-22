@@ -1,4 +1,3 @@
-import RenderProject from 'app/render-project';
 import Graph from 'app/graph';
 
 function getState (dash) {
@@ -37,7 +36,7 @@ var DashboardPool = {
             pool.drawLoop(0, 0, y + Math.cos(i * arch) * 32, sides, radius, -turn, turn + gap);
         }
 
-        state.object = pool.build(RenderProject.plane(1.0));
+        state.object = pool.build(Graph.projectPlane(1.0));
         dash.addObject(state.object, state, count);
 
         state.animTick = state.animTick || 0;

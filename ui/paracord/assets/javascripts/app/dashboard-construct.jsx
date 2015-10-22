@@ -1,5 +1,4 @@
 import Graph from 'app/graph';
-import RenderProject from 'app/render-project';
 import ConstructRender from 'app/construct-render';
 
 function getBaseState (dash) {
@@ -36,7 +35,7 @@ var DashboardConstruct = {
 
             construct.graphs.forEach(graph => {
                 var _state = getState(dash, construct, graph);
-                _state.object = ConstructRender.build(RenderProject.sphere(radius, 0.01), graph);
+                _state.object = ConstructRender.build(Graph.projectSphere(radius, 0.01), graph);
                 if (_state.object) {
                     group.add(_state.object);
                     dash.addSubObject(_state.object, _state, graph.view.changed);

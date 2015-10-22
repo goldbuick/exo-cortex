@@ -1,4 +1,3 @@
-import RenderProject from 'app/render-project';
 import Graph from 'app/graph';
 
 function getBaseState (dash) {
@@ -30,7 +29,7 @@ var DashboardFeed = {
         feed.drawSwipe(0, 0, 0, 128, radius - 12, 8);
         feed.drawLoopR(0, 0, -8, 128, radius, r, 0.2);
         state.texts = [ ];
-        state.object = feed.build(RenderProject.plane(1.0));
+        state.object = feed.build(Graph.projectPlane(1.0));
 
         var angle = Math.PI * 0.5, tunnel = 5;
         for (var i=0; i<feeds.length * tunnel; ++i) {
@@ -51,16 +50,13 @@ var DashboardFeed = {
                 if (r2() < 0.3) container.drawLoopR(radius, 0, 0, 64, _radius + 32 + 8, r2, 0.7);
             }
 
-            var _project = RenderProject.altPlane(1.0),
+            var _project = Graph.projectAltPlane(1.0),
                 _object = container.build(_project);
 
             if (slice === mid) {
-                let _text = container.genText(_project(0, radius + 64, 0), name, 0.4);
+                let _text = Graph.genText(_project(0, radius + 64, 0), name, 0.4);
                 state.texts.push(_text);
                 _object.add(_text);
-                // _text = container.genText(_project(0, radius - 64, 0), name, 0.4, true);
-                // state.texts.push(_text);
-                // _object.add(_text);
             }
 
             _object.rotation.y = angle;

@@ -1,5 +1,4 @@
 import RenderTarget from 'app/render-target';
-import RenderProject from 'app/render-project';
 import PoolStore from 'app/pool-store';
 import FeedStore from 'app/feed-store';
 import ConstructStore from 'app/construct-store';

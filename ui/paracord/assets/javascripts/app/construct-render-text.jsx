@@ -6,8 +6,7 @@ export default function (project, args, meta, data) {
     // ARGS
     // text - string
     // scale - resize text
-    var graph = new Graph(),
-        object = graph.genText(project(0, 0, 0), this.metaStr(meta, args.text), args.scale);
+    var object = Graph.genText(project(0, 0, 0), this.metaStr(meta, args.text), args.scale);
 
     if (object) {
         object.animIntro = function (value) {

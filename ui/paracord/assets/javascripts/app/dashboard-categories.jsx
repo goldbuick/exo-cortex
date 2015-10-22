@@ -1,4 +1,3 @@
-import RenderProject from 'app/render-project';
 import Graph from 'app/graph';
 
 function getBaseState (dash) {
@@ -44,7 +43,7 @@ var DashboardCategories = {
 
             category.drawLoop(0, 0, 6, 128, radius - 8);
             if (r() < 0.3) category.drawLoopR(0, 0, 0, 128, radius, r, 0.1);
-            _state.object = category.build(RenderProject.plane(1.0));
+            _state.object = category.build(Graph.projectPlane(1.0));
 
             var angle = 0;
             for (var i=0; i<types.length; ++i) {
@@ -68,7 +67,7 @@ var DashboardCategories = {
                 type.drawLoop(-radius - stroke2, bRad + stroke1, 0,
                     Math.round(3 + r() * 3), 6 + r() * 2);
                 
-                var _object = type.build(RenderProject.altPlane(1.0));
+                var _object = type.build(Graph.projectAltPlane(1.0));
                 _object.rotation.y = angle;
                 _state.object.add(_object);
                 angle += 0.2;

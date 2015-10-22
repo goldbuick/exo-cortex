@@ -24,6 +24,7 @@ var DashboardCategories = {
         var r = new alea('category-system');
         var offset = 0, radius = 600, step = 48, start = Math.PI * 0.25;
         state.animTick = state.animTick || 0;
+        state.spin = state.spin || new THREE.Vector3();
         state.basePosition = state.basePosition || -470;
         state.basePositionMin = state.basePositionMin || -470;
         state.channels = channels.map(channel => {
@@ -94,12 +95,19 @@ var DashboardCategories = {
         if (!state.channels) return;
 
         state.animTick += delta;
+        var spinDelta = new THREE.Vector3();
+        spinDelta.copy(state.spin);
+        spinDelta.multiplyScalar(delta);
+
         state.channels.forEach((channel => {
-            channel.animRotation += channel.animDelta * delta;
+            channel.animRotation += (channel.animDelta * delta) + spinDelta.y;
             channel.object.rotation.y = channel.animRotation;
             channel.object.position.y =
                 (Math.cos(-state.animTick) * 3) + state.basePosition + channel.basePosition;
         }));
+
+        spinDelta.multiplyScalar(4.5);
+        state.spin.sub(spinDelta);
     }
 
 };

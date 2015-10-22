@@ -153,25 +153,26 @@ var DashBoard = React.createClass({
         e.preventDefault();
         var state = getBaseState(this);
         state.dragStart = { x: e.clientX, y: e.clientY };
+        state.dragLast = { x: e.clientX, y: e.clientY };
     },
 
     handleMouseMove: function (e) {
         e.preventDefault();
         var state = getBaseState(this);
-        if (!state.dragStart) return;
+        if (!state.dragLast) return;
 
-        var dx = e.clientX - state.dragStart.x,
-            dy = e.clientY - state.dragStart.y,
+        var dx = e.clientX - state.dragLast.x,
+            dy = e.clientY - state.dragLast.y,
             speed = 0.04;
 
-        state.dragStart.x = e.clientX;
-        state.dragStart.y = e.clientY;
+        state.dragLast.x = e.clientX;
+        state.dragLast.y = e.clientY;
 
         var _state;
         switch (Math.round((state.mode || 0) / 100)) {
             default: _state = DashBoardConstruct.base(this); break;
-            case 1: break;
-            case 2: break;
+            case 1: _state = DashBoardFeed.base(this); break;
+            case 2: _state = DashBoardCategories.base(this); break;
         }
 
         if (_state && _state.spin) {
@@ -183,13 +184,13 @@ var DashBoard = React.createClass({
     handleMouseUp: function (e) {
         e.preventDefault();
         var state = getBaseState(this);
-        if (!state.dragStart) return;
+        if (!state.dragLast) return;
         var dx = e.clientX - state.dragStart.x,
             dy = e.clientY - state.dragStart.y;
         if (Math.abs(dx) + Math.abs(dy) < 2) {
             console.log('click ?', dx, dy);
         }
-        delete state.dragStart;
+        delete state.dragLast;
     },
 
     render: function () {
@@ -203,7 +204,8 @@ var DashBoard = React.createClass({
             onWheel={this.handleWheel}
             onMouseDown={this.handleMouseDown}
             onMouseMove={this.handleMouseMove}
-            onMouseUp={this.handleMouseUp}></div>;
+            onMouseUp={this.handleMouseUp}
+            onClick={this.handleClick}></div>;
     },
 
     update: function (delta) {

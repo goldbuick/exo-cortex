@@ -84,7 +84,23 @@ class Graph {
         }
     }
 
-    drawFill (x, y, z, sides, radius, front, back, drift) {
+    drawRect (x, y, w, h, z) {
+        var offset = this.glyph.count;
+
+        z = z || 0;
+        var hw = w * 0.5,
+            hh = h * 0.5;
+
+        this.glyph.addVert(x - hw, y - hh, z);
+        this.glyph.addVert(x + hw, y - hh, z);
+        this.glyph.addVert(x - hw, y + hh, z);
+        this.glyph.addVert(x + hw, y + hh, z);
+
+        this.glyph.addFill(offset, offset + 1, offset + 2);
+        this.glyph.addFill(offset + 2, offset + 1, offset + 3);
+    }
+
+    drawCircle (x, y, z, sides, radius, front, back, drift) {
         var offset = this.glyph.count,
             points = Graph.genArc(x, y, z, sides, radius, front, back, drift);
 
@@ -151,14 +167,17 @@ Graph.projectAltPlane = function (scale) {
     };
 };
 
-// assume x in radians, y up/down, and z is height
-Graph.projectColumn = function (radius, xscale) {
+Graph.projectColumn = function (radius, scale) {
     return function (x, y, z) {
-
+        y = y * scale;
+        var _radius = radius + z,
+            _x = Math.sin(y) * _radius,
+            _y = x,
+            _z = Math.cos(y) * _radius;
+        return [ _x, _y, _z ];
     };
 }
     
-// assume x, y in radians, z is height
 Graph.projectSphere = function (radius, scale) {
     return function (x, y, z) {
         x = x * scale;

@@ -59,12 +59,12 @@ export default function (project, args, meta, data) {
             if (r() < 0.2) {
                 a.x = Math.cos(angle) * (args.radius - tick - 4);
                 a.y = Math.sin(angle) * (args.radius - tick - 4);
-                graph.drawFill (a.x, a.y, 0, 6, 1);
+                graph.drawCircle(a.x, a.y, 0, 6, 1);
             }
             if (r() < 0.1) {
                 a.x = Math.cos(angle) * (args.radius - tick - 7);
                 a.y = Math.sin(angle) * (args.radius - tick - 7);
-                graph.drawFill (a.x, a.y, 0, 6, 1);
+                graph.drawCircle(a.x, a.y, 0, 6, 1);
             }
         }
         angle += step;

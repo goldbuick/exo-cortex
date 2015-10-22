@@ -73,6 +73,7 @@ var DashboardFeed = {
 
         state.animTick = state.animTick || 0;
         state.animRotation = state.animRotation || 0;
+        state.spin = state.spin || new THREE.Vector3();
         state.object.animIntro = function (value) {
             state.object.visible = Math.round(value * 100) % 4 === 0;
             state.texts.forEach(text => {
@@ -83,15 +84,20 @@ var DashboardFeed = {
 
     update: function (dash, delta) {
         var state = getBaseState(dash);
-
         if (!state.object) return;
+
+        var spinDelta = new THREE.Vector3();
+        spinDelta.copy(state.spin);
+        spinDelta.multiplyScalar(delta);
+
         state.animTick += delta;
-        state.animRotation -= delta * 0.01;
+        state.animRotation += (delta * -0.01) + spinDelta.y;
         state.object.rotation.y = state.animRotation;
         state.object.position.y =
             (Math.cos(state.animTick) * 3) + state.basePosition;
 
-        if (!state.containers) return;
+        spinDelta.multiplyScalar(4.5);
+        state.spin.sub(spinDelta);
     }
 
 };

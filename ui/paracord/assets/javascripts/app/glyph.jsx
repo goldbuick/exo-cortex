@@ -14,7 +14,7 @@ var fillMaterial = new THREE.MeshBasicMaterial({
     vertexColors: THREE.VertexColors
 });
 
-export default class Glyph {
+class Glyph {
     constructor () {
         this.count = 0;
         this.colors = [ ];
@@ -184,3 +184,7 @@ export default class Glyph {
         return group;
     }
 }
+
+Glyph.baseColor = css.getStyleRuleValue('.fg-color', 'color');
+
+export default Glyph;

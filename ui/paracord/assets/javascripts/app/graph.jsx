@@ -149,6 +149,8 @@ class Graph {
 
 }
 
+Graph.baseColor = Glyph.baseColor;
+
 Graph.projectPlane = function (scale) {
     return function (x, y, z) {
         var _x = x * scale,

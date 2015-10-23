@@ -30,6 +30,7 @@ var DashboardFeed = {
         feed.drawLoopR(0, 0, -8, 128, radius, r, 0.2);
         state.texts = [ ];
         state.object = feed.build(Graph.projectPlane(1.0));
+        // state.object = feed.build(Graph.projectColumn(radius * 0.5, 0.001));
 
         var angle = Math.PI * 0.5, tunnel = 5;
         for (var i=0; i<feeds.length * tunnel; ++i) {
@@ -43,7 +44,7 @@ var DashboardFeed = {
                 _front = Math.round(r2() * 30),
                 _back = -10 + Math.round(r2() * 40);
             container.drawSwipe(radius, 0, 0, 64, _radius,
-                6 + Math.round(r2() * 8), _front, _back);
+                2 + Math.round(r2() * 4), _front, _back);
 
             if (slice === mid) {
                 container.drawLoopR(radius, 0, 0, 64, _radius + 32, r2, 0.4);
@@ -57,6 +58,10 @@ var DashboardFeed = {
                 let _text = Graph.genText(_project(0, radius + 64, 0), name, 0.4);
                 state.texts.push(_text);
                 _object.add(_text);
+                dash.addDetail(_object, _project(-64, radius, 0), {
+                    mode: 'feed',
+                    container: name
+                });
             }
 
             _object.rotation.y = angle;

@@ -1,3 +1,4 @@
+import Graph from 'app/graph';
 import RenderTarget from 'app/render-target';
 import PoolStore from 'app/pool-store';
 import FeedStore from 'app/feed-store';
@@ -13,6 +14,13 @@ function getBaseState (dash) {
     return dash.getGraphState('base', 'state');
 }
 
+var detailMinGeometry = new THREE.OctahedronGeometry(16, 0),
+    detailMaxGeometry = new THREE.OctahedronGeometry(16, 0),
+    detailMinMaterial = new THREE.MeshBasicMaterial({
+        wireframe: true,
+        color: Graph.baseColor
+    });
+
 var DashBoard = React.createClass({
     mixins: [
         RenderTarget,
@@ -22,6 +30,7 @@ var DashBoard = React.createClass({
     ],
 
     componentDidMount: function () {
+        this.details = [ ];
         this.camera.position.z = 1440;
     },
 
@@ -34,6 +43,20 @@ var DashBoard = React.createClass({
     addSubObject: function (object, state, value) {
         object.keep = true;
         this.applyGraphStatus(state, object, value);
+    },
+
+    addDetail: function (object, pos, meta) {
+        var material = new THREE.MeshBasicMaterial({
+                wireframe: true, color: Graph.baseColor
+            }),
+            detail = new THREE.Mesh(detailMinGeometry, material);
+
+        detail.meta = meta;
+        detail.visible = true;
+        detail.position.set(pos[0], pos[1], pos[2]);
+        object.add(detail);
+
+        this.details.push(detail);
     },
 
     getGraphState: function (key, name) {
@@ -187,13 +210,23 @@ var DashBoard = React.createClass({
         if (!state.dragLast) return;
         var dx = e.clientX - state.dragStart.x,
             dy = e.clientY - state.dragStart.y;
+
         if (Math.abs(dx) + Math.abs(dy) < 2) {
-            console.log('click ?', dx, dy);
+            if (this.details) {
+                this.details.forEach(detail => {
+                    if (detail.visible &&
+                        detail.material.wireframe === false) {
+                        console.log(detail.meta);
+                    }
+                });
+            }
         }
+
         delete state.dragLast;
     },
 
     render: function () {
+        this.details = [ ];
         this.genScene(() => {
             DashBoardPool.gen(this);
             DashBoardCategories.gen(this);
@@ -204,8 +237,21 @@ var DashBoard = React.createClass({
             onWheel={this.handleWheel}
             onMouseDown={this.handleMouseDown}
             onMouseMove={this.handleMouseMove}
-            onMouseUp={this.handleMouseUp}
-            onClick={this.handleClick}></div>;
+            onMouseUp={this.handleMouseUp}></div>;
+    },
+
+    getSelectMode: function () {
+        var state = getBaseState(this),
+            mode = 'construct';
+
+        if (state.mode !== undefined) {
+            switch (Math.floor(state.mode / 100)) {
+                case 1: mode = 'feed'; break;
+                case 2: mode = 'category'; break;
+            }
+        }
+
+        return mode;
     },
 
     update: function (delta) {
@@ -214,6 +260,20 @@ var DashBoard = React.createClass({
         DashBoardCategories.update(this, delta);
         DashBoardFeed.update(this, delta);
         DashBoardConstruct.update(this, delta);
+        if (this.details) {
+            let mode = this.getSelectMode(),
+                global = new THREE.Vector3(),
+                scale = 0.8 + Math.cos(this.detailPulse) * 0.2;
+
+            this.details.forEach(detail => {
+                if (detail.meta.mode === mode) {
+                    global.setFromMatrixPosition(detail.matrixWorld);
+                    detail.material.wireframe = (global.z < 200);
+                } else {
+                    detail.material.wireframe = true;
+                }
+            });
+        }
     }
 
 });

@@ -68,10 +68,17 @@ var DashboardCategories = {
                 type.drawLoop(-radius - stroke2, bRad + stroke1, 0,
                     Math.round(3 + r() * 3), 6 + r() * 2);
                 
-                var _object = type.build(Graph.projectAltPlane(1.0));
+                var _project = Graph.projectAltPlane(1.0),
+                    _object = type.build(_project);
                 _object.rotation.y = angle;
                 _state.object.add(_object);
                 angle += 0.2;
+
+                dash.addDetail(_object, _project(0, -radius, 0), {
+                    mode: 'category',
+                    channel: channel,
+                    type: types[i]
+                });
             }
 
             _state.basePosition = offset;

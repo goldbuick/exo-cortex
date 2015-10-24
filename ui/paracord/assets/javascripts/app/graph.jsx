@@ -169,6 +169,15 @@ Graph.projectAltPlane = function (scale) {
     };
 };
 
+Graph.projectFacePlane = function (scale) {
+    return function (x, y, z) {
+        var _x = x * scale,
+            _y = y * scale,
+            _z = z * scale;
+        return [ _x, _y, _z ];
+    };
+};
+
 Graph.projectColumn = function (radius, scale) {
     return function (x, y, z) {
         y = y * scale;

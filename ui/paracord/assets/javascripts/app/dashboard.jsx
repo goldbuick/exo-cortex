@@ -14,13 +14,6 @@ function getBaseState (dash) {
     return dash.getGraphState('base', 'state');
 }
 
-var detailMinGeometry = new THREE.OctahedronGeometry(16, 0),
-    detailMaxGeometry = new THREE.OctahedronGeometry(16, 0),
-    detailMinMaterial = new THREE.MeshBasicMaterial({
-        wireframe: true,
-        color: Graph.baseColor
-    });
-
 var DashBoard = React.createClass({
     mixins: [
         RenderTarget,
@@ -46,16 +39,19 @@ var DashBoard = React.createClass({
     },
 
     addDetail: function (object, pos, meta) {
-        var material = new THREE.MeshBasicMaterial({
-                wireframe: true, color: Graph.baseColor
-            }),
-            detail = new THREE.Mesh(detailMinGeometry, material);
+        var icon = new Graph();
+        icon.drawSwipe(0, 0, 0, 6, 10, 3);
+        icon.drawSwipe(-6, 0, 0, 6, 10, 3, 2, 2);
 
+        var detail = icon.build(Graph.projectFacePlane(1.0));
+        detail.keep = true;
         detail.meta = meta;
-        detail.visible = true;
-        detail.position.set(pos[0], pos[1], pos[2]);
-        object.add(detail);
+        detail.scale.set(0.1, 0.1, 0.1);
+        detail.anchor = new THREE.Object3D();
+        detail.anchor.position.set(pos[0], pos[1], pos[2]);
 
+        object.add(detail.anchor);
+        this.scene.add(detail);
         this.details.push(detail);
     },
 
@@ -226,7 +222,13 @@ var DashBoard = React.createClass({
     },
 
     render: function () {
-        this.details = [ ];
+        if (this.details) {
+            this.details.forEach(detail => {
+                delete detail.keep;
+            });
+            this.details = [ ];
+        }
+        // this.details = [ ];
         this.genScene(() => {
             DashBoardPool.gen(this);
             DashBoardCategories.gen(this);
@@ -255,23 +257,25 @@ var DashBoard = React.createClass({
     },
 
     update: function (delta) {
+        var self = this;
         TWEEN.update();
-        DashBoardPool.update(this, delta);
-        DashBoardCategories.update(this, delta);
-        DashBoardFeed.update(this, delta);
-        DashBoardConstruct.update(this, delta);
-        if (this.details) {
-            let mode = this.getSelectMode(),
-                global = new THREE.Vector3(),
-                scale = 0.8 + Math.cos(this.detailPulse) * 0.2;
-
-            this.details.forEach(detail => {
-                if (detail.meta.mode === mode) {
-                    global.setFromMatrixPosition(detail.matrixWorld);
-                    detail.material.wireframe = (global.z < 200);
+        DashBoardPool.update(self, delta);
+        DashBoardCategories.update(self, delta);
+        DashBoardFeed.update(self, delta);
+        DashBoardConstruct.update(self, delta);
+        if (self.details) {
+            let target, mode = self.getSelectMode();
+            self.details.forEach(detail => {
+                detail.position.setFromMatrixPosition(detail.anchor.matrixWorld);
+                detail.lookAt(self.camera.position);
+                if (detail.meta.mode === mode && detail.position.z >= 200) {
+                    target = 1;
                 } else {
-                    detail.material.wireframe = true;
+                    target = 0.1;
                 }
+                detail.scale.x += (target - detail.scale.x) * delta * 6;
+                detail.scale.y = detail.scale.x;
+                detail.scale.z = detail.scale.x;
             });
         }
     }

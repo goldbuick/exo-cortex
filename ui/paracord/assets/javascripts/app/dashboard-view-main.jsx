@@ -127,10 +127,15 @@ class DashboardViewMain {
                 break;
         }
 
-        dash.setState({ view: 'details' });
+        dash.setCurrentView('detail');
+    }
+
+    gen (dash) {
+        
     }
 
     update (dash, delta) {
+        dash.centerCamera(delta, 0);
         if (!dash.details) return;
 
         var target,

@@ -6,6 +6,7 @@ import ConstructStore from 'app/construct-store';
 import AudioStore from 'app/audio-store';
 import AudioActions from 'app/audio-actions';
 import DashBoardViewMain from 'app/dashboard-view-main';
+import DashBoardViewDetail from 'app/dashboard-view-detail';
 import DashBoardPool from 'app/dashboard-pool';
 import DashBoardCategories from 'app/dashboard-categories';
 import DashBoardCategoriesDetail from 'app/dashboard-categories-detail';
@@ -75,8 +76,9 @@ var DashBoard = React.createClass({
         return data;
     },
 
-    getBaseState: function () {
-        return this.getGraphState('base', 'state');
+    getBaseState: function (view) {
+        view = view || '';
+        return this.getGraphState('base', ['state', view].join('-'));
     },
 
     applyGraphStatus: function (state, object, value) {
@@ -113,8 +115,10 @@ var DashBoard = React.createClass({
 
     handleWheel: function (e) {
         e.preventDefault();
+        var args = { dy: e.deltaY };
         switch (this.getCurrentView()) {
-            case 'main': DashBoardViewMain.handleWheel(this, { dy: e.deltaY }); break;
+            case 'main': DashBoardViewMain.handleWheel(this, args); break;
+            case 'detail': DashBoardViewDetail.handleWheel(this, args); break;
         }
     },
 
@@ -137,8 +141,10 @@ var DashBoard = React.createClass({
         state.dragLast.x = e.clientX;
         state.dragLast.y = e.clientY;
 
+        var args = { dx: dx, dy: dy };
         switch (this.getCurrentView()) {
-            case 'main': DashBoardViewMain.handleDrag(this, { dx: dx, dy: dy }); break;
+            case 'main': DashBoardViewMain.handleDrag(this, args); break;
+            case 'detail': DashBoardViewDetail.handleDrag(this, args); break;
         }
     },
 
@@ -150,8 +156,10 @@ var DashBoard = React.createClass({
             dy = e.clientY - state.dragStart.y;
 
         if (Math.abs(dx) + Math.abs(dy) < 2) {
+            let args = { x: e.clientX, y: e.clientY };
             switch (this.getCurrentView()) {
-                case 'main': DashBoardViewMain.handleClick(this); break;
+                case 'main': DashBoardViewMain.handleClick(this, args); break;
+                case 'detail': DashBoardViewDetail.handleClick(this, args); break;
             }
         }
 
@@ -165,6 +173,11 @@ var DashBoard = React.createClass({
         }
 
         this.genScene(() => {
+            switch (this.getCurrentView()) {
+                case 'main': DashBoardViewMain.gen(this); break;
+                case 'detail': DashBoardViewDetail.gen(this); break;
+            }
+
             DashBoardPool.gen(this);
             DashBoardCategories.gen(this);
             DashBoardFeed.gen(this);
@@ -179,9 +192,29 @@ var DashBoard = React.createClass({
             onMouseUp={this.handleMouseUp}></div>;
     },
 
+    centerCamera: function (delta, targetX) {
+        this.camera.position.x += (targetX - this.camera.position.x) * delta * 10;
+    },
+
     update: function (delta) {
         TWEEN.update();
-        DashBoardViewMain.update(this, delta);
+
+        // measure screen ratio
+        var len = 100,
+            state = this.getBaseState(),
+            hwidth = 0.5 * this.renderer.context.canvas.width,
+            left = new THREE.Vector3(len, 0, 1).project(this.camera),
+            center = new THREE.Vector3(0, 0, 1).project(this.camera);
+
+        left = (left.x * hwidth) + hwidth;
+        center = (center.x * hwidth) + hwidth;
+        state.screenRatio = len / (left - center);
+
+        switch (this.getCurrentView()) {
+            case 'main': DashBoardViewMain.update(this, delta); break;
+            case 'detail': DashBoardViewDetail.update(this, delta); break;
+        }
+
         DashBoardPool.update(this, delta);
         DashBoardCategories.update(this, delta);
         DashBoardFeed.update(this, delta);

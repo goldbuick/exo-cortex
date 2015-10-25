@@ -83,7 +83,7 @@ var DashboardCategories = {
             }
 
             _state.basePosition = offset;
-            _state.animDelta = _state.animDelta || (0.01 + 0.01 * r());
+            _state.animDelta = 0.02;
             _state.animRotation = _state.animRotation || start;
             _state.object.animIntro = function (value) {
                 _state.object.visible = Math.round(value * 100) % 4 === 0;
@@ -91,7 +91,7 @@ var DashboardCategories = {
 
             radius += step;
             offset += step;
-            start += Math.PI * 0.7;
+            start += Math.PI * 0.03;
             dash.addObject(_state.object, _state, types.length);
             return _state;
         });

@@ -13,6 +13,8 @@ class DashboardViewDetail {
     }
     
     handleWheel (dash, e) {
+        var state = this.getBaseState(dash);
+        state.menuRotation -= e.dy * 0.003;
     }
 
     handleDrag (dash, e) {
@@ -43,10 +45,11 @@ class DashboardViewDetail {
 
         rad = 2000;
         var menu = new Graph();
-        menu.drawLoop(0, 0, 0, 128, rad + 16);
+        menu.drawLoopR(0, 0, 0, 256, rad + 16, r, 0.3);
         menu.drawSwipe(0, 0, 0, 128, rad - 2, 8);
-        menu.drawLoopR(0, 0, 0, 128, rad - 16, r, 0.5);
+        menu.drawLoopR(0, 0, 0, 256, rad - 16, r, 0.7);
 
+        state.menuRotation = state.menuRotation || 0;
         state.menu = menu.build(Graph.projectFacePlane(1.0));
         state.menu.keep = true;
         state.menu.left = 280 - rad;
@@ -82,7 +85,10 @@ class DashboardViewDetail {
 
         dash.centerCamera(delta, cameraX);
         if (state.goback) state.goback.position.x = left + state.goback.left;
-        if (state.menu) state.menu.position.x = left + state.menu.left;
+        if (state.menu) {
+            state.menu.rotation.z = state.menuRotation;
+            state.menu.position.x = left + state.menu.left;
+        }
     }
 
 }

@@ -39,6 +39,7 @@ var DashBoard = React.createClass({
 
         var state = this.getBaseState('detail');
         state.items = items;
+        state.menuRotation = 0;
 
         this.setState({ view: view });
     },

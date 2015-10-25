@@ -113,7 +113,7 @@ class DashboardViewMain {
         if (!dash.details) return;
 
         var target,
-            angleStart = 0.1,
+            angleStart = 0.8,
             angleEnd = Math.PI - angleStart,
             mode = dash.getSelectMode();
 

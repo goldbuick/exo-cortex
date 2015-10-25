@@ -1,9 +1,10 @@
 var uid = 0;
 class ConstructView {
 
-    constructor (args) {
+    constructor (name, args) {
         var self = this;
         self.uid = ++uid;
+        self.name = name;
 
         var gid = 0;
         self.graphs = args.map(graph => {

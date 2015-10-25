@@ -25,7 +25,21 @@ var DashBoard = React.createClass({
         return this.state.view || 'main';
     },
 
-    setCurrentView: function (view) {
+    setCurrentView: function (view, items) {
+        // reset
+        DashBoardCategoriesDetail.base(this).items = [ ];
+
+        // set
+        items = items || [ ];
+        switch (this.getSelectMode()) {
+            default: break;
+            case 'feed': break;
+            case 'category': DashBoardCategoriesDetail.base(this).items = items; break;
+        }
+
+        var state = this.getBaseState('detail');
+        state.items = items;
+
         this.setState({ view: view });
     },
 
@@ -79,6 +93,20 @@ var DashBoard = React.createClass({
     getBaseState: function (view) {
         view = view || '';
         return this.getGraphState('base', ['state', view].join('-'));
+    },
+
+    getSelectMode: function () {
+        var state = this.getBaseState(),
+            mode = 'construct';
+
+        if (state.mode !== undefined) {
+            switch (Math.floor(state.mode / 100)) {
+                case 1: mode = 'feed'; break;
+                case 2: mode = 'category'; break;
+            }
+        }
+
+        return mode;
     },
 
     applyGraphStatus: function (state, object, value) {

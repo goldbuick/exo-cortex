@@ -76,6 +76,7 @@ var DashboardCategories = {
 
                 dash.addDetail(_object, _project(0, -radius, 0), {
                     mode: 'category',
+                    name: [ channel, '<=', types[i] ].join(' '),
                     channel: channel,
                     type: types[i]
                 });

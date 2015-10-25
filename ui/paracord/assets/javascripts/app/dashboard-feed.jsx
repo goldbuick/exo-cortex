@@ -60,6 +60,7 @@ var DashboardFeed = {
                 _object.add(_text);
                 dash.addDetail(_object, _project(-64, radius, 0), {
                     mode: 'feed',
+                    name: name,
                     container: name
                 });
             }

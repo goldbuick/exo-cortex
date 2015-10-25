@@ -248,10 +248,36 @@ Graph.genText = function (pos, text, scale, flip) {
 
     var _width = geometry.layout.width * (scale * 0.5 * flip),
         _height = geometry.layout.height * (scale * 0.25);
+
     mesh.scale.multiplyScalar(scale);
     mesh.scale.x *= flip;
     mesh.position.set(pos[0], pos[1] - _height, pos[2] - _width);
     mesh.rotation.y = Math.PI * 0.5;
+    mesh.rotation.z = Math.PI;
+    return mesh;
+};
+
+Graph.genTextFlat = function (pos, text, scale) {
+    if (!fontConfig) return;
+    var geometry = BmFontText({
+            text: text,
+            font: fontConfig
+        }),
+        material = new THREE.ShaderMaterial(BmFontShader({
+            map: fontTexture,
+            smooth: 1 / 16,
+            transparent: true,
+            side: THREE.DoubleSide,
+            color: fontColor,
+            scramble: 0
+        })),
+        mesh = new THREE.Mesh(geometry, material);
+
+    var _height = geometry.layout.height * (scale * 0.25);
+
+    mesh.scale.multiplyScalar(scale);
+    mesh.scale.x *= -1;
+    mesh.position.set(pos[0], pos[1] - _height, pos[2]);
     mesh.rotation.z = Math.PI;
     return mesh;
 };

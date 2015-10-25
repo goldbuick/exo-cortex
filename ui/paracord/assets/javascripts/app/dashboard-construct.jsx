@@ -46,6 +46,7 @@ var DashboardConstruct = {
 
             dash.addDetail(group, _project(8, 0, 0), {
                 mode: 'construct',
+                name: construct.name,
                 construct: construct.uid
             });
             return group;

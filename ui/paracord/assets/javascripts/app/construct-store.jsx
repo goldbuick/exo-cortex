@@ -4,7 +4,7 @@ import ConstructView from 'app/construct-view';
 function test (constructs) {
 
     // for (var i=0; i<5; ++i)
-    constructs.push(new ConstructView([{
+    constructs.push(new ConstructView('all.servers', [{
         viz: {
             type: ConstructView.TEXT,
             text: 'all.servers',
@@ -26,7 +26,7 @@ function test (constructs) {
         }
     }]));
 
-    constructs.push(new ConstructView([{
+    constructs.push(new ConstructView('irc.freenode.net', [{
         viz: {
             type: ConstructView.TEXT,
             text: 'irc.freenode.net',
@@ -51,7 +51,7 @@ function test (constructs) {
         }
     }]));
 
-    constructs.push(new ConstructView([{
+    constructs.push(new ConstructView('irc.afternet.org', [{
         viz: {
             type: ConstructView.TEXT,
             text: 'irc.afternet.org',

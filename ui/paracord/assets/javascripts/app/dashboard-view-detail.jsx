@@ -1,20 +1,45 @@
 import Graph from 'app/graph';
 import AudioActions from 'app/audio-actions';
-import DashBoardPool from 'app/dashboard-pool';
-import DashBoardCategories from 'app/dashboard-categories';
-import DashBoardCategoriesDetail from 'app/dashboard-categories-detail';
-import DashBoardFeed from 'app/dashboard-feed';
-import DashBoardConstruct from 'app/dashboard-construct';
 
 class DashboardViewDetail {
 
     getBaseState (dash) {
         return dash.getBaseState('detail');
     }
+
+    getMenuIndex (dash) {
+        var state = this.getBaseState(dash),
+            index = state.menuIndex;
+        return Math.min(Math.max(0, index), state.items.length - 1);
+    }
     
     handleWheel (dash, e) {
         var state = this.getBaseState(dash);
-        state.menuRotation -= e.dy * 0.003;
+        if (state.scrolling) return;
+        if (e.dx < -30) {
+            AudioActions.swish();
+            dash.setCurrentView('main');
+            return;
+        }
+        if (Math.abs(e.dy) < 20) return;
+        
+        var indexTarget = state.menuIndex + (e.dy > 0 ? 1 : -1);
+        indexTarget = Math.min(Math.max(0, indexTarget), state.items.length - 1);
+        if (indexTarget !== state.menuIndex) AudioActions.swish();
+
+        var scroll = { value: state.menuIndex },
+            target = { value: indexTarget };
+
+        state.scrolling = new TWEEN.Tween(scroll).to(target, 512);
+        state.scrolling.onUpdate(() => {
+            state.menuIndex = scroll.value;
+        });
+        state.scrolling.onComplete(() => {
+            state.scrolling = undefined;
+        });
+
+        state.scrolling.easing(TWEEN.Easing.Exponential.InOut);
+        state.scrolling.start();
     }
 
     handleDrag (dash, e) {
@@ -49,7 +74,8 @@ class DashboardViewDetail {
         menu.drawSwipe(0, 0, 0, 128, rad - 2, 8);
         menu.drawLoopR(0, 0, 0, 256, rad - 16, r, 0.7);
 
-        state.menuRotation = state.menuRotation || 0;
+        state.menuTwist = 0.1;
+        state.menuIndex = state.menuIndex || 0;
         state.menu = menu.build(Graph.projectFacePlane(1.0));
         state.menu.keep = true;
         state.menu.left = 280 - rad;
@@ -61,13 +87,13 @@ class DashboardViewDetail {
             text.position.x = rad + 64;
 
             anchor = new Graph();
-            anchor.drawCircle(0, 0, 0, 6, 16);
-            anchor.drawSwipe(0, 0, 0, 6, 36, 8);
+            anchor.drawSwipe(-8, 0, 0, 6, 36, 8, 2, 2);
             anchor = anchor.build(Graph.projectFacePlane(1.0));
             anchor.position.x = rad;
+            anchor.rotation.z += Math.PI * 0.5;
 
             pivot = new THREE.Object3D();
-            pivot.rotation.z = i * -0.1;
+            pivot.rotation.z = i * -state.menuTwist;
             pivot.add(text);
             pivot.add(anchor);
             state.menu.add(pivot);
@@ -83,10 +109,15 @@ class DashboardViewDetail {
             cameraX = 1400 + hwidth,
             left = cameraX - hwidth;
 
+        state.leftEdge = left + 600;
         dash.centerCamera(delta, cameraX);
-        if (state.goback) state.goback.position.x = left + state.goback.left;
+
+        if (state.goback) {
+            state.goback.position.x = left + state.goback.left;
+        }
+
         if (state.menu) {
-            state.menu.rotation.z = state.menuRotation;
+            state.menu.rotation.z = state.menuIndex * state.menuTwist;
             state.menu.position.x = left + state.menu.left;
         }
     }

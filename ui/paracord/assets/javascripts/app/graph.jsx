@@ -282,4 +282,45 @@ Graph.genTextFlat = function (pos, text, scale) {
     return mesh;
 };
 
+Graph.genTextEx = function (opts) {
+    if (!fontConfig) return;
+    
+    var fopts = {
+        text: opts.text,
+        font: fontConfig
+    };
+    if (opts.mode !== undefined) fopts.mode = opts.mode;
+    if (opts.width !== undefined) fopts.width = opts.width;
+    
+    var geometry = BmFontText(fopts),
+        material = new THREE.ShaderMaterial(BmFontShader({
+            map: fontTexture,
+            smooth: 1 / 16,
+            transparent: true,
+            side: THREE.DoubleSide,
+            color: fontColor,
+            scramble: 0
+        })),
+        mesh = new THREE.Mesh(geometry, material);
+
+    opts.scale = opts.scale || 1;
+    var _width = geometry.layout.width * opts.scale,
+        _height = geometry.layout.height * opts.scale;
+
+    var flip = opts.flip ? 1 : -1;
+    if (opts.ax === undefined) opts.ax = 0.5;
+    if (opts.ay === undefined) opts.ay = 0.5;
+
+    mesh.scale.multiplyScalar(opts.scale);
+    mesh.scale.x *= flip;
+    opts.pos[1] -= _height * opts.ay;
+    opts.pos[2] -= _width * opts.ax * -flip;
+
+    mesh.position.set(opts.pos[0], opts.pos[1], opts.pos[2]);
+    mesh.rotation.z = Math.PI;
+
+    return mesh;
+};
+
+
 export default Graph;

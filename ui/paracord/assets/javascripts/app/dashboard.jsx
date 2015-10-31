@@ -7,6 +7,7 @@ import AudioStore from 'app/audio-store';
 import AudioActions from 'app/audio-actions';
 import DashBoardViewMain from 'app/dashboard-view-main';
 import DashBoardViewDetail from 'app/dashboard-view-detail';
+import DashBoardViewFragment from 'app/dashboard-view-fragment';
 import DashBoardPool from 'app/dashboard-pool';
 import DashBoardCategories from 'app/dashboard-categories';
 import DashBoardCategoriesDetail from 'app/dashboard-categories-detail';
@@ -21,6 +22,10 @@ var DashBoard = React.createClass({
         Reflux.connect(ConstructStore, 'constructs'),
     ],
 
+    getViewDetail: function() {
+        return DashBoardViewDetail;
+    },
+
     getCurrentView: function () {
         return this.state.view || 'main';
     },
@@ -31,15 +36,16 @@ var DashBoard = React.createClass({
 
         // set
         items = items || [ ];
-        switch (this.getSelectMode()) {
+        switch (DashBoardViewMain.getSelectMode(this)) {
             default: break;
             case 'feed': break;
             case 'category': DashBoardCategoriesDetail.base(this).items = items; break;
         }
 
-        var state = this.getBaseState('detail');
+        // reset detail view always
+        var state = DashBoardViewDetail.getBaseState(this);
         state.items = items;
-        state.menuRotation = 0;
+        state.menuIndex = 0;
 
         this.setState({ view: view });
     },
@@ -96,20 +102,6 @@ var DashBoard = React.createClass({
         return this.getGraphState('base', ['state', view].join('-'));
     },
 
-    getSelectMode: function () {
-        var state = this.getBaseState(),
-            mode = 'construct';
-
-        if (state.mode !== undefined) {
-            switch (Math.floor(state.mode / 100)) {
-                case 1: mode = 'feed'; break;
-                case 2: mode = 'category'; break;
-            }
-        }
-
-        return mode;
-    },
-
     applyGraphStatus: function (state, object, value) {
         this.applyGraphIntro(state, object, 512);
         var strValue = JSON.stringify(value);
@@ -144,10 +136,11 @@ var DashBoard = React.createClass({
 
     handleWheel: function (e) {
         e.preventDefault();
-        var args = { dy: e.deltaY };
+        var args = { dx: e.deltaX, dy: e.deltaY };
         switch (this.getCurrentView()) {
             case 'main': DashBoardViewMain.handleWheel(this, args); break;
             case 'detail': DashBoardViewDetail.handleWheel(this, args); break;
+            case 'fragment': DashBoardViewFragment.handleWheel(this, args); break;
         }
     },
 
@@ -174,6 +167,7 @@ var DashBoard = React.createClass({
         switch (this.getCurrentView()) {
             case 'main': DashBoardViewMain.handleDrag(this, args); break;
             case 'detail': DashBoardViewDetail.handleDrag(this, args); break;
+            case 'fragment': DashBoardViewFragment.handleDrag(this, args); break;
         }
     },
 
@@ -189,6 +183,7 @@ var DashBoard = React.createClass({
             switch (this.getCurrentView()) {
                 case 'main': DashBoardViewMain.handleClick(this, args); break;
                 case 'detail': DashBoardViewDetail.handleClick(this, args); break;
+                case 'fragment': DashBoardViewFragment.handleClick(this, args); break;
             }
         }
 
@@ -205,6 +200,8 @@ var DashBoard = React.createClass({
             switch (this.getCurrentView()) {
                 case 'main': DashBoardViewMain.gen(this); break;
                 case 'detail': DashBoardViewDetail.gen(this); break;
+                // ? this may be more of an overlay ?
+                case 'fragment': DashBoardViewFragment.gen(this); break;
             }
 
             DashBoardPool.gen(this);
@@ -242,6 +239,7 @@ var DashBoard = React.createClass({
         switch (this.getCurrentView()) {
             case 'main': DashBoardViewMain.update(this, delta); break;
             case 'detail': DashBoardViewDetail.update(this, delta); break;
+            case 'fragment': DashBoardViewFragment.update(this, delta); break;
         }
 
         DashBoardPool.update(this, delta);

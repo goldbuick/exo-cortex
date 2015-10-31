@@ -7,16 +7,49 @@ import DashBoardConstruct from 'app/dashboard-construct';
 
 class DashboardViewMain {
 
+    getBaseState (dash) {
+        return dash.getBaseState('detail');
+    }
+
+    getSelectMode (dash) {
+        var state = this.getBaseState(dash),
+            mode = 'construct';
+
+        if (state.mode !== undefined) {
+            switch (Math.floor(state.mode / 100)) {
+                case 1: mode = 'feed'; break;
+                case 2: mode = 'category'; break;
+            }
+        }
+
+        return mode;
+    }
+
+    switchToDetails (dash) {
+        var items = dash.details
+            .filter(detail => detail.forward)
+            .map(detail => detail.meta);
+
+        AudioActions.swish();
+        dash.setCurrentView('detail', items);
+    }
+
     handleWheel (dash, e) {
-        var state = dash.getBaseState();
-        if (state.scrolling || Math.abs(e.dy) < 20) return;
+        var state = this.getBaseState(dash);
+        if (state.scrolling) return;
+        if (e.dx > 30 && dash.details) {
+            this.switchToDetails(dash);
+            return;
+        }
+        if (Math.abs(e.dy) < 20) return;
 
         state.mode = state.mode || 0;
         var delta = e.dy > 0 ? 1 : -1,
             modeTarget = Math.round(state.mode / 100) + delta;
 
-        if (modeTarget >= -1 && modeTarget <= 2) AudioActions.swish();
         modeTarget = Math.min(Math.max(-1, modeTarget), 2) * 100;
+        if (modeTarget >= -1 && modeTarget <= 2) AudioActions.swish();
+        
         var scroll = { value: state.mode },
             target = { value: modeTarget };
 
@@ -82,7 +115,7 @@ class DashboardViewMain {
 
     handleDrag (dash, e) {
         var _state;
-        switch (dash.getSelectMode()) {
+        switch (this.getSelectMode(dash)) {
             default: _state = DashBoardConstruct.base(dash); break;
             case 'feed': _state = DashBoardFeed.base(dash); break;
             case 'category': _state = DashBoardCategories.base(dash); break;
@@ -96,12 +129,7 @@ class DashboardViewMain {
 
     handleClick (dash) {
         if (!dash.details) return;
-
-        var items = dash.details
-            .filter(detail => detail.forward)
-            .map(detail => detail.meta);
-
-        dash.setCurrentView('detail', items);
+        this.switchToDetails(dash);
     }
 
     gen (dash) {
@@ -115,7 +143,7 @@ class DashboardViewMain {
         var target,
             angleStart = 0.8,
             angleEnd = Math.PI - angleStart,
-            mode = dash.getSelectMode();
+            mode = this.getSelectMode(dash);
 
         dash.details.forEach(detail => {
             detail.position.setFromMatrixPosition(detail.anchor.matrixWorld);

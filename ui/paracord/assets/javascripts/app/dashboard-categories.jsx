@@ -25,6 +25,7 @@ var DashboardCategories = {
         var offset = 0, radius = 600, step = 48, start = Math.PI * 0.25;
         state.animTick = state.animTick || 0;
         state.spin = state.spin || new THREE.Vector3();
+        state.animRotation = state.animRotation || 0;
         state.basePosition = state.basePosition || -470;
         state.basePositionMin = state.basePositionMin || -470;
         state.channels = channels.map(channel => {
@@ -84,7 +85,7 @@ var DashboardCategories = {
 
             _state.basePosition = offset;
             _state.animDelta = 0.02;
-            _state.animRotation = _state.animRotation || start;
+            _state.animRotationOffset = start;
             _state.object.animIntro = function (value) {
                 _state.object.visible = Math.round(value * 100) % 4 === 0;
             };
@@ -107,9 +108,9 @@ var DashboardCategories = {
         spinDelta.copy(state.spin);
         spinDelta.multiplyScalar(delta);
 
+        state.animRotation += spinDelta.y;
         state.channels.forEach((channel => {
-            channel.animRotation += (channel.animDelta * delta) + spinDelta.y;
-            channel.object.rotation.y = channel.animRotation;
+            channel.object.rotation.y = state.animRotation + channel.animRotationOffset;
             channel.object.position.y =
                 (Math.cos(-state.animTick) * 3) + state.basePosition + channel.basePosition;
         }));

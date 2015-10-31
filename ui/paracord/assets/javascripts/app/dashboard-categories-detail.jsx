@@ -1,4 +1,5 @@
 import Graph from 'app/graph';
+import DashBoardViewDetail from 'app/dashboard-view-detail';
 
 class DashBoardCategoriesDetail {
 
@@ -11,14 +12,73 @@ class DashBoardCategoriesDetail {
     }
 
     gen (dash) {
-        var items = this.base(dash).items || [ ];
+        var self = this,
+            state = self.base(dash),
+            items = state.items || [ ];
         if (items.length === 0) return;
-        
-        console.log('gen detail', items);
+
+        var index = 0;
+        state.pages = items.map(item => {
+            var r = new alea(['detail-category', item.channel, item.type].join('-')),
+                _state = self.getState(dash, item.channel, item.type);
+
+            var data = new Graph();
+
+            dash.state.pool.reset();
+            dash.state.pool.type.filterExact(item.type);            
+            dash.state.pool.channel.filterExact(item.channel);
+
+            var arc = 32,
+                inner = 32,
+                records = dash.state.pool.all(),
+                ratio = records.length / dash.state.pool.size(),
+                sub = Math.floor(arc * ratio);
+
+            sub = arc - Math.max(1, sub);
+            data.drawSwipe(0, 0, 0, arc, inner, 8, sub);
+
+            var count = 1 + Math.round(r() * 3);
+            for (var i=1; i<=count; ++i) {
+                data.drawLoopR(0, 0, 0, arc, (inner + 8) + (i * 8), r, 0.5 + (i * 0.1));
+            }
+
+            _state.index = index++;
+            _state.object = data.build(Graph.projectFacePlane(1.0));
+
+            var content = JSON.stringify(records[0], undefined, 1);
+            var text = Graph.genTextEx({
+                pos: [128, 0, 0],
+                text: content,
+                ax: 0,
+                ay: 0.5,
+                scale: 0.5,
+                mode: 'pre'
+            });
+            _state.object.add(text);
+
+            dash.addObject(_state.object, _state, Math.random());
+            return _state;
+        });
     }
 
     update (dash, delta) {
+        var state = this.base(dash);
+        if (!state.pages || state.pages.length === 0) return;
 
+        var index = DashBoardViewDetail.getMenuIndex(dash),
+            left = (DashBoardViewDetail.getBaseState(dash).leftEdge || 0) + 300;
+
+        state.pages.forEach(page => {
+            var diff = (page.index - index);
+            if (Math.abs(diff) >= 1) {
+                page.object.visible = false;
+            } else {
+                page.object.visible = true;
+            }
+            page.object.position.x = left;
+            page.object.position.y = (page.index - index) * -1024;
+            page.object.rotation.x = (page.index - index) * Math.PI * 0.3;
+        });
     }
 
 }

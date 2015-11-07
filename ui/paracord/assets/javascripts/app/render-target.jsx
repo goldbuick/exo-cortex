@@ -19,6 +19,7 @@ var RenderTarget = {
             this.camera.aspect = element.width() / element.height();
             this.camera.updateProjectionMatrix();
             this.composer.reset();
+            if (this.resize) this.resize();
         }.bind(this), 100);
     },
 

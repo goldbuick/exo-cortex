@@ -150,6 +150,7 @@ class Graph {
 }
 
 Graph.baseColor = Glyph.baseColor;
+Graph.deepColor = Glyph.deepColor;
 
 Graph.projectPlane = function (scale) {
     return function (x, y, z) {

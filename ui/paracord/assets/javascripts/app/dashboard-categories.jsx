@@ -22,7 +22,7 @@ var DashboardCategories = {
         var channels = pool.groupByChannels.all().map(item => { return item.key; });
 
         var r = new alea('category-system');
-        var offset = 0, radius = 600, step = 48, start = Math.PI * 0.25;
+        var offset = 0, radius = 600, step = 48, start = Math.PI;
         state.animTick = state.animTick || 0;
         state.spin = state.spin || new THREE.Vector3();
         state.animRotation = state.animRotation || 0;

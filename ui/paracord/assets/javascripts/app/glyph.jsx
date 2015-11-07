@@ -186,5 +186,6 @@ class Glyph {
 }
 
 Glyph.baseColor = css.getStyleRuleValue('.fg-color', 'color');
+Glyph.deepColor = css.getStyleRuleValue('.deep-color', 'color');
 
 export default Glyph;

@@ -47,6 +47,9 @@ class DashboardViewDetail {
 
     handleClick (dash, e) {
         if (e.x < 100) dash.setCurrentView('main');
+        var items = dash.fragments
+            .filter(fragment => fragment.visible);
+        dash.captureFragments(items);
     }
 
     gen (dash) {

@@ -51,11 +51,16 @@ class DashBoardCategoriesDetail {
                 text: content,
                 ax: 0,
                 ay: 0.5,
-                scale: 0.5,
+                scale: 0.6,
                 mode: 'pre'
             });
             _state.object.add(text);
 
+            dash.addFragment(_state.object, [0, 128, 0], {
+                icon: 'message',
+                type: item.type,
+                channel: item.channel
+            });
             dash.addObject(_state.object, _state, Math.random());
             return _state;
         });

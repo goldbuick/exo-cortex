@@ -51,8 +51,11 @@ var DashBoard = React.createClass({
     },
 
     componentDidMount: function () {
+        var state = this.getBaseState();
         this.details = [ ];
-        this.camera.position.z = 1440;
+        this.fragments = [ ];
+        state.screenCameraZ = 1440;
+        this.camera.position.z = state.screenCameraZ;
     },
 
     addObject: function (object, state, value) {
@@ -88,6 +91,39 @@ var DashBoard = React.createClass({
         object.add(detail.anchor);
         this.scene.add(detail);
         this.details.push(detail);
+    },
+
+    addFragment: function (object, pos, meta) {
+        var fragment = new THREE.Group();
+        fragment.keep = true;
+        fragment.meta = meta;
+        fragment.track = object;
+        fragment.visible = false;
+        fragment.anchor = new THREE.Object3D();
+        fragment.anchor.position.set(pos[0], pos[1], pos[2]);
+
+        var rad = 12,
+            width = 6,
+            height = 20,
+            edge = rad + width * 0.5,
+            step = rad + width * 2 + height * 0.5,
+            icon = new Graph();
+
+        icon.drawSwipe(0, 0, 0, 6, rad, width);
+        icon.drawRect(0, -step, width, height, 0);
+        icon.drawRect(edge, -step + width, width, height, 0);
+        icon.drawRect(-edge, -step + width, width, height, 0);
+        icon = icon.build(Graph.projectFacePlane(1.0));
+        icon.rotation.z = Math.PI * 0.5;
+        fragment.add(icon);
+
+        object.add(fragment.anchor);
+        this.scene.add(fragment);
+        this.fragments.push(fragment);
+    },
+
+    captureFragments: function (fragments) {
+        DashBoardViewFragment.add(this, fragments);
     },
 
     getGraphState: function (key, name) {
@@ -195,13 +231,15 @@ var DashBoard = React.createClass({
             this.details.forEach(detail => { delete detail.keep; });
             this.details = [ ];
         }
+        if (this.fragments) {
+            this.fragments.forEach(fragment => { delete fragment.keep; });
+            this.fragments = [ ];
+        }
 
         this.genScene(() => {
             switch (this.getCurrentView()) {
                 case 'main': DashBoardViewMain.gen(this); break;
                 case 'detail': DashBoardViewDetail.gen(this); break;
-                // ? this may be more of an overlay ?
-                case 'fragment': DashBoardViewFragment.gen(this); break;
             }
 
             DashBoardPool.gen(this);
@@ -209,6 +247,7 @@ var DashBoard = React.createClass({
             DashBoardFeed.gen(this);
             DashBoardConstruct.gen(this);
             DashBoardCategoriesDetail.gen(this);
+            DashBoardViewFragment.gen(this);
         });
 
         return <div className="render-target"
@@ -222,24 +261,36 @@ var DashBoard = React.createClass({
         this.camera.position.x += (targetX - this.camera.position.x) * delta * 10;
     },
 
+    zoomCamera: function (delta, targetZ) {
+        this.camera.position.z += (targetZ - this.camera.position.z) * delta * 10;
+    },
+
+    resize: function() {
+        var state = this.getBaseState();
+        delete state.screenRatio;
+    },
+
     update: function (delta) {
         TWEEN.update();
 
         // measure screen ratio
-        var len = 100,
-            state = this.getBaseState(),
-            hwidth = 0.5 * this.renderer.context.canvas.width,
-            left = new THREE.Vector3(len, 0, 1).project(this.camera),
-            center = new THREE.Vector3(0, 0, 1).project(this.camera);
+        var state = this.getBaseState();
+        if (state.screenRatio === undefined) {
+            let len = 100,
+                hwidth = 0.5 * this.renderer.context.canvas.width,
+                left = new THREE.Vector3(len, 0, 1).project(this.camera),
+                center = new THREE.Vector3(0, 0, 1).project(this.camera);
 
-        left = (left.x * hwidth) + hwidth;
-        center = (center.x * hwidth) + hwidth;
-        state.screenRatio = len / (left - center);
+            // scene ratio
+            left = (left.x * hwidth) + hwidth;
+            center = (center.x * hwidth) + hwidth;
+            state.screenRatio = len / (left - center);
+            if (isNaN(state.screenRatio)) delete state.screenRatio;
+        }
 
         switch (this.getCurrentView()) {
             case 'main': DashBoardViewMain.update(this, delta); break;
             case 'detail': DashBoardViewDetail.update(this, delta); break;
-            case 'fragment': DashBoardViewFragment.update(this, delta); break;
         }
 
         DashBoardPool.update(this, delta);
@@ -247,6 +298,7 @@ var DashBoard = React.createClass({
         DashBoardFeed.update(this, delta);
         DashBoardConstruct.update(this, delta);
         DashBoardCategoriesDetail.update(this, delta);
+        DashBoardViewFragment.update(this, delta);
     }
 
 });

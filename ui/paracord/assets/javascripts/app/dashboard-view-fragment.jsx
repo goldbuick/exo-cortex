@@ -39,7 +39,7 @@ class DashboardViewFragment {
 
         function update(open) { return function() {
             state.open = open;
-            state.edge = anim.value * 200;
+            state.edge = anim.value * 1000;
         } }
 
         state.slide = new TWEEN.Tween(anim)
@@ -48,7 +48,7 @@ class DashboardViewFragment {
             .easing(TWEEN.Easing.Exponential.InOut);
 
         var close = new TWEEN.Tween(anim)
-            .delay(256)
+            .delay(512)
             .onUpdate(update(false))
             .to({ value: 0 }, 512)
             .easing(TWEEN.Easing.Exponential.InOut)
@@ -76,10 +76,10 @@ class DashboardViewFragment {
     update (dash, delta) {
         var state = this.getBaseState(dash),
             screenRatio = dash.getBaseState().screenRatio,
-            screenCameraZ = dash.getBaseState().screenCameraZ;
+            screenNear = dash.getBaseState().screenCameraZ,
+            screenFar = screenNear + 640;
 
-        dash.zoomCamera(delta, state.open ?
-            (screenCameraZ * 2) : screenCameraZ);
+        dash.zoomCamera(delta, state.open ? screenFar : screenNear);
 
         if (!isNaN(screenRatio)) {
             let state = this.getBaseState(dash),
@@ -87,7 +87,7 @@ class DashboardViewFragment {
                 right = dash.camera.position.x + width;
 
             if (state.backdrop) {
-                state.backdrop.position.z = dash.camera.position.z - screenCameraZ;
+                state.backdrop.position.z = dash.camera.position.z - screenNear;
                 state.backdrop.position.x = right - (state.edge || 0) * screenRatio;
             }
         }

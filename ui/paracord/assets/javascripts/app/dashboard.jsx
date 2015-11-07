@@ -123,6 +123,7 @@ var DashBoard = React.createClass({
     },
 
     captureFragments: function (fragments) {
+        if (!fragments || fragments.length === 0) return;
         DashBoardViewFragment.add(this, fragments);
     },
 

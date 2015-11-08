@@ -49,7 +49,7 @@ export default Reflux.createStore({
 
     init: function () {
         this.feed = { };
-        // test(this.feed);
+        test(this.feed);
     },
 
     getInitialState: function () {

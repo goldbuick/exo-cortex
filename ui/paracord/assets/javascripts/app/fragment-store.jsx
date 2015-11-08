@@ -32,5 +32,6 @@ var store = Reflux.createStore({
 });
 
 store.Message = 'Message';
+store.Container = 'Container';
 
 export default store;

@@ -6,13 +6,14 @@ export default Reflux.createStore({
     ],
     
     init: function () {
-        this.swishVolume = -50;
+        var volume = -10;
+
+        this.swishVolume = -30;
         this.swishVolumeRamp = this.swishVolume * 0.5;
         this.swish = new Tone.Noise('brown').toMaster().start();
         this.swish.volume.value = this.swishVolume;
 
-        var volume = -50,
-            comp = new Tone.Compressor(volume * 0.25).toMaster();
+        var comp = new Tone.Compressor(volume * 0.25).toMaster();
 
         this.drones = [];
         this.dronesStarted = false;

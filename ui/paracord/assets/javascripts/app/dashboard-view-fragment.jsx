@@ -1,5 +1,6 @@
 import Graph from 'app/graph';
 import AudioActions from 'app/audio-actions';
+import FragmentStore from 'app/fragment-store';
 
 var material = new THREE.MeshBasicMaterial({
     opacity: 0.96,
@@ -19,11 +20,13 @@ class DashboardViewFragment {
     }
 
     open (dash) {
+        AudioActions.swish();
         var state = this.getBaseState(dash);
         state.open = true;
     }
 
     close (dash) {
+        AudioActions.swish();
         var state = this.getBaseState(dash);
         state.open = false;
     }
@@ -50,13 +53,13 @@ class DashboardViewFragment {
 
         state.slide = new TWEEN.Tween(anim)
             .onUpdate(update(true))
-            .to({ value: 1 }, 256)
+            .to({ value: 1 }, 128)
             .easing(TWEEN.Easing.Exponential.InOut);
 
         var close = new TWEEN.Tween(anim)
-            .delay(512)
+            .delay(1024)
             .onUpdate(update(false))
-            .to({ value: 0 }, 512)
+            .to({ value: 0 }, 256)
             .easing(TWEEN.Easing.Exponential.InOut)
             .onComplete(() => { state.slide = undefined; });
 
@@ -70,25 +73,46 @@ class DashboardViewFragment {
 
         var self = this,
             state = self.getBaseState(dash),
-            geometry = new THREE.PlaneGeometry(
-                dash.renderer.context.canvas.width * screenRatio,
-                dash.renderer.context.canvas.height * screenRatio);
+            width = dash.renderer.context.canvas.width * screenRatio,
+            height = dash.renderer.context.canvas.height * screenRatio,
+            geometry = new THREE.PlaneGeometry(width, height);
 
         state.backdrop = new THREE.Mesh(geometry, material);
         state.backdrop.keep = true;
         state.backdrop.position.z = dash.camera.position.z - state.screenCameraZ;
         dash.scene.add(state.backdrop);
 
+        state.backdrop.width = width;
+        state.backdrop.height = height;
+        state.backdrop.left = new THREE.Group();
+        state.backdrop.left.position.z = 16;
+        state.backdrop.add(state.backdrop.left);
+
+        var start = 0;
         state.fragments = Object.keys(dash.state.fragments).map(id => {
             var _state = self.getState(dash, id),
                 _fragment = dash.state.fragments[id];
 
-            // dash.addObject(_state.object, _state, types.length);
-            console.log(_fragment);
+            var symbol = new Graph();
+            switch (_fragment.type) {
+                case FragmentStore.Message:
+                    break;
+            }
+
+            symbol.drawSwipe(0, 0, 0, 6, 32, 16, 1);
+
+            _state.object = symbol.build(Graph.projectFacePlane(1.0));
+            _state.object.position.y = start;
+
+            var text = Graph.genTextFlat([0, 0, 0], _fragment.name, 0.5);
+            text.position.x = 64;
+            _state.object.add(text);
+
+            start -= 128;
+            state.backdrop.left.add(_state.object);
+            dash.addSubObject(_state.object, _state, id);
             return _state;
         });        
-
-        console.log();
     }
 
     update (dash, delta) {
@@ -100,13 +124,14 @@ class DashboardViewFragment {
         dash.zoomCamera(delta, state.open ? screenFar : screenNear);
 
         if (!isNaN(screenRatio)) {
-            let state = this.getBaseState(dash),
-                width = dash.renderer.context.canvas.width * screenRatio,
-                right = dash.camera.position.x + width;
-
+            let state = this.getBaseState(dash);
             if (state.backdrop) {
+                let border = 32 * screenRatio,
+                    right = dash.camera.position.x + state.backdrop.width;
                 state.backdrop.position.z = dash.camera.position.z - screenNear;
                 state.backdrop.position.x = right - (state.edge || 0) * screenRatio;
+                state.backdrop.left.position.x = (state.backdrop.width * -0.5) + border;
+                state.backdrop.left.position.y = (state.backdrop.height * 0.5) - border;
             }
         }
 

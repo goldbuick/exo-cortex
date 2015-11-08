@@ -48,7 +48,7 @@ class DashboardViewMain {
             modeTarget = Math.round(state.mode / 100) + delta;
 
         modeTarget = Math.min(Math.max(-1, modeTarget), 2) * 100;
-        if (modeTarget >= -1 && modeTarget <= 2) AudioActions.swish();
+        if (modeTarget !== state.mode) AudioActions.swish();
         
         var scroll = { value: state.mode },
             target = { value: modeTarget };

@@ -1,4 +1,5 @@
 import Graph from 'app/graph';
+import FragmentStore from 'app/fragment-store';
 import DashBoardViewDetail from 'app/dashboard-view-detail';
 
 class DashBoardCategoriesDetail {
@@ -57,9 +58,12 @@ class DashBoardCategoriesDetail {
             _state.object.add(text);
 
             dash.addFragment(_state.object, [0, 128, 0], {
-                icon: 'message',
-                type: item.type,
-                channel: item.channel
+                type: FragmentStore.Message,
+                name: item.channel + ' <= ' + item.type,
+                details: {
+                    type: item.type,
+                    channel: item.channel
+                }
             });
             dash.addObject(_state.object, _state, Math.random());
             return _state;

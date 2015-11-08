@@ -14,6 +14,10 @@ class DashboardViewFragment {
         return dash.getBaseState('fragments');
     }
 
+    getState (dash, id) {
+        return dash.getGraphState('fragments', id);
+    }
+
     open (dash) {
         var state = this.getBaseState(dash);
         state.open = true;
@@ -33,18 +37,20 @@ class DashboardViewFragment {
     handleClick (dash, e) {
     }
 
-    add (dash, fragments) {
+    add (dash) {
         var state = this.getBaseState(dash),
             anim = { value: 0 };
 
-        function update(open) { return function() {
-            state.open = open;
-            state.edge = anim.value * 1000;
-        } }
+        function update(open) {
+            return function() {
+                state.open = open;
+                state.edge = anim.value * 512;
+            }
+        }
 
         state.slide = new TWEEN.Tween(anim)
             .onUpdate(update(true))
-            .to({ value: 1 }, 512)
+            .to({ value: 1 }, 256)
             .easing(TWEEN.Easing.Exponential.InOut);
 
         var close = new TWEEN.Tween(anim)
@@ -62,7 +68,8 @@ class DashboardViewFragment {
         var screenRatio = dash.getBaseState().screenRatio;
         if (isNaN(screenRatio)) return;
 
-        var state = this.getBaseState(dash),
+        var self = this,
+            state = self.getBaseState(dash),
             geometry = new THREE.PlaneGeometry(
                 dash.renderer.context.canvas.width * screenRatio,
                 dash.renderer.context.canvas.height * screenRatio);
@@ -71,13 +78,24 @@ class DashboardViewFragment {
         state.backdrop.keep = true;
         state.backdrop.position.z = dash.camera.position.z - state.screenCameraZ;
         dash.scene.add(state.backdrop);
+
+        state.fragments = Object.keys(dash.state.fragments).map(id => {
+            var _state = self.getState(dash, id),
+                _fragment = dash.state.fragments[id];
+
+            // dash.addObject(_state.object, _state, types.length);
+            console.log(_fragment);
+            return _state;
+        });        
+
+        console.log();
     }
 
     update (dash, delta) {
         var state = this.getBaseState(dash),
             screenRatio = dash.getBaseState().screenRatio,
             screenNear = dash.getBaseState().screenCameraZ,
-            screenFar = screenNear + 640;
+            screenFar = screenNear + 768;
 
         dash.zoomCamera(delta, state.open ? screenFar : screenNear);
 
@@ -99,6 +117,8 @@ class DashboardViewFragment {
                 fragment.lookAt(dash.camera.position);
             });
         }
+
+        // state.fragments
     }
 
 }

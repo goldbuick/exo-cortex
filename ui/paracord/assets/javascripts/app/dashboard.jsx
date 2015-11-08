@@ -3,6 +3,8 @@ import RenderTarget from 'app/render-target';
 import PoolStore from 'app/pool-store';
 import FeedStore from 'app/feed-store';
 import ConstructStore from 'app/construct-store';
+import FragmentStore from 'app/fragment-store';
+import FragmentActions from 'app/fragment-actions';
 import AudioStore from 'app/audio-store';
 import AudioActions from 'app/audio-actions';
 import DashBoardViewMain from 'app/dashboard-view-main';
@@ -20,6 +22,8 @@ var DashBoard = React.createClass({
         Reflux.connect(PoolStore, 'pool'),
         Reflux.connect(FeedStore, 'feed'),
         Reflux.connect(ConstructStore, 'constructs'),
+        Reflux.connect(FragmentStore, 'fragments'),
+        Reflux.listenTo(FragmentActions.capture, 'captureFragments')
     ],
 
     getViewDetail: function() {
@@ -122,9 +126,8 @@ var DashBoard = React.createClass({
         this.fragments.push(fragment);
     },
 
-    captureFragments: function (fragments) {
-        if (!fragments || fragments.length === 0) return;
-        DashBoardViewFragment.add(this, fragments);
+    captureFragments: function () {
+        DashBoardViewFragment.add(this);
     },
 
     getGraphState: function (key, name) {

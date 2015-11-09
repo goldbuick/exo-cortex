@@ -4,7 +4,7 @@ import DashBoardViewDetail from 'app/dashboard-view-detail';
 
 class DashBoardCategoriesDetail {
 
-    base (dash) {
+    getBaseState (dash) {
         return dash.getGraphState('detail-base', 'category');
     }
 
@@ -12,9 +12,13 @@ class DashBoardCategoriesDetail {
         return dash.getGraphState('detail-category', [channel, type].join('-'));
     }
 
+    setItems (dash, items) {
+        this.getBaseState(dash).items = items;
+    }
+
     gen (dash) {
         var self = this,
-            state = self.base(dash),
+            state = self.getBaseState(dash),
             items = state.items || [ ];
         if (items.length === 0) return;
 
@@ -71,7 +75,7 @@ class DashBoardCategoriesDetail {
     }
 
     update (dash, delta) {
-        var state = this.base(dash);
+        var state = this.getBaseState(dash);
         if (!state.pages || state.pages.length === 0) return;
 
         var index = DashBoardViewDetail.getMenuIndex(dash),

@@ -14,6 +14,7 @@ import DashBoardPool from 'app/dashboard-pool';
 import DashBoardCategories from 'app/dashboard-categories';
 import DashBoardCategoriesDetail from 'app/dashboard-categories-detail';
 import DashBoardFeed from 'app/dashboard-feed';
+import DashBoardFeedDetail from 'app/dashboard-feed-detail';
 import DashBoardConstruct from 'app/dashboard-construct';
 
 var DashBoard = React.createClass({
@@ -36,14 +37,27 @@ var DashBoard = React.createClass({
 
     setCurrentView: function (view, items) {
         // reset
-        DashBoardCategoriesDetail.base(this).items = [ ];
+        DashBoardCategoriesDetail.setItems(this, []);
+        DashBoardFeedDetail.setItems(this, []);
+        // DashBoardConstructDetail.setItems(this, []);
 
         // set
         items = items || [ ];
         switch (DashBoardViewMain.getSelectMode(this)) {
             default: break;
-            case 'feed': break;
-            case 'category': DashBoardCategoriesDetail.base(this).items = items; break;
+            case 'category':
+                DashBoardCategoriesDetail.setItems(this, items);
+                break;
+
+            case 'feed':
+                items.push({ create: true, name: 'create new container' });
+                DashBoardFeedDetail.setItems(this, items);
+                break;
+
+            case 'construct':
+                items.push({ create: true, name: 'create new construct' });
+                // DashBoardConstructDetail.setItems(this, items);
+                break;
         }
 
         // reset detail view always
@@ -249,6 +263,7 @@ var DashBoard = React.createClass({
             DashBoardPool.gen(this);
             DashBoardCategories.gen(this);
             DashBoardFeed.gen(this);
+            DashBoardFeedDetail.gen(this);
             DashBoardConstruct.gen(this);
             DashBoardCategoriesDetail.gen(this);
             DashBoardViewFragment.gen(this);
@@ -300,6 +315,7 @@ var DashBoard = React.createClass({
         DashBoardPool.update(this, delta);
         DashBoardCategories.update(this, delta);
         DashBoardFeed.update(this, delta);
+        DashBoardFeedDetail.update(this, delta);
         DashBoardConstruct.update(this, delta);
         DashBoardCategoriesDetail.update(this, delta);
         DashBoardViewFragment.update(this, delta);

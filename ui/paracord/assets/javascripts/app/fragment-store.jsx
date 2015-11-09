@@ -18,8 +18,8 @@ var store = Reflux.createStore({
     onAdd: function (items) {
         var self = this,
             fragments = items.filter(item => item.visible).map(item => item.meta);
+        if (fragments.length === 0) return;
 
-        var added = true;
         fragments.forEach(fragment => {
             var id = uid(fragment);
             self.fragments[id] = fragment;

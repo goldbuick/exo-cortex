@@ -151,7 +151,7 @@ export default Reflux.createStore({
     
     init: function () {
         this.constructs = [ ];
-        test(this.constructs);
+        // test(this.constructs);
     },
 
     getInitialState: function () {

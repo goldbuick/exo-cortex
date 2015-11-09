@@ -99,7 +99,7 @@ class DashboardViewFragment {
                     break;
             }
 
-            symbol.drawSwipe(0, 0, 0, 6, 32, 16, 1);
+            symbol.drawSwipe(0, 0, 0, 6, 28, 8, 1);
 
             _state.object = symbol.build(Graph.projectFacePlane(1.0));
             _state.object.position.y = start;
@@ -126,7 +126,7 @@ class DashboardViewFragment {
         if (!isNaN(screenRatio)) {
             let state = this.getBaseState(dash);
             if (state.backdrop) {
-                let border = 32 * screenRatio,
+                let border = 48 * screenRatio,
                     right = dash.camera.position.x + state.backdrop.width;
                 state.backdrop.position.z = dash.camera.position.z - screenNear;
                 state.backdrop.position.x = right - (state.edge || 0) * screenRatio;

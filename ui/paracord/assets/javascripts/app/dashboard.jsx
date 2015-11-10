@@ -235,9 +235,22 @@ var DashBoard = React.createClass({
         if (Math.abs(dx) + Math.abs(dy) < 2) {
             let args = { x: e.clientX, y: e.clientY };
             switch (this.getCurrentView()) {
-                case 'main': DashBoardViewMain.handleClick(this, args); break;
-                case 'detail': DashBoardViewDetail.handleClick(this, args); break;
-                case 'fragment': DashBoardViewFragment.handleClick(this, args); break;
+                case 'main':
+                    DashBoardViewMain.handleClick(this, args);
+                    break;
+
+                case 'detail':
+                    if (!DashBoardViewDetail.handleClick(this, args)) {
+                        if (DashBoardCategoriesDetail.getItems(this).length > 0)
+                            DashBoardCategoriesDetail.handleClick(this, args);
+                        if (DashBoardFeedDetail.getItems(this).length > 0)
+                            DashBoardFeedDetail.handleClick(this, args);
+                    }
+                    break;
+
+                case 'fragment':
+                    DashBoardViewFragment.handleClick(this, args);
+                    break;
             }
         }
 

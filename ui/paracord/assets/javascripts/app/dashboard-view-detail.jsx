@@ -1,6 +1,5 @@
 import Graph from 'app/graph';
 import AudioActions from 'app/audio-actions';
-import FragmentActions from 'app/fragment-actions';
 
 class DashboardViewDetail {
 
@@ -44,11 +43,13 @@ class DashboardViewDetail {
     }
 
     handleDrag (dash, e) {
+        return false;
     }
 
     handleClick (dash, e) {
-        if (e.x < 100) dash.setCurrentView('main');
-        FragmentActions.add(dash.fragments);
+        if (e.x > 100) return false;
+        dash.setCurrentView('main');
+        return true;
     }
 
     gen (dash) {

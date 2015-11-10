@@ -10,7 +10,7 @@
 
 @fg-color: darken(@base-color, 6%);
 @bg-color: darken(@base-color, 64%);
-@alt-color: darken(@base-color, 25%);
+@alt-color: lighten(@base-color, 12%);
 @soft-color: darken(@base-color, 42%);
 @deep-color: darken(@base-color, 69.2%);
 
@@ -31,6 +31,20 @@ body, html {
 
 @glow: rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 20%,
     rgba(255,255,255,0.001) 40%, rgba(255,255,255,0) 100%;
+
+.input-text {
+    top: 0;
+    left: 10px;
+    right: 10px;
+    position: absolute;
+
+    input {
+        color: @alt-color;
+        font-family: 'cpunk';
+        box-shadow: none !important;
+        border-bottom: 1px solid @alt-color !important;
+    }
+}
 
 .queue {
     top: 0;
@@ -104,34 +118,4 @@ body, html {
     right: 0;
     bottom: 0;
     position: absolute;
-}
-
-@cmd-line-anim: 0.1s;
-@cmd-line-font-size: 12px;
-@cmd-line-height: (@cmd-line-font-size + 4px);
-
-.terminal, .cmd {
-    font-family: 'cpunk';
-    font-size: @cmd-line-font-size;
-    line-height: @cmd-line-height;
-}
-
-.terminal .terminal-output div div, .cmd .prompt {
-    line-height: @cmd-line-height;    
-}
-
-.diver {
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: 0;
-    position: absolute;
-    border-bottom: 2px solid @alt-color;
-    -webkit-transition: height @cmd-line-anim;
-    -moz-transition: height @cmd-line-anim;
-    transition: height @cmd-line-anim;
-}
-
-.diver.closed {
-    height: 0 !important;
 }

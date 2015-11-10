@@ -1,5 +1,6 @@
 import Graph from 'app/graph';
 import FragmentStore from 'app/fragment-store';
+import FragmentActions from 'app/fragment-actions';
 import DashBoardViewDetail from 'app/dashboard-view-detail';
 
 class DashBoardCategoriesDetail {
@@ -10,6 +11,10 @@ class DashBoardCategoriesDetail {
 
     getState (dash, channel, type) {
         return dash.getGraphState('detail-category', [channel, type].join('-'));
+    }
+
+    getItems (dash) {
+        return this.getBaseState(dash).items;
     }
 
     setItems (dash, items) {
@@ -92,6 +97,10 @@ class DashBoardCategoriesDetail {
             page.object.position.y = (page.index - index) * -1024;
             page.object.rotation.x = (page.index - index) * Math.PI * 0.3;
         });
+    }
+
+    handleClick (dash, e) {
+        FragmentActions.add(dash.fragments);
     }
 
 }

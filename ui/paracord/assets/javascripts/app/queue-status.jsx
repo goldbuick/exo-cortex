@@ -1,6 +1,6 @@
 import QueueStore from 'app/queue-store';
 
-var Page = React.createClass({
+var QueueStatus = React.createClass({
     mixins: [
         Reflux.connect(QueueStore, 'queue'),
     ],
@@ -26,4 +26,4 @@ var Page = React.createClass({
 
 });
 
-export default Page;
+export default QueueStatus;

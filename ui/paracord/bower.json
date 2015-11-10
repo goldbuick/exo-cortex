@@ -13,8 +13,6 @@
     "animate.css": "~3.3.0",
     "d3": "~3.5.6",
     "threejs": "*",
-    "jquery.terminal": "~0.8.8",
-    "jquery-mousewheel": "~3.1.13",
     "Alea": "*",
     "tweenjs": "~16.3.1",
     "tone": "*"

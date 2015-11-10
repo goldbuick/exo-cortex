@@ -1,4 +1,5 @@
 import Graph from 'app/graph';
+import InputActions from 'app/input-actions';
 import FragmentStore from 'app/fragment-store';
 import DashBoardViewDetail from 'app/dashboard-view-detail';
 
@@ -10,6 +11,10 @@ class DashBoardFeedDetail {
 
     getState (dash, container) {
         return dash.getGraphState('detail-feed', container);
+    }
+
+    getItems (dash) {
+        return this.getBaseState(dash).items;
     }
 
     setItems (dash, items) {
@@ -92,6 +97,10 @@ class DashBoardFeedDetail {
         //     page.object.position.y = (page.index - index) * -1024;
         //     page.object.rotation.x = (page.index - index) * Math.PI * 0.3;
         // });
+    }
+
+    handleClick (dash, e) {
+        console.log(e);
     }
 
 }

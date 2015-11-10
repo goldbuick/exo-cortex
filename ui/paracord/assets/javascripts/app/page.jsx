@@ -1,9 +1,7 @@
-// import Diver from 'app/diver';
 import Dashboard from 'app/dashboard';
-import ResizeContainer from 'app/resize-container';
-// import FeedStore from 'app/feed-store';
-import PoolStore from 'app/pool-store';
+import InputText from 'app/input-text';
 import QueueStatus from 'app/queue-status';
+import ResizeContainer from 'app/resize-container';
 
 var Page = React.createClass({
     mixins: [
@@ -16,6 +14,7 @@ var Page = React.createClass({
                 <div className="bottom" />
                 <ResizeContainer><Dashboard /></ResizeContainer>
             </div>
+            <InputText />
             <QueueStatus />
         </div>;
     }
